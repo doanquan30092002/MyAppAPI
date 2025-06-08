@@ -1,5 +1,5 @@
-﻿using BuiltDB.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MyApp.Core.Entities;
 
 namespace MyApp.Infrastructure.Data
 {
@@ -7,6 +7,7 @@ namespace MyApp.Infrastructure.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> dbContextOptions)
             : base(dbContextOptions) { }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Account> Accounts { get; set; }
@@ -24,14 +25,12 @@ namespace MyApp.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Auction>()
+            modelBuilder
+                .Entity<Auction>()
                 .HasOne(a => a.CreatedByUser)
                 .WithMany()
                 .HasForeignKey(a => a.CreatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
-
         }
-
-
     }
 }

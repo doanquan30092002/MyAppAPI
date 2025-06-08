@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BuiltDB.Models
+namespace MyApp.Core.Entities
 {
-	public class BlogType
-	{
-		[Key]
-		public Guid BlogTypeId { get; set; }
-		public string BlogsName { get; set; }
-	}
+    public class BlogType
+    {
+        [Key]
+        public Guid BlogTypeId { get; set; }
+        public string BlogsName { get; set; }
+    }
 }

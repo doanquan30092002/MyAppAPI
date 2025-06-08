@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BuiltDB.Models
+namespace MyApp.Core.Entities
 {
-	public class Role
-	{
-		[Key]
-		public int RoleId { get; set; }
-		public string RoleName { get; set; }
-	}
+    public class Role
+    {
+        [Key]
+        public int RoleId { get; set; }
+        public string RoleName { get; set; }
+    }
 }
