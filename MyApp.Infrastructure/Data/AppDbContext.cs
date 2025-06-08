@@ -10,35 +10,27 @@ namespace MyApp.Infrastructure.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<Image> Images { get; set; }
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<Auction> Auctions { get; set; }
+        public DbSet<AuctionAssets> AuctionAssets { get; set; }
+        public DbSet<AuctionDocuments> AuctionDocuments { get; set; }
+        public DbSet<AuctionCategory> AuctionCategories { get; set; }
+        public DbSet<Blogs> Blogs { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Blacklist> Blacklists { get; set; }
+        public DbSet<Information> Informations { get; set; }
+        public DbSet<BlogType> BlogTypes { get; set; }
+        public DbSet<AuctionRound> AuctionRounds { get; set; }
+        public DbSet<AuctionRoundPrices> AuctionRoundPrices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
-            // Cấu hình khóa chính của bảng UserRole
-            modelBuilder.Entity<UserRole>().HasKey(ur => new { ur.UserId, ur.RoleId });
-
-            // Cấu hình quan hệ giữa User và UserRole
             modelBuilder
-                .Entity<UserRole>()
-                .HasOne(ur => ur.User)
-                .WithMany(u => u.UserRoles)
-                .HasForeignKey(ur => ur.UserId);
-
-            // Cấu hình quan hệ giữa Role và UserRole
-            modelBuilder
-                .Entity<UserRole>()
-                .HasOne(ur => ur.Role)
-                .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.RoleId);
-            modelBuilder
-                .Entity<Role>()
-                .HasData(
-                    new Role { Id = "2282fcab-6ead-463b-86d1-fee0b313ab0d", RoleName = "Admin" },
-                    new Role { Id = "61d6e025-bbd2-429d-922f-e02c8be9d866", RoleName = "User" }
-                );
+                .Entity<Auction>()
+                .HasOne(a => a.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(a => a.CreatedBy)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
