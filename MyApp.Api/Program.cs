@@ -92,6 +92,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "Images");
+if (!Directory.Exists(imagePath))
+{
+	Directory.CreateDirectory(imagePath);
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles(
