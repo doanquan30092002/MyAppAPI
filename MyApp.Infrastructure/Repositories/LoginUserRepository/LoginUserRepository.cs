@@ -18,11 +18,10 @@ namespace MyApp.Infrastructure.Repositories.LoginUserRepository
             this.mapper = mapper;
         }
 
-        public async Task<AccountDTO> GetAccountLogin(LoginUserRequest loginRequestDTO)
+        public async Task<AccountDTO> GetAccountLogin(string email, string password)
         {
             var account = await context.Accounts.FirstOrDefaultAsync(x =>
-                x.PhoneNumber.Equals(loginRequestDTO.PhoneNumber)
-                && x.Password.Equals(loginRequestDTO.Password)
+                x.Email.Equals(email) && x.Password.Equals(password)
             );
             if (account != null)
             {
@@ -31,22 +30,22 @@ namespace MyApp.Infrastructure.Repositories.LoginUserRepository
             return null;
         }
 
-        public async Task<string> GetRoleNameByPhoneNumber(string phoneNumber)
+        public async Task<string> GetRoleNameByEmail(string email)
         {
             var roleNames = await context
                 .Accounts.Include(x => x.Role)
-                .Where(x => x.PhoneNumber == phoneNumber)
+                .Where(x => x.Email == email)
                 .Select(ur => ur.Role.RoleName)
                 .FirstOrDefaultAsync();
 
             return roleNames;
         }
 
-        public async Task<UserDTO> GetUserByPhoneNumber(string phoneNumber)
+        public async Task<UserDTO> GetUserByEmail(string email)
         {
             var user = await context
                 .Accounts.Include(x => x.User)
-                .FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
+                .FirstOrDefaultAsync(x => x.Email == email);
             return user != null ? mapper.Map<UserDTO>(user.User) : null;
         }
     }
