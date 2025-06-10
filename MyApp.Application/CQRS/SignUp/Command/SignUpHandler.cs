@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using MediatR;
+using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.ISignUpRepository;
 
 namespace MyApp.Application.CQRS.SignUp.Command
@@ -23,17 +24,14 @@ namespace MyApp.Application.CQRS.SignUp.Command
             var isEmailExists = await _signUpRepository.CheckEmailExists(request.Email);
             if (isEmailExists)
             {
-                return new SignUpResponse { Message = "The email address is already registered." };
+                return new SignUpResponse { Message = Message.EMAIL_EXITS };
             }
 
             // Check if citizen identification number exists
             var isUserExists = await _signUpRepository.CheckUserExits(request);
             if (isUserExists)
             {
-                return new SignUpResponse
-                {
-                    Message = "The citizen identification number has been registered.",
-                };
+                return new SignUpResponse { Message = Message.CITIZENS_ID_EXITS };
             }
 
             // Begin transaction
@@ -41,7 +39,7 @@ namespace MyApp.Application.CQRS.SignUp.Command
                 await _signUpRepository.BeginTransactionAsync(cancellationToken) as IDbTransaction;
             if (transaction == null)
             {
-                throw new InvalidOperationException("Failed to create a database transaction.");
+                throw new InvalidOperationException(Message.CREATE_FAIL);
             }
 
             try
@@ -51,7 +49,7 @@ namespace MyApp.Application.CQRS.SignUp.Command
                 if (!isUserInserted)
                 {
                     transaction.Rollback();
-                    return new SignUpResponse { Message = "Failed to create user." };
+                    return new SignUpResponse { Message = Message.CREATE_FAIL };
                 }
 
                 // Insert account
@@ -59,23 +57,17 @@ namespace MyApp.Application.CQRS.SignUp.Command
                 if (!isAccountInserted)
                 {
                     transaction.Rollback();
-                    return new SignUpResponse
-                    {
-                        Message = "Failed to create account. User creation has been rolled back.",
-                    };
+                    return new SignUpResponse { Message = Message.CREATE_FAIL };
                 }
 
                 // Commit transaction
                 transaction.Commit();
-                return new SignUpResponse { Message = "User and account created successfully." };
+                return new SignUpResponse { Message = Message.CREATE_SUCCESS };
             }
             catch (Exception)
             {
-                transaction.Rollback(); // Use synchronous Rollback for IDisposable
-                return new SignUpResponse
-                {
-                    Message = "An error occurred during signup. All changes have been rolled back.",
-                };
+                transaction.Rollback();
+                return new SignUpResponse { Message = Message.CREATE_FAIL };
             }
         }
     }

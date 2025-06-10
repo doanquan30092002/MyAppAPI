@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Microsoft.EntityFrameworkCore.Storage;
+using MyApp.Application.Common.Sha256Hasher;
 using MyApp.Application.CQRS.SignUp.Command;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Core.Entities;
@@ -44,7 +45,7 @@ namespace MyApp.Infrastructure.Repositories.SignUpRepository
                     AccountId = Guid.NewGuid(),
                     PhoneNumber = signUpRequest.PhoneNumber,
                     Email = signUpRequest.Email,
-                    Password = signUpRequest.Password,
+                    Password = Sha256Hasher.ComputeSha256Hash(signUpRequest.Password),
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                     CreatedBy = userId,
