@@ -23,22 +23,33 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
             CancellationToken cancellationToken
         )
         {
-            // check user exist
+            // check account exist
             var account = await loginUserRepository.GetAccountLogin(
                 request.Email,
                 Sha256Hasher.ComputeSha256Hash(request.Password)
             );
             if (account != null)
             {
-                var role = await loginUserRepository.GetRoleNameByEmail(account.Email);
-                var user = await loginUserRepository.GetUserByEmail(account.Email);
-                var result = new LoginUserResponse
+                if (account.IsActive)
                 {
-                    Token = tokenRepository.CreateJWTToken(user, role),
-                    Message = "Đăng nhập thành công",
-                };
+                    var role = await loginUserRepository.GetRoleNameByEmail(account.Email);
+                    var user = await loginUserRepository.GetUserByEmail(account.Email);
+                    var result = new LoginUserResponse
+                    {
+                        Token = tokenRepository.CreateJWTToken(user, role),
+                        Message = "Đăng nhập thành công",
+                    };
 
-                return result;
+                    return result;
+                }
+                else
+                {
+                    return new LoginUserResponse
+                    {
+                        Token = null,
+                        Message = "Tài khoản của bạn đã bị khóa",
+                    };
+                }
             }
             return new LoginUserResponse
             {
