@@ -12,8 +12,8 @@ using MyApp.Infrastructure.Data;
 namespace MyApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250610153444_TenMigration")]
-    partial class TenMigration
+    [Migration("20250611142148_Init Database")]
+    partial class InitDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,9 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("AuctionEndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("AuctionMap")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AuctionName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -99,9 +102,6 @@ namespace MyApp.Infrastructure.Migrations
 
                     b.Property<DateTime>("AuctionStartDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Auction_Map")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
@@ -242,13 +242,16 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<Guid>("CreateByTicket")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("NumericalOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("StatusDeposit")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("StatusRefundDeposit")
                         .HasColumnType("bit");
 
                     b.Property<bool>("StatusTicket")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Status_deposit")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("UpdateAtTicket")

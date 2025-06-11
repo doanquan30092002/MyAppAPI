@@ -242,13 +242,13 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<int?>("NumericalOrder")
                         .HasColumnType("int");
 
+                    b.Property<bool>("StatusDeposit")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("StatusRefundDeposit")
                         .HasColumnType("bit");
 
                     b.Property<bool>("StatusTicket")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Status_deposit")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("UpdateAtTicket")

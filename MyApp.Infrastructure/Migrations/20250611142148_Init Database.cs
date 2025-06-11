@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MyApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class InitDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -115,12 +115,12 @@ namespace MyApp.Infrastructure.Migrations
                     AuctionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AuctionDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AuctionRules = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AuctionPlanningMap = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AuctionPlanningMap = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RegisterOpenDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RegisterEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AuctionStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AuctionEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Auction_Map = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AuctionMap = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -128,7 +128,7 @@ namespace MyApp.Infrastructure.Migrations
                     QRLink = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NumberRoundMax = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<bool>(type: "bit", nullable: false),
-                    WinnerData = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WinnerData = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CategoryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -318,8 +318,9 @@ namespace MyApp.Infrastructure.Migrations
                     UpdateAtTicket = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateAtDeposit = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StatusTicket = table.Column<bool>(type: "bit", nullable: false),
-                    Status_deposit = table.Column<bool>(type: "bit", nullable: false),
-                    StatusRefundDeposit = table.Column<bool>(type: "bit", nullable: false)
+                    StatusDeposit = table.Column<bool>(type: "bit", nullable: false),
+                    StatusRefundDeposit = table.Column<bool>(type: "bit", nullable: false),
+                    NumericalOrder = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
