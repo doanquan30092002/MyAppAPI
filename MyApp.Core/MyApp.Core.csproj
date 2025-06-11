@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <Folder Include="DTOs\" />
-    <Folder Include="Mapper\" />
+    <Folder Include="Mapper\SearchUserAttendance\" />
   </ItemGroup>
 
 </Project>

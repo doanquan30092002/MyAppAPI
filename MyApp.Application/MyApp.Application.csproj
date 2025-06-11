@@ -16,9 +16,4 @@
     <ProjectReference Include="..\MyApp.Core\MyApp.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="CQRS\" />
-    <Folder Include="Interfaces\" />
-  </ItemGroup>
-
 </Project>
