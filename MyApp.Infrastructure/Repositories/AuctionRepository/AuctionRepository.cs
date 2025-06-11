@@ -52,7 +52,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 RegisterEndDate = command.RegisterEndDate,
                 AuctionStartDate = command.AuctionStartDate,
                 AuctionEndDate = command.AuctionEndDate,
-                Auction_Map = command.Auction_Map,
+                AuctionMap = command.Auction_Map,
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = userId,
                 UpdatedAt = DateTime.UtcNow,
