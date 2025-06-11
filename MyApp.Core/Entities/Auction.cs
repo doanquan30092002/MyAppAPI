@@ -10,7 +10,7 @@ namespace MyApp.Core.Entities
         public string AuctionName { get; set; }
         public string AuctionDescription { get; set; }
         public string AuctionRules { get; set; }
-        public string AuctionPlanningMap { get; set; }
+        public string? AuctionPlanningMap { get; set; }
         public DateTime RegisterOpenDate { get; set; }
         public DateTime RegisterEndDate { get; set; }
 
@@ -18,7 +18,7 @@ namespace MyApp.Core.Entities
 
         public DateTime AuctionEndDate { get; set; }
 
-        public string Auction_Map { get; set; }
+        public string? Auction_Map { get; set; }
         public DateTime CreatedAt { get; set; }
         public Guid CreatedBy { get; set; }
 
@@ -33,7 +33,7 @@ namespace MyApp.Core.Entities
 
         public bool Status { get; set; }
 
-        public string WinnerData { get; set; }
+        public string? WinnerData { get; set; }
         public int CategoryId { get; set; }
 
         [ForeignKey("CategoryId")]
