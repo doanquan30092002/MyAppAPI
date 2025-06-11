@@ -6,13 +6,16 @@ namespace MyApp.Core
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddCoreDI(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddCoreDI(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
-            services.Configure<ConnectionStringOptions>(configuration.GetSection(ConnectionStringOptions.SectionName));
+            services.Configure<ConnectionStringOptions>(
+                configuration.GetSection(ConnectionStringOptions.SectionName)
+            );
 
             return services;
         }
     }
 }
-
-
