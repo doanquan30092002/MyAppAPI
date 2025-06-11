@@ -9,5 +9,6 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
     public class LoginUserResponse
     {
         public string Token { get; set; }
+        public string Message { get; set; }
     }
 }

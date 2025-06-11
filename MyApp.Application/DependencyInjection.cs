@@ -1,3 +1,4 @@
+
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,10 @@ using MyApp.Application.Common.Services.JwtHelper;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
 using MyApp.Application.Interfaces.IJwtHelper;
-using MyApp.Application.Interfaces.IUnitOfWork;
+
+﻿using MediatR.NotificationPublishers;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace MyApp.Application
 {

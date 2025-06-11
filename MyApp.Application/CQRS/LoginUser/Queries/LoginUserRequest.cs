@@ -11,7 +11,8 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
     public class LoginUserRequest : IRequest<LoginUserResponse>
     {
         [Required]
-        public string PhoneNumber { get; set; }
+        [DataType(DataType.EmailAddress)]
+        public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
