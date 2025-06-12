@@ -31,7 +31,7 @@ namespace MyApp.Infrastructure.Repositories.LoginUserRepository
                 configuration["Jwt:Issuer"],
                 configuration["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddDays(1),
                 signingCredentials: credentials
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
