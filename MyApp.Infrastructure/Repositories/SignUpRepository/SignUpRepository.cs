@@ -111,6 +111,19 @@ namespace MyApp.Infrastructure.Repositories.SignUpRepository
             }
         }
 
+        public Task<bool> CheckPhoneNumberExits(string phoneNumber)
+        {
+            var phoneNumberExists = context.Accounts.Any(u => u.PhoneNumber == phoneNumber);
+            if (phoneNumberExists)
+            {
+                return Task.FromResult(true);
+            }
+            else
+            {
+                return Task.FromResult(false);
+            }
+        }
+
         public async Task<IDbTransaction> BeginTransactionAsync(CancellationToken cancellationToken)
         {
             var dbContextTransaction = await context.Database.BeginTransactionAsync(
