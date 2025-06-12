@@ -13,5 +13,6 @@ namespace MyApp.Application.Interfaces.ISignUpRepository
 
         public Task<bool> CheckEmailExists(string email);
         Task<IDbTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
+        Task<bool> CheckPhoneNumberExits(string phoneNumber);
     }
 }
