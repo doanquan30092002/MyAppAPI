@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.LoginUser.Queries;
 
 namespace MyApp.Api.Controllers.LoginUserController
@@ -17,7 +18,14 @@ namespace MyApp.Api.Controllers.LoginUserController
         )
         {
             var response = await _mediator.Send(loginRequest);
-            return Ok(response);
+            return Ok(
+                new ApiResponse<LoginUserResponse>
+                {
+                    Code = string.IsNullOrEmpty(response.Token) ? 400 : 200,
+                    Message = response.Message,
+                    Data = response.Token != null ? response : null,
+                }
+            );
         }
     }
 }

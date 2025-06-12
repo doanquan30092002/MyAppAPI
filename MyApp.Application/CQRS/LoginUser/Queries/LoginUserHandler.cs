@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Sha256Hasher;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 
@@ -37,25 +38,17 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
                     var result = new LoginUserResponse
                     {
                         Token = tokenRepository.CreateJWTToken(user, role),
-                        Message = "Đăng nhập thành công",
+                        Message = Message.LOGIN_SUCCESS,
                     };
 
                     return result;
                 }
                 else
                 {
-                    return new LoginUserResponse
-                    {
-                        Token = null,
-                        Message = "Tài khoản của bạn đã bị khóa",
-                    };
+                    return new LoginUserResponse { Token = null, Message = Message.ACCOUNT_LOCKED };
                 }
             }
-            return new LoginUserResponse
-            {
-                Token = null,
-                Message = "Đăng nhập sai tài khoản hoặc mật khẩu",
-            };
+            return new LoginUserResponse { Token = null, Message = Message.LOGIN_WRONG };
         }
     }
 }
