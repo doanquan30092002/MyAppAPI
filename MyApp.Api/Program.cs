@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
@@ -82,7 +82,20 @@ builder
     );
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173", "https://digitalauction-fe.pages.dev") // FE URL
+                .AllowCredentials() // Cho phép gửi cookie
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    );
+});
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
@@ -93,7 +106,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

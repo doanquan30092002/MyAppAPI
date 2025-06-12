@@ -10,7 +10,7 @@
         #region Login
         public const string LOGIN_SUCCESS = "Đăng nhập thành công";
         public const string ACCOUNT_LOCKED = "Tài khoản của bạn đã bị khóa";
-        public const string LOGIN_WRONG = "Tài khoản của bạn đã bị khóa";
+        public const string LOGIN_WRONG = "Sai tài khoản hoặc mật khẩu";
         #endregion
         #region SearchUserAttendance
         public const string FOUND_NUMERICAL_ORDER = "Tìm thấy số thứ tự";
