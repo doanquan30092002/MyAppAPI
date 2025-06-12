@@ -12,5 +12,10 @@
         public const string ACCOUNT_LOCKED = "Tài khoản của bạn đã bị khóa";
         public const string LOGIN_WRONG = "Tài khoản của bạn đã bị khóa";
         #endregion
+        #region SearchUserAttendance
+        public const string FOUND_NUMERICAL_ORDER = "Tìm thấy số thứ tự";
+        public const string NOT_FOUND_NUMERICAL_ORDER = "Không tìm thấy số thứ tự";
+        public const string AUCTION_NOT_EXIST = "Không tồn tại phiên đấu giá này";
+        #endregion
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.SearchUserAttendance.Queries;
 using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Core.Entities;
@@ -42,7 +43,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
                 {
                     return new SearchUserAttendanceResponse
                     {
-                        Message = "Tìm thấy số thứ tự.",
+                        Message = Message.FOUND_NUMERICAL_ORDER,
                         AuctionName = auctionSearch.AuctionName,
                         NumericalOrder = numericalOrder,
                     };
@@ -51,7 +52,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
                 {
                     return new SearchUserAttendanceResponse
                     {
-                        Message = "Không tìm thấy số thứ tự.",
+                        Message = Message.NOT_FOUND_NUMERICAL_ORDER,
                         AuctionName = auctionSearch.AuctionName,
                         NumericalOrder = null,
                     };
@@ -59,7 +60,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
             }
             return new SearchUserAttendanceResponse
             {
-                Message = "Không tồn tại phiên đấu giá này.",
+                Message = Message.AUCTION_NOT_EXIST,
                 AuctionName = null,
                 NumericalOrder = null,
             };

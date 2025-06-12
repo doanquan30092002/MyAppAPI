@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.SearchUserAttendance.Queries;
 
 namespace MyApp.Api.Controllers.SearchUserAttendanceController
@@ -9,18 +11,14 @@ namespace MyApp.Api.Controllers.SearchUserAttendanceController
     [ApiController]
     public class SearchUserAttendanceController(IMediator _mediator) : ControllerBase
     {
-        [HttpPost]
+        [HttpGet]
         [Route("Search-User-Attendance")]
         [AllowAnonymous]
         public async Task<ActionResult<SearchUserAttendanceResponse>> SearchUserAttendance(
             [FromQuery] Guid auctionId,
-            [FromBody] string citizenIdentification
+            string citizenIdentification
         )
         {
-            if (auctionId == Guid.Empty || string.IsNullOrWhiteSpace(citizenIdentification))
-            {
-                return BadRequest("Invalid auction ID or citizen identification.");
-            }
             var searchUserAttendanceRequest = new SearchUserAttendanceRequest
             {
                 AuctionId = auctionId,
@@ -28,13 +26,31 @@ namespace MyApp.Api.Controllers.SearchUserAttendanceController
             };
             var response = await _mediator.Send(searchUserAttendanceRequest);
             if (
-                response.Message.Equals("Không tìm thấy số thứ tự.")
-                || response.Message.Equals("Không tồn tại phiên đấu giá này.")
+                response.Message.Equals(Message.NOT_FOUND_NUMERICAL_ORDER)
+                || response.Message.Equals(Message.AUCTION_NOT_EXIST)
             )
             {
-                return NotFound(response);
+                return NotFound(
+                    new ApiResponse<SearchUserAttendanceResponse>
+                    {
+                        Code = 404,
+                        Message = response.Message,
+                        Data = null,
+                    }
+                );
             }
-            return Ok(response);
+            return Ok(
+                new ApiResponse<SearchUserAttendanceResponse>
+                {
+                    Code = 200,
+                    Message = response.Message,
+                    Data = new SearchUserAttendanceResponse
+                    {
+                        AuctionName = response.AuctionName,
+                        NumericalOrder = response.NumericalOrder,
+                    },
+                }
+            );
         }
     }
 }
