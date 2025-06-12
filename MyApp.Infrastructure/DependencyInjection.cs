@@ -5,6 +5,8 @@ using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
+using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
+using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.IUnitOfWork;
@@ -46,6 +48,9 @@ namespace MyApp.Infrastructure
 
             services.AddScoped<ISearchUserAttendanceRepository, SearchUserAttendanceRepository>();
             services.AddScoped<ISignUpRepository, SignUpRepository>();
+
+            services.AddScoped<IGetAuctionByIdRepository, IGetAuctionByIdRepository>();
+            services.AddScoped<IGetListRepository, IGetListRepository>();
 
             return services;
         }
