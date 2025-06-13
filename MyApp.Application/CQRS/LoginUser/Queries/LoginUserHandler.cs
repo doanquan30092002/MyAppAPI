@@ -5,7 +5,7 @@ using MyApp.Application.Interfaces.ILoginUserRepository;
 
 namespace MyApp.Application.CQRS.LoginUser.Queries
 {
-    public class LoginUserHandler : IRequestHandler<LoginUserRequest, LoginUserResponse>
+    public class LoginUserHandler : IRequestHandler<LoginUserRequest, LoginUserResponseDTO>
     {
         private readonly ILoginUserRepository loginUserRepository;
         private readonly ITokenRepository tokenRepository;
@@ -19,7 +19,7 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
             this.tokenRepository = tokenRepository;
         }
 
-        public async Task<LoginUserResponse> Handle(
+        public async Task<LoginUserResponseDTO> Handle(
             LoginUserRequest request,
             CancellationToken cancellationToken
         )
@@ -35,20 +35,28 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
                 {
                     var role = await loginUserRepository.GetRoleNameByEmail(account.Email);
                     var user = await loginUserRepository.GetUserByEmail(account.Email);
-                    var result = new LoginUserResponse
+                    var result = new LoginUserResponseDTO
                     {
                         Token = tokenRepository.CreateJWTToken(user, role),
                         Message = Message.LOGIN_SUCCESS,
+                        Id = user.Id,
+                        Email = account.Email,
+                        Name = user.Name,
+                        RoleName = role,
                     };
 
                     return result;
                 }
                 else
                 {
-                    return new LoginUserResponse { Token = null, Message = Message.ACCOUNT_LOCKED };
+                    return new LoginUserResponseDTO
+                    {
+                        Token = null,
+                        Message = Message.ACCOUNT_LOCKED,
+                    };
                 }
             }
-            return new LoginUserResponse { Token = null, Message = Message.LOGIN_WRONG };
+            return new LoginUserResponseDTO { Token = null, Message = Message.LOGIN_WRONG };
         }
     }
 }

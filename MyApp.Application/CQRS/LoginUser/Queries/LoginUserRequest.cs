@@ -8,7 +8,7 @@ using MediatR;
 
 namespace MyApp.Application.CQRS.LoginUser.Queries
 {
-    public class LoginUserRequest : IRequest<LoginUserResponse>
+    public class LoginUserRequest : IRequest<LoginUserResponseDTO>
     {
         [Required]
         [DataType(DataType.EmailAddress)]
