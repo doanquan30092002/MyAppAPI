@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -35,11 +36,22 @@ namespace MyApp.Application.Exceptions
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            int statusCode = exception switch
+            {
+                ArgumentNullException => (int)HttpStatusCode.BadRequest,
+                ArgumentException => (int)HttpStatusCode.BadRequest,
+                UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
+                KeyNotFoundException => (int)HttpStatusCode.NotFound,
+                ValidationException => (int)HttpStatusCode.BadRequest,
+                _ => (int)HttpStatusCode.InternalServerError,
+            };
+
+            context.Response.StatusCode = statusCode;
 
             var response = new ApiResponse<string>
             {
-                Code = context.Response.StatusCode,
+                Code = statusCode,
                 Message = exception.Message,
                 Data = null,
             };
