@@ -37,13 +37,13 @@ namespace MyApp.Application.JobBackgroud.AuctionJob
             _logger.LogInformation(
                 "Hangfire Job Start: SetAuctionUpdateableFalseAsync for AuctionId={AuctionId} at {Time}",
                 auctionId,
-                DateTime.UtcNow
+                DateTime.Now
             );
             await _AuctionRepository.UpdateAuctionUpdateableAsync(auctionId, false);
             _logger.LogInformation(
                 "Hangfire Job Complete: SetAuctionUpdateableFalseAsync for AuctionId={AuctionId} at {Time}",
                 auctionId,
-                DateTime.UtcNow
+                DateTime.Now
             );
         }
     }

@@ -97,6 +97,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                 throw;
             }
 
+            if (updateResult.StatusChangedToTrue)
             {
                 var delay = updateResult.AuctionEndDate - DateTime.Now;
                 if (delay > TimeSpan.Zero)

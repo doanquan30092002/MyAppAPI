@@ -36,7 +36,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
 
         [Range(1, 5, ErrorMessage = "Số vòng tối đa phải từ 1 đến 5.")]
         public int NumberRoundMax { get; set; }
-        public bool Status { get; set; } = false;
+        public int Status { get; set; }
         public string? WinnerData { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "CategoryId là bắt buộc.")]

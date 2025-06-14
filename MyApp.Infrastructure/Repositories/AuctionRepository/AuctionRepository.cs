@@ -90,6 +90,11 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             int oldStatus = auction.Status;
             int newStatus = command.Status;
 
+            if (newStatus == 1 && DateTime.Now > auction.AuctionEndDate)
+                throw new ValidationException(
+                    "Không thể công khai phiên đấu giá do ngày kết thúc phiên đấu giá đã qua."
+                );
+
             if (oldStatus == 1)
             {
                 if (command.WinnerData != null)
@@ -113,6 +118,10 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                     auction.AuctionPlanningMap = await _uploadFileService.UploadAsync(
                         command.AuctionPlanningMap
                     );
+                }
+                else
+                {
+                    auction.AuctionPlanningMap = "No file uploaded";
                 }
 
                 auction.AuctionMap = command.Auction_Map;
