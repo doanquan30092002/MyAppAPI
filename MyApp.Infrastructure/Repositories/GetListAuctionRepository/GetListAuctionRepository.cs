@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.Auction.GetListAuction.Querries;
 using MyApp.Application.CQRS.Auction.GetListAution.Querries;
 using MyApp.Application.Interfaces.IGetListRepository;
-using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
