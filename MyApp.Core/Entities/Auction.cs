@@ -38,5 +38,7 @@ namespace MyApp.Core.Entities
 
         [ForeignKey("CategoryId")]
         public AuctionCategory Category { get; set; }
+
+        public bool? Updateable { get; set; }
     }
 }

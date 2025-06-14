@@ -1,21 +1,20 @@
-
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon.S3;
 using MediatR.NotificationPublishers;
+using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using MyApp.Application.Common.Services.JwtHelper;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
+using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IJwtHelper;
-
-﻿using MediatR.NotificationPublishers;
-using Microsoft.Extensions.DependencyInjection;
-
+using MyApp.Application.JobBackgroud.AuctionJob;
 
 namespace MyApp.Application
 {
@@ -55,6 +54,8 @@ namespace MyApp.Application
             services.AddScoped<IUploadFile, UploadFile>();
 
             services.AddScoped<IJwtHelper, JwtHelper>();
+
+            services.AddTransient<SetAuctionUpdateableFalse>();
 
             return services;
         }
