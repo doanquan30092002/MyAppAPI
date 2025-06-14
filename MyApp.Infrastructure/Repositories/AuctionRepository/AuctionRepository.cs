@@ -54,15 +54,16 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 AuctionStartDate = command.AuctionStartDate,
                 AuctionEndDate = command.AuctionEndDate,
                 AuctionMap = command.Auction_Map,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 CreatedBy = userId,
-                UpdatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.Now,
                 UpdatedBy = userId,
                 QRLink = "Test",
                 NumberRoundMax = command.NumberRoundMax,
-                Status = command.Status,
-                WinnerData = command.WinnerData,
+                Status = 0,
+                WinnerData = null,
                 CategoryId = command.CategoryId,
+                Updateable = true,
             };
 
             await _context.Auctions.AddAsync(auction);
@@ -86,10 +87,10 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             if (auction == null)
                 throw new ValidationException("Auction không tồn tại.");
 
-            bool oldStatus = auction.Status;
-            bool newStatus = command.Status;
+            int oldStatus = auction.Status;
+            int newStatus = command.Status;
 
-            if (oldStatus)
+            if (oldStatus == 1)
             {
                 if (command.WinnerData != null)
                 {
@@ -133,7 +134,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             return new UpdateAuctionResult
             {
                 AuctionId = auction.AuctionId,
-                StatusChangedToTrue = !oldStatus && newStatus,
+                StatusChangedToTrue = (oldStatus == 0 && newStatus == 1),
                 AuctionEndDate = auction.AuctionEndDate,
             };
         }
@@ -147,7 +148,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 throw new ValidationException("Auction không tồn tại.");
 
             auction.Updateable = updateable;
-            auction.UpdatedAt = DateTime.UtcNow;
+            auction.UpdatedAt = DateTime.Now;
             _context.Auctions.Update(auction);
             await _context.SaveChangesAsync();
         }

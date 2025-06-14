@@ -31,7 +31,7 @@ namespace MyApp.Core.Entities
 
         public int NumberRoundMax { get; set; }
 
-        public bool Status { get; set; }
+        public int Status { get; set; }
 
         public string? WinnerData { get; set; }
         public int CategoryId { get; set; }
