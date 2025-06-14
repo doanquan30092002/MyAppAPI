@@ -9,11 +9,11 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
     {
         private readonly IGetAuctionByIdRepository _getAuctionByIdRepository;
 
-        public GetAuctionByIdHandler(IGetListRepository getListRepository)
+        public GetAuctionByIdHandler(IGetAuctionByIdRepository getAuctionByIdRepository)
         {
             _getAuctionByIdRepository =
-                _getAuctionByIdRepository
-                ?? throw new ArgumentNullException(nameof(getListRepository));
+                getAuctionByIdRepository
+                ?? throw new ArgumentNullException(nameof(getAuctionByIdRepository));
         }
 
         public async Task<GetAuctionByIdResponse> Handle(

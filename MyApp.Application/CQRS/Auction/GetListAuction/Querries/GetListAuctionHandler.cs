@@ -12,7 +12,7 @@ namespace MyApp.Application.CQRS.Auction.GetListAuction.Querries
         public GetListAuctionHandler(IGetListRepository getListRepository)
         {
             _getListRepository =
-                _getListRepository ?? throw new ArgumentNullException(nameof(getListRepository));
+                getListRepository ?? throw new ArgumentNullException(nameof(getListRepository));
         }
 
         public Task<GetListAuctionResponse> Handle(

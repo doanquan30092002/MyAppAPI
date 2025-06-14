@@ -27,8 +27,8 @@ namespace MyApp.Application.CQRS.Auction.GetListAution.Querries
 
         public bool IsAscending { get; set; } = true;
 
-        public int? PageNumber { get; set; } = 1;
+        public int? PageNumber { get; set; }
 
-        public int? PageSize { get; set; } = 2;
+        public int? PageSize { get; set; }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Auction.GetListAuction.Querries;
 using MyApp.Application.CQRS.Auction.GetListAuctionById.Querries;
 using MyApp.Application.CQRS.Auction.GetListAution.Querries;
@@ -13,31 +15,46 @@ namespace MyApp.Api.Controllers.GetAuctionByIdController
         [HttpGet]
         [Route("Detail/{auction_id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<GetAuctionByIdResponse>> GetAuctionById(
+        public async Task<ActionResult<ApiResponse<GetAuctionByIdResponse>>> GetAuctionById(
             [FromRoute] Guid auction_id
         )
         {
             try
             {
-                // Create a GetListAuctionRequest with only AuctionId set
-                var request = new GetListAuctionRequest { AuctionId = auction_id };
-
-                // Send the request to the mediator
+                var request = new GetAuctionByIdRequest { AuctionId = auction_id };
                 var response = await _mediator.Send(request);
 
-                // Check if any auction was found
-                if (response.Auctions == null || !response.Auctions.Any())
+                if (response == null)
                 {
-                    return NotFound("Auction not found.");
+                    return NotFound(
+                        new ApiResponse<GetAuctionByIdResponse>
+                        {
+                            Code = 400,
+                            Message = "Auction not found.",
+                            Data = null,
+                        }
+                    );
                 }
 
-                return Ok(response);
+                return Ok(
+                    new ApiResponse<GetAuctionByIdResponse>
+                    {
+                        Code = 200,
+                        Message = "Auction retrieved successfully.",
+                        Data = response,
+                    }
+                );
             }
             catch (Exception ex)
             {
                 return StatusCode(
                     500,
-                    $"An error occurred while retrieving the auction: {ex.Message}"
+                    new ApiResponse<GetAuctionByIdResponse>
+                    {
+                        Code = 500,
+                        Message = $"An error occurred while retrieving the auction: {ex.Message}",
+                        Data = null,
+                    }
                 );
             }
         }

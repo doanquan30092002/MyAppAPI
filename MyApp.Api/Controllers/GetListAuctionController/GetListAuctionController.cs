@@ -12,7 +12,7 @@ namespace MyApp.Api.Controllers.GetListAuctionController
         [Route("List")]
         [AllowAnonymous]
         public async Task<ActionResult<LoginUserResponse>> getListAuction(
-            [FromBody] GetListAuctionRequest getListAuctionRequest
+            [FromQuery] GetListAuctionRequest getListAuctionRequest
         )
         {
             var response = await _mediator.Send(getListAuctionRequest);
