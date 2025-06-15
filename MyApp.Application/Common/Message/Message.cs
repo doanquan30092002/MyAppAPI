@@ -14,6 +14,8 @@
         public const string LOGIN_SUCCESS = "Đăng nhập thành công";
         public const string ACCOUNT_LOCKED = "Tài khoản của bạn đã bị khóa";
         public const string LOGIN_WRONG = "Sai tài khoản hoặc mật khẩu";
+        public const string EXPIRED_CITIZEN_IDENTIFICATION =
+            "Căn cước công dân hết hạn. Vui lòng cập nhật!";
         #endregion
         #region SearchUserAttendance
         public const string FOUND_NUMERICAL_ORDER = "Tìm thấy số thứ tự";

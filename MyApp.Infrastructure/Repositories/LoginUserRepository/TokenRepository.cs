@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MyApp.Application.Interfaces.ILoginUserRepository;
@@ -21,7 +20,8 @@ namespace MyApp.Infrastructure.Repositories.LoginUserRepository
         public string CreateJWTToken(UserDTO user, string role)
         {
             var claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.UserData, JsonSerializer.Serialize(user)));
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+            claims.Add(new Claim(ClaimTypes.Name, user.Name));
             claims.Add(new Claim(ClaimTypes.Role, role));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
