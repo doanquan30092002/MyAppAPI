@@ -31,12 +31,18 @@ namespace MyApp.Core.Entities
 
         public int NumberRoundMax { get; set; }
 
-        public bool Status { get; set; }
+        public int Status { get; set; }
 
         public string? WinnerData { get; set; }
         public int CategoryId { get; set; }
 
         [ForeignKey("CategoryId")]
         public AuctionCategory Category { get; set; }
+
+        public bool? Updateable { get; set; }
+
+        public string? CancelReasonFile { get; set; }
+
+        public string? CancelReason { get; set; }
     }
 }

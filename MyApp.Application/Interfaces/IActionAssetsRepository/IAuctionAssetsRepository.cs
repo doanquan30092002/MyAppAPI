@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace MyApp.Application.Interfaces.IActionAssetsRepository
 {
-    public interface IAuctionAssetsRepository { }
+    public interface IAuctionAssetsRepository
+    {
+        Task DeleteByAuctionIdAsync(Guid auctionId);
+    }
 }

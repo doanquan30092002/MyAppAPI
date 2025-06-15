@@ -49,7 +49,6 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
             var userId = _jwtHelper.GetUserIdFromHttpContext(httpContext);
 
             if (userId == null)
-                //userId = new Guid("1133E698-6F24-4062-8706-51980D3AE030");
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             var category = await _auctionCategoriesRepository.FindByIdAsync(request.CategoryId);

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyApp.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using MyApp.Infrastructure.Data;
 namespace MyApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250613103021_addUpdateable")]
+    partial class addUpdateable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,12 +103,6 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("AuctionStartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CancelReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CancelReasonFile")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -128,8 +125,8 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("RegisterOpenDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.Property<bool?>("Updateable")
                         .HasColumnType("bit");
