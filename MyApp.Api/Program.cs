@@ -69,7 +69,6 @@ builder.Services.AddSwaggerGen(option =>
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
-    {
         option.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
