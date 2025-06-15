@@ -10,16 +10,13 @@ using MyApp.Application.CQRS.ForgotPassword.Enums;
 
 namespace MyApp.Application.CQRS.ForgotPassword.Commands
 {
-    public class VerifyOtpAndChangePasswordCommand : IRequest<bool>, IValidatableObject
+    public class VerifyOtpCommand : IRequest<string>, IValidatableObject
     {
         [Required(ErrorMessage = "Thông tin liên hệ là bắt buộc.")]
         public string Contact { get; set; }
 
         [Required(ErrorMessage = "Mã OTP là bắt buộc.")]
         public string OtpCode { get; set; }
-
-        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc.")]
-        public string NewPassword { get; set; }
 
         [Required(ErrorMessage = "Kênh gữi OTP là bắt buộc.")]
         [Range(0, 1, ErrorMessage = "Kênh OTP không hỗ trợ")]
@@ -41,25 +38,15 @@ namespace MyApp.Application.CQRS.ForgotPassword.Commands
                 if (!emailRegex.IsMatch(Contact) && !phoneRegex.IsMatch(Contact))
                 {
                     yield return new ValidationResult(
-                        "Thông tin lạc phải là Email hoặc số điện thoại.",
+                        "Thông tin liên hệ phải là Email hoặc số điện thoại.",
                         new[] { nameof(Contact) }
                     );
                 }
             }
 
-            // Validate OtpCode
             if (string.IsNullOrWhiteSpace(OtpCode))
             {
-                yield return new ValidationResult("Mã OTP là bắt buộc", new[] { nameof(OtpCode) });
-            }
-
-            // Validate NewPassword
-            if (string.IsNullOrWhiteSpace(NewPassword))
-            {
-                yield return new ValidationResult(
-                    "Mất khẩu mới là bắt buộc",
-                    new[] { nameof(NewPassword) }
-                );
+                yield return new ValidationResult("Mã OTP là bắt buộc.", new[] { nameof(OtpCode) });
             }
 
             if (
