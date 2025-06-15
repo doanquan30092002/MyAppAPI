@@ -32,7 +32,7 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
 
         public int NumberRoundMax { get; set; }
 
-        public bool Status { get; set; }
+        public int Status { get; set; }
 
         public string? WinnerData { get; set; }
         public string CategoryName { get; set; }
