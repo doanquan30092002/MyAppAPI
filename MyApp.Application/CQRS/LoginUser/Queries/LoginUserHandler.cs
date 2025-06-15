@@ -31,21 +31,35 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
             );
             if (account != null)
             {
+                //check account is active
                 if (account.IsActive)
                 {
-                    var role = await loginUserRepository.GetRoleNameByEmail(account.Email);
                     var user = await loginUserRepository.GetUserByEmail(account.Email);
-                    var result = new LoginUserResponseDTO
+                    // check valid date
+                    if (user.ValidDate > DateTime.UtcNow.Date)
                     {
-                        Token = tokenRepository.CreateJWTToken(user, role),
-                        Message = Message.LOGIN_SUCCESS,
-                        Id = user.Id,
-                        Email = account.Email,
-                        Name = user.Name,
-                        RoleName = role,
-                    };
+                        var role = await loginUserRepository.GetRoleNameByEmail(account.Email);
 
-                    return result;
+                        var result = new LoginUserResponseDTO
+                        {
+                            Token = tokenRepository.CreateJWTToken(user, role),
+                            Message = Message.LOGIN_SUCCESS,
+                            Id = user.Id,
+                            Email = account.Email,
+                            Name = user.Name,
+                            RoleName = role,
+                        };
+
+                        return result;
+                    }
+                    else
+                    {
+                        return new LoginUserResponseDTO
+                        {
+                            Token = null,
+                            Message = Message.EXPIRED_CITIZEN_IDENTIFICATION,
+                        };
+                    }
                 }
                 else
                 {
