@@ -5,6 +5,7 @@ using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
+using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.IUnitOfWork;
@@ -16,6 +17,7 @@ using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
+using MyApp.Infrastructure.Repositories.ForgetPassRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
 using MyApp.Infrastructure.Repositories.SignUpRepository;
@@ -49,6 +51,8 @@ namespace MyApp.Infrastructure
             services.AddScoped<ISignUpRepository, SignUpRepository>();
 
             services.AddScoped<IAuctionAssetsRepository, AuctionAssetsImplement>();
+
+            services.AddScoped<IForgetPasswordRepository, ForgetPassRepository>();
 
             return services;
         }

@@ -5,16 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon.S3;
 using MediatR.NotificationPublishers;
-using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using MyApp.Application.Common.Services.JwtHelper;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
-using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IJwtHelper;
 using MyApp.Application.JobBackgroud.AuctionJob;
+using MyApp.Core.Models;
 
 namespace MyApp.Application
 {
@@ -32,6 +30,7 @@ namespace MyApp.Application
             });
 
             services.AddScoped<IOTPService, SmsOTPService>();
+            services.AddScoped<IOTPService, EmailOTPService>();
             services.AddSingleton<HttpClient>();
 
             services.Configure<S3Settings>(configuration.GetSection("CloudFly"));
@@ -56,6 +55,15 @@ namespace MyApp.Application
             services.AddScoped<IJwtHelper, JwtHelper>();
 
             services.AddTransient<SetAuctionUpdateableFalse>();
+
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            services.AddSingleton(resolver =>
+                resolver
+                    .GetRequiredService<Microsoft.Extensions.Options.IOptions<EmailSettings>>()
+                    .Value
+            );
+
+            services.AddMemoryCache();
 
             return services;
         }
