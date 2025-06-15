@@ -39,7 +39,13 @@ namespace MyApp.Api.Controllers.LoginUserController
                 {
                     Code = string.IsNullOrEmpty(response.Token) ? 400 : 200,
                     Message = response.Message,
-                    Data = response.Token != null ? response : null,
+                    Data = new LoginUserResponse
+                    {
+                        Id = response.Id,
+                        Email = response.Email,
+                        Name = response.Name,
+                        RoleName = response.RoleName,
+                    },
                 }
             );
         }
