@@ -56,5 +56,15 @@ namespace MyApp.Application.CQRS.ForgotPassword.Service
 
             return data.CodeResult == "100";
         }
+
+        public bool VerifyResetGuid(string to, string guid)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<string> IOTPService.VerifyOtpAsync(string to, string code)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -20,20 +20,45 @@ namespace MyApp.Api.Controllers.ForgotPasswordController
             return Ok(response);
         }
 
-        [HttpPost("verify-otp-and-change-password")]
-        public async Task<IActionResult> VerifyOtpAndChangePassword(
-            [FromBody] VerifyOtpAndChangePasswordCommand command
-        )
+        [AllowAnonymous]
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpCommand command)
+        {
+            var resetGuid = await _mediator.Send(command);
+            if (string.IsNullOrEmpty(resetGuid))
+            {
+                return BadRequest(
+                    new ApiResponse<string>
+                    {
+                        Code = 400,
+                        Message = "OTP không hợp lệ hoặc đã hết hạn",
+                        Data = null,
+                    }
+                );
+            }
+
+            return Ok(
+                new ApiResponse<string>
+                {
+                    Code = 200,
+                    Message = "OTP hợp lệ, bạn có thể đặt lại mật khẩu",
+                    Data = resetGuid,
+                }
+            );
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         {
             var result = await _mediator.Send(command);
-
             if (!result)
             {
                 return BadRequest(
                     new ApiResponse<string>
                     {
                         Code = 400,
-                        Message = "OTP không hợp lệ hoặc đổi mật khẩu thất bại",
+                        Message = "ResetGuid không hợp lệ hoặc đổi mật khẩu thất bại",
                         Data = null,
                     }
                 );

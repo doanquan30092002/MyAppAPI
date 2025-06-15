@@ -9,13 +9,12 @@ using MyApp.Application.Interfaces.IForgetPasswordRepository;
 
 namespace MyApp.Application.CQRS.ForgotPassword.Commands
 {
-    public class VerifyOtpAndChangePasswordHandler
-        : IRequestHandler<VerifyOtpAndChangePasswordCommand, bool>
+    public class ResetPasswordHandler : IRequestHandler<ResetPasswordCommand, bool>
     {
         private readonly IOTPService _otpService;
         private readonly IForgetPasswordRepository _forgetPasswordRepository;
 
-        public VerifyOtpAndChangePasswordHandler(
+        public ResetPasswordHandler(
             IOTPService otpService,
             IForgetPasswordRepository forgetPasswordRepository
         )
@@ -25,14 +24,14 @@ namespace MyApp.Application.CQRS.ForgotPassword.Commands
         }
 
         public async Task<bool> Handle(
-            VerifyOtpAndChangePasswordCommand request,
+            ResetPasswordCommand request,
             CancellationToken cancellationToken
         )
         {
-            var isValidOtp = await _otpService.VerifyOtpAsync(request.Contact, request.OtpCode);
-            if (!isValidOtp)
+            var isValidGuid = _otpService.VerifyResetGuid(request.Contact, request.ResetGuid);
+            if (!isValidGuid)
             {
-                return false;
+                throw new UnauthorizedAccessException("ResetGuid không hợp lệ hoặc đã hết hạn.");
             }
 
             var result = await _forgetPasswordRepository.UpdatePasswordAsync(

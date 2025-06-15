@@ -17,6 +17,7 @@ namespace MyApp.Application.CQRS.ForgotPassword.Service
         private readonly IMemoryCache _cache;
         private readonly EmailSettings _emailSettings;
         private readonly TimeSpan _otpExpire = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _guidExpire = TimeSpan.FromMinutes(10);
 
         public EmailOTPService(IMemoryCache cache, EmailSettings emailSettings)
         {
@@ -53,7 +54,7 @@ namespace MyApp.Application.CQRS.ForgotPassword.Service
             return otp;
         }
 
-        public Task<bool> VerifyOtpAsync(string to, string code)
+        public Task<string> VerifyOtpAsync(string to, string code)
         {
             if (
                 _cache.TryGetValue($"otp_{to}", out var cachedObj)
@@ -62,9 +63,28 @@ namespace MyApp.Application.CQRS.ForgotPassword.Service
             )
             {
                 _cache.Remove($"otp_{to}");
-                return Task.FromResult(true);
+
+                var resetGuid = Guid.NewGuid().ToString();
+                _cache.Set($"reset_{to}", resetGuid, _guidExpire);
+
+                return Task.FromResult(resetGuid);
             }
-            return Task.FromResult(false);
+
+            throw new UnauthorizedAccessException("OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        public bool VerifyResetGuid(string to, string guid)
+        {
+            if (
+                _cache.TryGetValue($"reset_{to}", out var cachedObj)
+                && cachedObj is string cachedGuid
+                && cachedGuid == guid
+            )
+            {
+                _cache.Remove($"reset_{to}");
+                return true;
+            }
+            return false;
         }
     }
 }

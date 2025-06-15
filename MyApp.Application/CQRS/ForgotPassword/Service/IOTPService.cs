@@ -13,6 +13,8 @@ namespace MyApp.Application.CQRS.ForgotPassword.Service
 
         Task<string> SendOtpAsync(string to, string messageTemplate = null);
 
-        Task<bool> VerifyOtpAsync(string to, string code);
+        Task<string> VerifyOtpAsync(string to, string code);
+
+        bool VerifyResetGuid(string to, string guid);
     }
 }
