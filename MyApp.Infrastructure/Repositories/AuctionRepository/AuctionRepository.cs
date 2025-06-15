@@ -64,6 +64,8 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 WinnerData = null,
                 CategoryId = command.CategoryId,
                 Updateable = true,
+                CancelReasonFile = "No file uploaded",
+                CancelReason = null,
             };
 
             await _context.Auctions.AddAsync(auction);

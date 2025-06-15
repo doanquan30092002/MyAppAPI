@@ -40,5 +40,9 @@ namespace MyApp.Core.Entities
         public AuctionCategory Category { get; set; }
 
         public bool? Updateable { get; set; }
+
+        public string? CancelReasonFile { get; set; }
+
+        public string? CancelReason { get; set; }
     }
 }
