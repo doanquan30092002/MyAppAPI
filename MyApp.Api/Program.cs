@@ -4,7 +4,6 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp.Api;
@@ -70,7 +69,6 @@ builder.Services.AddSwaggerGen(option =>
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
-    {
         option.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -82,21 +80,8 @@ builder
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
             ),
-        };
-        option.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var tokenFromCookie = context.Request.Cookies["access_token"];
-                if (!string.IsNullOrEmpty(tokenFromCookie))
-                {
-                    context.Token = tokenFromCookie;
-                }
-                return Task.CompletedTask;
-            },
-        };
-    });
-
+        }
+    );
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
