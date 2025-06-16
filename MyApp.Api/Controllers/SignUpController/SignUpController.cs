@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Response;
-using MyApp.Application.CQRS.SignUp.Command;
+using MyApp.Application.CQRS.SignUp.SignUpUser.Command;
 
 namespace MyApp.Api.Controllers.SignUpController
 {
