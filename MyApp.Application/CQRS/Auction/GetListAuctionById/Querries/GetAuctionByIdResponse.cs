@@ -36,5 +36,7 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
 
         public string? WinnerData { get; set; }
         public string CategoryName { get; set; }
+
+        public List<AuctionAssets> ListAuctionAssets { get; set; } = new List<AuctionAssets>();
     }
 }
