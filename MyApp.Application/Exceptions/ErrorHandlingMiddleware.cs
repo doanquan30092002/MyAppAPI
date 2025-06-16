@@ -56,7 +56,12 @@ namespace MyApp.Application.Exceptions
                 Data = null,
             };
 
-            var result = JsonSerializer.Serialize(response);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            };
+
+            var result = JsonSerializer.Serialize(response, options);
             return context.Response.WriteAsync(result);
         }
     }
