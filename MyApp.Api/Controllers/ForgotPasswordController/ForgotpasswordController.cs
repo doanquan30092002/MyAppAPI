@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.ForgotPassword.Commands;
+using MyApp.Core.DTOs.ResetPassDTO;
 
 namespace MyApp.Api.Controllers.ForgotPasswordController
 {
@@ -38,11 +39,11 @@ namespace MyApp.Api.Controllers.ForgotPasswordController
             }
 
             return Ok(
-                new ApiResponse<string>
+                new ApiResponse<ResetPasswordTokenResponse>
                 {
                     Code = 200,
                     Message = "OTP hợp lệ, bạn có thể đặt lại mật khẩu",
-                    Data = resetGuid,
+                    Data = new ResetPasswordTokenResponse { ResetToken = resetGuid },
                 }
             );
         }

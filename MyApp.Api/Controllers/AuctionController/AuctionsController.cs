@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
+using MyApp.Core.DTOs.AuctionDTO;
 
 namespace MyApp.Api.Controllers.AuctionController
 {
@@ -18,11 +19,11 @@ namespace MyApp.Api.Controllers.AuctionController
         public async Task<IActionResult> CreateAuction([FromForm] AddAuctionCommand command)
         {
             var auctionId = await _mediator.Send(command);
-            var response = new ApiResponse<Guid>
+            var response = new ApiResponse<AuctionResponse>
             {
                 Code = 200,
                 Message = "Tạo phiên đấu giá thành công",
-                Data = auctionId,
+                Data = new AuctionResponse { AuctionId = auctionId },
             };
             return Ok(response);
         }
@@ -34,11 +35,11 @@ namespace MyApp.Api.Controllers.AuctionController
         {
             var updatedAuctionId = await _mediator.Send(command);
 
-            var response = new ApiResponse<Guid>
+            var response = new ApiResponse<AuctionResponse>
             {
                 Code = 200,
                 Message = "Cập nhật phiên đấu giá thành công",
-                Data = updatedAuctionId,
+                Data = new AuctionResponse { AuctionId = updatedAuctionId },
             };
             return Ok(response);
         }
