@@ -3,10 +3,12 @@ using System.Text;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp.Api;
+using MyApp.Application.Common.Response;
 using MyApp.Application.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -104,7 +106,11 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:5173", "https://digitalauction-fe.pages.dev") // FE URL
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "https://digitalauction-fe.pages.dev",
+                    "http://localhost:8080"
+                ) // FE URL
                 .AllowCredentials() // Cho phép gửi cookie
                 .AllowAnyHeader()
                 .AllowAnyMethod();
@@ -121,6 +127,28 @@ builder.Services.AddHangfire(config =>
 });
 
 builder.Services.AddHangfireServer();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context
+            .ModelState.Where(x => x.Value?.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors)
+            .Select(x => x.ErrorMessage)
+            .Distinct()
+            .ToList();
+
+        var response = new ApiResponse<string>
+        {
+            Code = StatusCodes.Status400BadRequest,
+            Message = string.Join(" | ", errors),
+            Data = null,
+        };
+
+        return new BadRequestObjectResult(response);
+    };
+});
 
 var app = builder.Build();
 
