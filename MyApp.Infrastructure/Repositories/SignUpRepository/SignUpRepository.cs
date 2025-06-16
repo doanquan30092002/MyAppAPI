@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Microsoft.EntityFrameworkCore.Storage;
 using MyApp.Application.Common.Sha256Hasher;
-using MyApp.Application.CQRS.SignUp.Command;
+using MyApp.Application.CQRS.SignUp.SignUpUser.Command;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
@@ -52,7 +52,7 @@ namespace MyApp.Infrastructure.Repositories.SignUpRepository
                     UpdatedBy = userId,
                     IsActive = true,
                     UserId = userId,
-                    RoleId = 1,
+                    RoleId = signUpRequest.RoleId,
                 };
 
                 context.Accounts.Add(account);
