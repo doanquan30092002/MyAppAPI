@@ -8,6 +8,7 @@ using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyApp.Application.Common.Services.JwtHelper;
+using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
 using MyApp.Application.Interfaces.IJwtHelper;
@@ -64,6 +65,11 @@ namespace MyApp.Application
             );
 
             services.AddMemoryCache();
+
+            services.Configure<SmsToOptions>(configuration.GetSection("SmsTo"));
+            services.AddHttpClient<SmsToSendMessage>();
+            services.AddTransient<ISendMessage, SmsToSendMessage>();
+            services.AddTransient<ISendMessage, EmailSendMessage>();
 
             return services;
         }
