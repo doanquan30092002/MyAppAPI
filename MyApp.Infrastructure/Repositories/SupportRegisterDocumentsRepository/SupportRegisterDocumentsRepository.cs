@@ -41,6 +41,16 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
             return invalidIds;
         }
 
+        public async Task<User?> GetUserByCitizenIdentificationAsync(string citizenIdentification)
+        {
+            if (string.IsNullOrWhiteSpace(citizenIdentification))
+                return null;
+
+            return await _dbContext
+                .Users.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.CitizenIdentification == citizenIdentification);
+        }
+
         public async Task<Guid> GetUserIdByCitizenIdentificationAsync(string citizenIdentification)
         {
             if (string.IsNullOrWhiteSpace(citizenIdentification))
@@ -140,6 +150,31 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
             }
 
             await _dbContext.AuctionDocuments.AddRangeAsync(documents);
+            var result = await _dbContext.SaveChangesAsync();
+
+            return result > 0;
+        }
+
+        public async Task<bool> UpdateAuctionDocumentStatusAsync(
+            Guid auctionDocumentId,
+            UpdateStatusAuctionDocumentRequest request,
+            Guid updatedBy
+        )
+        {
+            var auctionDocument = await _dbContext.AuctionDocuments.FirstOrDefaultAsync(x =>
+                x.AuctionDocumentsId == auctionDocumentId
+            );
+
+            if (auctionDocument == null)
+                throw new KeyNotFoundException(
+                    $"Không tìm thấy hồ sơ đấu giá với Id: {auctionDocumentId}"
+                );
+
+            auctionDocument.UpdateAtTicket = DateTime.Now;
+            auctionDocument.StatusTicket = request.StatusTicket;
+            auctionDocument.StatusDeposit = request.StatusDeposit;
+
+            _dbContext.AuctionDocuments.Update(auctionDocument);
             var result = await _dbContext.SaveChangesAsync();
 
             return result > 0;

@@ -37,5 +37,25 @@ namespace MyApp.Application.Interfaces.ISupportRegisterDocuments
         /// <param name="auctionId">Guid của phiên đấu giá</param>
         /// <returns>Thông tin phiên đấu giá, nếu không tìm thấy trả về null</returns>
         Task<Auction?> GetAuctionByIdAsync(Guid auctionId);
+
+        /// <summary>
+        /// Tìm thông tin người dùng theo số căn cước công dân (CMND/CCCD).
+        /// </summary>
+        /// <param name="citizenIdentification">Chuỗi số CCCD/CMND</param>
+        /// <returns>Thông tin người dùng. Nếu không tìm thấy, trả về null</returns>
+        Task<User?> GetUserByCitizenIdentificationAsync(string citizenIdentification);
+
+        /// <summary>
+        /// Cập nhật trạng thái hồ sơ đấu giá.
+        /// </summary>
+        /// <param name="auctionDocumentId">Id của hồ sơ đấu giá cần cập nhật</param>
+        /// <param name="request">Trạng thái mới cần cập nhật</param>
+        /// <param name="updatedBy">Guid người thực hiện cập nhật</param>
+        /// <returns>True nếu cập nhật thành công, false nếu thất bại</returns>
+        Task<bool> UpdateAuctionDocumentStatusAsync(
+            Guid auctionDocumentId,
+            UpdateStatusAuctionDocumentRequest request,
+            Guid updatedBy
+        );
     }
 }
