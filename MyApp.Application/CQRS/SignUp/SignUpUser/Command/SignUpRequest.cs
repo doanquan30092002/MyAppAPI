@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 using MyApp.Core.Entities;
 
-namespace MyApp.Application.CQRS.SignUp.Command
+namespace MyApp.Application.CQRS.SignUp.SignUpUser.Command
 {
     public class SignUpRequest : IRequest<SignUpResponse>
     {
@@ -39,5 +39,7 @@ namespace MyApp.Application.CQRS.SignUp.Command
             ErrorMessage = "Mật khẩu không hợp lệ"
         )]
         public string Password { get; set; }
+
+        public int RoleId { get; set; }
     }
 }

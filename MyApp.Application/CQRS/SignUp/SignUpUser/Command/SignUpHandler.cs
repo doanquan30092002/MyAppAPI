@@ -4,7 +4,7 @@ using MediatR;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.ISignUpRepository;
 
-namespace MyApp.Application.CQRS.SignUp.Command
+namespace MyApp.Application.CQRS.SignUp.SignUpUser.Command
 {
     public class SignUpHandler : IRequestHandler<SignUpRequest, SignUpResponse>
     {

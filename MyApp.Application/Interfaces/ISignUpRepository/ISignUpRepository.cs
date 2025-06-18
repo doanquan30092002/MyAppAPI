@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using MyApp.Application.CQRS.SignUp.Command;
+using MyApp.Application.CQRS.SignUp.SignUpUser.Command;
 
 namespace MyApp.Application.Interfaces.ISignUpRepository
 {

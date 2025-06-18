@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.Auction.GetListAuctionById.Querries;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
+using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
@@ -58,6 +59,25 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                         Status = a.Status,
                         WinnerData = a.WinnerData,
                         CategoryName = category != null ? category.CategoryName : null,
+                        ListAuctionAssets = (
+                            from aa in context.AuctionAssets
+                            where aa.AuctionId == a.AuctionId
+                            select new AuctionAssets
+                            {
+                                AuctionAssetsId = aa.AuctionAssetsId,
+                                TagName = aa.TagName,
+                                StartingPrice = aa.StartingPrice,
+                                Unit = aa.Unit,
+                                Deposit = aa.Deposit,
+                                RegistrationFee = aa.RegistrationFee,
+                                Description = aa.Description,
+                                CreatedAt = aa.CreatedAt,
+                                CreatedBy = aa.CreatedBy,
+                                UpdatedAt = aa.UpdatedAt,
+                                UpdatedBy = aa.UpdatedBy,
+                                AuctionId = aa.AuctionId,
+                            }
+                        ).ToList(),
                     }
                 ).FirstOrDefaultAsync();
 

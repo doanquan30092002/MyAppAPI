@@ -61,6 +61,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<IForgetPasswordRepository, ForgetPassRepository>();
             services.AddScoped<IGetAuctionByIdRepository, GetAuctionByIdRepository>();
             services.AddScoped<IGetListRepository, GetListAuctionRepository>();
+            services.AddScoped<IGetRoleRepository, GetRoleRepository>();
 
             services.AddTransient<ISupportRegisterDocuments, SupportRegisterDocumentsRepository>();
 
