@@ -11,7 +11,7 @@ namespace MyApp.Api.Controllers.SendMessageController
     [ApiController]
     public class SendMessageController(IMediator _mediator) : ControllerBase
     {
-        [AllowAnonymous]
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] SendMessageCommand command)
         {

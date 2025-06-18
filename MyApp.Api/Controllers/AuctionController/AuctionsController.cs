@@ -13,7 +13,7 @@ namespace MyApp.Api.Controllers.AuctionController
     [ApiController]
     public class AuctionsController(IMediator _mediator) : ControllerBase
     {
-        [AllowAnonymous]
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreateAuction([FromForm] AddAuctionCommand command)
