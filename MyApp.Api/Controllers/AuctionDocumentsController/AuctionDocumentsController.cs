@@ -96,7 +96,7 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
         /// <returns>File Word xuất ra</returns>
         [HttpPost("export-word")]
         [Consumes("multipart/form-data")]
-        //[Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> ExportWordAuctionDocuments(
             [FromForm] ExportWordAuctionDocumentCommand command
         )
