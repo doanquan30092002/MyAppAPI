@@ -7,6 +7,7 @@ using Amazon.S3;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MyApp.Application.Common.Services.ExportWord.ExportAuctionDocuments;
 using MyApp.Application.Common.Services.JwtHelper;
 using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
@@ -71,6 +72,8 @@ namespace MyApp.Application
             services.AddHttpClient<SmsToSendMessage>();
             services.AddTransient<ISendMessage, SmsToSendMessage>();
             services.AddTransient<ISendMessage, EmailSendMessage>();
+
+            services.AddScoped<IExportAuctionDocuments, ExportAuctionDocuments>();
 
             return services;
         }

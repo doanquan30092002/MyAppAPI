@@ -27,6 +27,39 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
                 .FirstOrDefaultAsync(x => x.AuctionId == auctionId);
         }
 
+        public async Task<AuctionDocuments> GetAuctionDocumentByIdAsync(Guid auctionDocumentId)
+        {
+            var auctionDocument = await _dbContext
+                .AuctionDocuments.Include(ad => ad.User)
+                .Include(ad => ad.AuctionAsset)
+                .FirstOrDefaultAsync(ad => ad.AuctionDocumentsId == auctionDocumentId);
+
+            if (auctionDocument != null)
+            {
+                return auctionDocument;
+            }
+            throw new KeyNotFoundException("Không tìm thấy hồ sơ đấu giá với Id tương ứng.");
+        }
+
+        public async Task<string?> GetPhoneNumberByCitizenIdentificationAsync(
+            string citizenIdentification
+        )
+        {
+            if (string.IsNullOrWhiteSpace(citizenIdentification))
+                return null;
+
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u =>
+                u.CitizenIdentification == citizenIdentification
+            );
+
+            if (user == null)
+                return null;
+
+            var account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.UserId == user.Id);
+
+            return account?.PhoneNumber;
+        }
+
         public async Task<List<Guid>> GetInvalidAuctionAssetIdsAsync(List<Guid> auctionAssetIds)
         {
             if (auctionAssetIds == null || !auctionAssetIds.Any())

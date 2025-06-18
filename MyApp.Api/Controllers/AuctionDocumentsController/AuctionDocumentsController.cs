@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyApp.Api.Controllers.AuctionDocumentsController
 {
@@ -70,6 +71,7 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
         /// <param name="request">Thông tin cập nhật trạng thái</param>
         /// <returns>Trả về true nếu thành công</returns>
         [HttpPut("update-status")]
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> UpdateStatus(
             [FromBody] UpdateStatusAuctionDocumentsCommand request
         )
@@ -83,6 +85,51 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
                     Data = null,
                 }
             );
+        }
+
+        /// <summary>
+        /// Xuất hồ sơ đấu giá ra file Word theo AuctionId và số căn cước công dân, cho phép upload template.
+        /// </summary>
+        /// <param name="auctionId">Id phiên đấu giá</param>
+        /// <param name="citizenIdentification">Số căn cước công dân/CMND</param>
+        /// <param name="templateFile">File template Word (tùy chọn)</param>
+        /// <returns>File Word xuất ra</returns>
+        [HttpPost("export-word")]
+        [Consumes("multipart/form-data")]
+        //[Authorize(Roles = "Staff")]
+        public async Task<IActionResult> ExportWordAuctionDocuments(
+            [FromForm] ExportWordAuctionDocumentCommand command
+        )
+        {
+            try
+            {
+                var fileBytes = await _mediator.Send(command);
+                var fileName = $"ho-so-dau-gia-{command.AuctionDocumentId}.docx";
+                var base64 = Convert.ToBase64String(fileBytes);
+
+                var response = new ApiResponse<object>
+                {
+                    Code = 200,
+                    Message = "Xuất file thành công",
+                    Data = new
+                    {
+                        FileName = fileName,
+                        ContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        Base64 = base64,
+                    },
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new ApiResponse<object>
+                {
+                    Code = 400,
+                    Message = "Lỗi xuất file: Hãy kiểm tra định dạng file theo tiêu chuẩn format",
+                    Data = null,
+                };
+                return StatusCode(500, errorResponse);
+            }
         }
     }
 }

@@ -57,5 +57,14 @@ namespace MyApp.Application.Interfaces.ISupportRegisterDocuments
             UpdateStatusAuctionDocumentRequest request,
             Guid updatedBy
         );
+
+        /// <summary>
+        /// Lấy hồ sơ đấu giá theo AuctionDocumentId.
+        /// </summary>
+        /// <param name="auctionDocumentId">Id hồ sơ đấu giá</param>
+        /// <returns>Hồ sơ đấu giá, null nếu không tồn tại</returns>
+        Task<AuctionDocuments> GetAuctionDocumentByIdAsync(Guid auctionDocumentId);
+
+        Task<string?> GetPhoneNumberByCitizenIdentificationAsync(string citizenIdentification);
     }
 }
