@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Auction.GetListAuctionById.Querries;
 
@@ -36,22 +37,19 @@ namespace MyApp.Api.Controllers.GetAuctionByIdController
                     new ApiResponse<GetAuctionByIdResponse>
                     {
                         Code = 200,
-                        Message = "Auction retrieved successfully.",
+                        Message = Message.HANDLER_SUCCESS,
                         Data = response,
                     }
                 );
             }
             catch (Exception ex)
             {
-                return StatusCode(
-                    500,
-                    new ApiResponse<GetAuctionByIdResponse>
-                    {
-                        Code = 500,
-                        Message = $"An error occurred while retrieving the auction: {ex.Message}",
-                        Data = null,
-                    }
-                );
+                return new ApiResponse<GetAuctionByIdResponse>
+                {
+                    Code = 500,
+                    Message = Message.HANDLER_ERROR + ex.Message,
+                    Data = null,
+                };
             }
         }
     }

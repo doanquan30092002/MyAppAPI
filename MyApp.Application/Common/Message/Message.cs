@@ -2,6 +2,12 @@
 {
     public class Message
     {
+        #region Common
+        public const string HANDLER_FAILED = "Xử lý thất bại";
+        public const string HANDLER_SUCCESS = "Xử lý thành công";
+        public const string HANDLER_ERROR = "Xử lý xảy ra lỗi";
+        #endregion
+
         #region SignUp
         public const string EMAIL_EXITS = "Email đã được sử dụng";
         public const string PHONE_NUMBER_EXITS = "Số diện thoại đã được sử dụng";
@@ -9,6 +15,11 @@
         public const string CREATE_FAIL = "Có lỗi không thể đăng ký tài khoản";
         public const string CREATE_SUCCESS = "Đăng ký tài khoản thành công";
         public const string VALIDATION_FAILED = "Xác thực thất bại";
+        #endregion
+
+        #region GetUserInfo
+        public const string GET_USER_INFO_SUCCESS = "Lấy thông tin người dùng thành công";
+        public const string GET_USER_INFO_FAIL = "Lấy thông tin người dùng thất bại";
         #endregion
 
         #region Login
