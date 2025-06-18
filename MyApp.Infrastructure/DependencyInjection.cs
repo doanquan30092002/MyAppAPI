@@ -10,6 +10,7 @@ using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
+using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Core.Options;
@@ -25,6 +26,7 @@ using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
 using MyApp.Infrastructure.Repositories.SignUpRepository;
+using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
 
 namespace MyApp.Infrastructure
 {
@@ -60,6 +62,8 @@ namespace MyApp.Infrastructure
             services.AddScoped<IGetAuctionByIdRepository, GetAuctionByIdRepository>();
             services.AddScoped<IGetListRepository, GetListAuctionRepository>();
             services.AddScoped<IGetRoleRepository, GetRoleRepository>();
+
+            services.AddTransient<ISupportRegisterDocuments, SupportRegisterDocumentsRepository>();
 
             return services;
         }
