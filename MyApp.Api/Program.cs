@@ -106,10 +106,14 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .SetIsOriginAllowed(_ => true)
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "https://digitalauction-fe.pages.dev",
+                    "http://localhost:8080"
+                )
+                .AllowCredentials()
                 .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+                .AllowAnyMethod();
         }
     );
 });
