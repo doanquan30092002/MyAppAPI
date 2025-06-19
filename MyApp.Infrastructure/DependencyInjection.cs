@@ -8,6 +8,7 @@ using MyApp.Application.Interfaces.IExcelRepository;
 using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
+using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
@@ -23,6 +24,7 @@ using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
+using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
 using MyApp.Infrastructure.Repositories.SignUpRepository;
@@ -62,6 +64,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<IGetAuctionByIdRepository, GetAuctionByIdRepository>();
             services.AddScoped<IGetListRepository, GetListAuctionRepository>();
             services.AddScoped<IGetRoleRepository, GetRoleRepository>();
+            services.AddScoped<IGetUserInfoRepository, GetUserInfoRepository>();
 
             services.AddTransient<ISupportRegisterDocuments, SupportRegisterDocumentsRepository>();
 
