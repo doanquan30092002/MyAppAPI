@@ -29,7 +29,7 @@ namespace MyApp.Api.Controllers.LoginUserController
                     {
                         HttpOnly = true, // Ngăn JS truy cập → chống XSS
                         Secure = false, // Chỉ gửi qua HTTPS
-                        SameSite = SameSiteMode.Strict, // Tránh CSRF
+                        SameSite = SameSiteMode.None, // Tránh CSRF
                         Expires = DateTimeOffset.UtcNow.AddDays(1), // Thời gian sống của cookie
                         Path = "/", // Cookie có thể truy cập từ mọi đường dẫn
                     }
