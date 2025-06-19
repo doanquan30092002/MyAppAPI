@@ -106,14 +106,10 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins(
-                    "http://localhost:5173",
-                    "https://digitalauction-fe.pages.dev",
-                    "http://localhost:8080"
-                ) // FE URL
-                .AllowCredentials() // Cho phép gửi cookie
+                .SetIsOriginAllowed(_ => true)
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         }
     );
 });

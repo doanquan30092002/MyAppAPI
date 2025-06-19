@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
@@ -35,8 +36,16 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
             CancellationToken cancellationToken
         )
         {
-            var httpContext = _httpContextAccessor.HttpContext;
-            var createdByUserId = _jwtHelper.GetUserIdFromHttpContext(httpContext);
+            Guid? createdByUserId = null;
+
+            var createdByUserStr = _httpContextAccessor
+                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
+                ?.Value;
+
+            if (Guid.TryParse(createdByUserStr, out var parsedGuid))
+            {
+                createdByUserId = parsedGuid;
+            }
 
             if (createdByUserId == null)
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
