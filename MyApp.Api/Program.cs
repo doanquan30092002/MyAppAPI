@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp.Api;
 using MyApp.Application.Common.Response;
+using MyApp.Application.CQRS.PaymentDeposit.RealTimeStatusDeposit;
 using MyApp.Application.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -150,6 +151,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
@@ -176,5 +179,5 @@ app.UseStaticFiles(
     }
 );
 app.MapControllers();
-
+app.MapHub<AuctionDepositHub>("/hubs/auctionDeposit");
 app.Run();

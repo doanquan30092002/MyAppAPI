@@ -10,6 +10,6 @@ namespace MyApp.Core.DTOs.AuctionDocumentsDTO
     {
         public string QrUrl { get; set; }
 
-        public InforBankTuanLinh inforBankTuanLinh { get; set; }
+        public InforBankTuanLinh InforBankTuanLinh { get; set; }
     }
 }
