@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
@@ -16,6 +17,7 @@ namespace MyApp.Api.Controllers.PaymentDepositController
         /// <summary>
         /// Lấy thông tin thanh toán đặt cọc theo AuctionDocumentsId
         /// </summary>
+        [Authorize(Roles = "Customer")]
         [HttpGet("get-infor-payment-deposit/{auctionDocumentsId}")]
         public async Task<ActionResult<ApiResponse<InforPaymentDepositResponse>>> GetInfo(
             Guid auctionDocumentsId

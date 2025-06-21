@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.PaymentDeposit.RealTimeStatusDeposit;
 using MyApp.Application.Interfaces.IPaymentDeposit;
 
@@ -41,10 +42,17 @@ namespace MyApp.Application.CQRS.PaymentDeposit.WebHookPaymentDeposit
                     .Clients.Group(request.AuctionDocumentsId.ToString())
                     .SendAsync(
                         "NotifyDepositStatusChanged",
-                        new
+                        new ApiResponse<object>
                         {
-                            AuctionDocumentsId = request.AuctionDocumentsId,
-                            Status = request.Status,
+                            Code = result ? 200 : 400,
+                            Message = result
+                                ? "Cập nhật trạng thái đặt cọc thành công"
+                                : "Cập nhật trạng thái đặt cọc thất bại",
+                            Data = new
+                            {
+                                AuctionDocumentsId = request.AuctionDocumentsId,
+                                Status = request.Status,
+                            },
                         }
                     );
             }
