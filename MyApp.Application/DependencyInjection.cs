@@ -7,10 +7,13 @@ using Amazon.S3;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MyApp.Application.Common.Services.ExportWord.ExportAuctionDocuments;
 using MyApp.Application.Common.Services.JwtHelper;
+using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
 using MyApp.Application.Interfaces.IJwtHelper;
+using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.JobBackgroud.AuctionJob;
 using MyApp.Core.Models;
 
@@ -64,6 +67,13 @@ namespace MyApp.Application
             );
 
             services.AddMemoryCache();
+
+            services.Configure<SmsToOptions>(configuration.GetSection("SmsTo"));
+            services.AddHttpClient<SmsToSendMessage>();
+            services.AddTransient<ISendMessage, SmsToSendMessage>();
+            services.AddTransient<ISendMessage, EmailSendMessage>();
+
+            services.AddScoped<IExportAuctionDocuments, ExportAuctionDocuments>();
 
             return services;
         }

@@ -40,6 +40,8 @@ namespace MyApp.Application.Exceptions
             int statusCode = exception switch
             {
                 ArgumentNullException => (int)HttpStatusCode.BadRequest,
+                InvalidOperationException => (int)HttpStatusCode.BadRequest,
+                NotSupportedException => (int)HttpStatusCode.BadRequest,
                 ArgumentException => (int)HttpStatusCode.BadRequest,
                 UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
                 KeyNotFoundException => (int)HttpStatusCode.NotFound,

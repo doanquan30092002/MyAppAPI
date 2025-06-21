@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Hangfire;
@@ -54,8 +55,17 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             CancellationToken cancellationToken
         )
         {
-            var httpContext = _httpContextAccessor.HttpContext;
-            var userId = _jwtHelper.GetUserIdFromHttpContext(httpContext);
+            Guid? userId = null;
+
+            var userIdStr = _httpContextAccessor
+                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
+                ?.Value;
+
+            if (Guid.TryParse(userIdStr, out var parsedGuid))
+            {
+                userId = parsedGuid;
+            }
+
             if (userId == null)
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 

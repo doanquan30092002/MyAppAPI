@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MyApp.Core.DTOs.AuctionDocumentsDTO
+{
+    public class UpdateStatusAuctionDocumentRequest
+    {
+        public bool StatusTicket { get; set; }
+
+        public bool StatusDeposit { get; set; }
+    }
+}
