@@ -2,6 +2,9 @@
 {
     public class Message
     {
+        #region Common
+        public const string SYSTEM_ERROR = "Hệ thống đang bị lỗi. Xin thử lại sau!";
+        #endregion
         //SignUp
         public const string EMAIL_EXITS = "Email đã được sử dụng";
         public const string PHONE_NUMBER_EXITS = "Số diện thoại đã được sử dụng";
@@ -24,6 +27,12 @@
         public const string FOUND_NUMERICAL_ORDER = "Tìm thấy số thứ tự";
         public const string NOT_FOUND_NUMERICAL_ORDER = "Không tìm thấy số thứ tự";
         public const string AUCTION_NOT_EXIST = "Không tồn tại phiên đấu giá này";
+        #endregion
+        #region UpdateAccountAndProfile
+        public const string UPDATE_ACCOUNT_SUCCESS = "Cập nhật tài khoản thành công";
+        public const string PASSWORD_OLD_NOT_EQUAL = "Mật khẩu cũ không khớp với mật khẩu hiện tại";
+        public const string PASSWORD_OLD_OR_NEW_EMPTY = "Hãy nhập đủ mật khẩu cũ và mật khẩu mới";
+        public const string NO_FIELDS_PROVIDED = "Không có thông tin nào được cập nhật";
         #endregion
     }
 }

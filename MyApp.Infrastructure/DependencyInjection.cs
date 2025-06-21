@@ -12,6 +12,7 @@ using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Application.Interfaces.SearchUserAttendance;
+using MyApp.Application.Interfaces.UpdateAccountRepository;
 using MyApp.Core.Options;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.ImplementUnitOfWork;
@@ -25,6 +26,7 @@ using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
 using MyApp.Infrastructure.Repositories.SignUpRepository;
+using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
 
 namespace MyApp.Infrastructure
 {
@@ -45,7 +47,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddScoped<ILoginUserRepository, LoginUserRepository>();
-            //services.AddScoped<IImageRepository, ImageRepository>();
+            services.AddScoped<IUpdateAccountRepository, UpdateAccountRepository>();
             services.AddScoped<IAuctionRepository, AuctionRepository>();
             services.AddScoped<IExcelRepository, ExcelRepository>();
 
