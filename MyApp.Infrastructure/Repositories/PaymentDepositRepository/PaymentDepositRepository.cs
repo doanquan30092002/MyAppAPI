@@ -72,7 +72,13 @@ namespace MyApp.Infrastructure.Repositories.PaymentDepositRepository
 
             var qrUrl = $"https://qr.sepay.vn/img?{query}";
 
-            return new InforPaymentDepositResponse { QrUrl = qrUrl, InforBankTuanLinh = bankInfo };
+            return new InforPaymentDepositResponse
+            {
+                QrUrl = qrUrl,
+                InforBankTuanLinh = bankInfo,
+                Money = depositAmount,
+                Description = noiDung,
+            };
         }
 
         public async Task<bool> UpdateStatusDepositAsync(
