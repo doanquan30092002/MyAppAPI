@@ -16,6 +16,7 @@ using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Application.Interfaces.UpdateAccountRepository;
+using MyApp.Application.Interfaces.UpdateExpiredProfile;
 using MyApp.Core.Options;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.ImplementUnitOfWork;
@@ -33,6 +34,7 @@ using MyApp.Infrastructure.Repositories.SearchUserAttendance;
 using MyApp.Infrastructure.Repositories.SignUpRepository;
 using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
 using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
+using MyApp.Infrastructure.Repositories.UpdateExpiredProfile;
 
 namespace MyApp.Infrastructure
 {
@@ -73,6 +75,7 @@ namespace MyApp.Infrastructure
             services.AddTransient<ISupportRegisterDocuments, SupportRegisterDocumentsRepository>();
 
             services.AddScoped<IPaymentDeposit, PaymentDepositRepository>();
+            services.AddScoped<IUpdateExpiredProfileRepository, UpdateExpiredProfileRepository>();
 
             return services;
         }

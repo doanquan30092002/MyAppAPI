@@ -40,11 +40,16 @@
         public const string NOT_FOUND_NUMERICAL_ORDER = "Không tìm thấy số thứ tự";
         public const string AUCTION_NOT_EXIST = "Không tồn tại phiên đấu giá này";
         #endregion
-        #region UpdateAccountAndProfile
+        #region UpdateAccount
         public const string UPDATE_ACCOUNT_SUCCESS = "Cập nhật tài khoản thành công";
         public const string PASSWORD_OLD_NOT_EQUAL = "Mật khẩu cũ không khớp với mật khẩu hiện tại";
         public const string PASSWORD_OLD_OR_NEW_EMPTY = "Hãy nhập đủ mật khẩu cũ và mật khẩu mới";
         public const string NO_FIELDS_PROVIDED = "Không có thông tin nào được cập nhật";
+        #endregion
+        #region UpdateExpiredProfile
+        public const string CITIZEN_IDENTIFICATION_NOT_MATCH =
+            "Số Căn Cước Công Dân không trùng với số đã đăng ký ban đầu";
+        public const string UPDATE_PROFILE_SUCCESS = "Cập nhật thông tin cá nhân thành công";
         #endregion
     }
 }
