@@ -11,5 +11,9 @@ namespace MyApp.Core.DTOs.AuctionDocumentsDTO
         public string QrUrl { get; set; }
 
         public InforBankTuanLinh InforBankTuanLinh { get; set; }
+
+        public decimal Money { get; set; }
+
+        public string Description { get; set; }
     }
 }
