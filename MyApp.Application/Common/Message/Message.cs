@@ -51,5 +51,11 @@
             "Số Căn Cước Công Dân không trùng với số đã đăng ký ban đầu";
         public const string UPDATE_PROFILE_SUCCESS = "Cập nhật thông tin cá nhân thành công";
         #endregion
+        #region RegisterAuctionDocument
+        public const string CREATE_QR_SUCCESS = "Tạo QR thành công";
+        public const string REGISTER_AUCTION_DOCUMENT_FAIL = "Lỗi khi tạo phiếu đăng ký hồ sơ";
+        public const string AUCTION_DOCUMENT_EXIST =
+            "Bạn đã đăng ký mua hồ sơ tham gia đấu giá cho tài sản này. Vui lòng xem lịch sử mua hồ sơ";
+        #endregion
     }
 }

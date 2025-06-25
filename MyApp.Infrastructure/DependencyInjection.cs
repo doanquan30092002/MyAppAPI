@@ -14,6 +14,7 @@ using MyApp.Application.Interfaces.IPaymentDeposit;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
+using MyApp.Application.Interfaces.RegisterAuctionDocument;
 using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Application.Interfaces.UpdateAccountRepository;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
@@ -30,6 +31,7 @@ using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.PaymentDepositRepository;
+using MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
 using MyApp.Infrastructure.Repositories.SignUpRepository;
 using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
@@ -76,6 +78,10 @@ namespace MyApp.Infrastructure
 
             services.AddScoped<IPaymentDeposit, PaymentDepositRepository>();
             services.AddScoped<IUpdateExpiredProfileRepository, UpdateExpiredProfileRepository>();
+            services.AddScoped<
+                IRegisterAuctionDocumentRepository,
+                RegisterAuctionDocumentRepository
+            >();
 
             return services;
         }

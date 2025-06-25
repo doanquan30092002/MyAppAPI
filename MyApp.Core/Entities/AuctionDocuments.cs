@@ -27,9 +27,14 @@ namespace MyApp.Core.Entities
 
         public DateTime UpdateAtTicket { get; set; } = DateTime.Now;
 
-        public DateTime CreateAtDeposit { get; set; } = DateTime.Now;
+        public DateTime? CreateAtDeposit { get; set; }
 
-        public bool StatusTicket { get; set; }
+        /*
+        0: chưa chuyển tiền phiếu đăng ký hồ sơ
+        1: đã chuyển tiền phiếu đăng ký hồ sơ
+        2: đã ký phiếu đăng ký hồ sơ
+        */
+        public int StatusTicket { get; set; }
 
         public bool StatusDeposit { get; set; }
 

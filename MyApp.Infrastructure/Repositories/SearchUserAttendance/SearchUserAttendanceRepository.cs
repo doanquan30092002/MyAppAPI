@@ -35,7 +35,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
                     .Where(x => x.AuctionAsset.Auction.AuctionId.Equals(auctionId))
                     .Include(x => x.User)
                     .Where(x => x.User.CitizenIdentification.Equals(citizenIdentification))
-                    .Where(x => x.StatusTicket == true)
+                    .Where(x => x.StatusTicket == 2)
                     .Where(x => x.StatusDeposit == true)
                     .Select(x => x.NumericalOrder)
                     .FirstOrDefaultAsync();
