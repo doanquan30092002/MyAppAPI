@@ -20,7 +20,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
         /// Trạng thái vé (bắt buộc)
         /// </summary>
         [Required(ErrorMessage = "Trạng thái hồ là bắt buộc.")]
-        public bool StatusTicket { get; set; }
+        public int StatusTicket { get; set; }
 
         /// <summary>
         /// Trạng thái đặt cọc (bắt buộc)

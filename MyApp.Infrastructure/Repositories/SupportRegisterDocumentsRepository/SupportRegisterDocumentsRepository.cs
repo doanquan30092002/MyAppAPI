@@ -174,7 +174,7 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
                     CreateAtTicket = DateTime.Now,
                     UpdateAtTicket = DateTime.Now,
                     CreateAtDeposit = DateTime.Now,
-                    //StatusTicket = false,
+                    StatusTicket = 0,
                     StatusDeposit = false,
                     StatusRefundDeposit = false,
                     NumericalOrder = numericalOrder,
@@ -204,7 +204,7 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
                 );
 
             auctionDocument.UpdateAtTicket = DateTime.Now;
-            //auctionDocument.StatusTicket = request.StatusTicket;
+            auctionDocument.StatusTicket = request.StatusTicket;
             auctionDocument.StatusDeposit = request.StatusDeposit;
 
             _dbContext.AuctionDocuments.Update(auctionDocument);
