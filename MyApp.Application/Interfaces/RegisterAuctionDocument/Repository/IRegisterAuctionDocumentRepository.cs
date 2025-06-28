@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyApp.Application.CQRS.RegisterAuctionDocument.Command;
+﻿using MyApp.Application.CQRS.RegisterAuctionDocument.Command;
 
-namespace MyApp.Application.Interfaces.RegisterAuctionDocument
+namespace MyApp.Application.Interfaces.RegisterAuctionDocument.Repository
 {
     public interface IRegisterAuctionDocumentRepository
     {
@@ -18,6 +13,6 @@ namespace MyApp.Application.Interfaces.RegisterAuctionDocument
             string? bankAccountNumber,
             string? bankBranch
         );
-        Task<bool> UpdateStatusTicketAsync(Guid auctionDocumentsId);
+        Task<string?> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId);
     }
 }

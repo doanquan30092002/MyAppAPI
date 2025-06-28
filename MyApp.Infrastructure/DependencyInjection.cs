@@ -14,7 +14,9 @@ using MyApp.Application.Interfaces.IPaymentDeposit;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
-using MyApp.Application.Interfaces.RegisterAuctionDocument;
+using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
+using MyApp.Application.Interfaces.RegisterAuctionDocument.Sender;
+using MyApp.Application.Interfaces.RegisterAuctionDocument.Service;
 using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Application.Interfaces.UpdateAccountRepository;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
@@ -37,6 +39,8 @@ using MyApp.Infrastructure.Repositories.SignUpRepository;
 using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
 using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
 using MyApp.Infrastructure.Repositories.UpdateExpiredProfile;
+using MyApp.Infrastructure.Services.RegisterAuctionDocument.Sender;
+using MyApp.Infrastructure.Services.RegisterAuctionDocument.Service;
 
 namespace MyApp.Infrastructure
 {
@@ -82,6 +86,9 @@ namespace MyApp.Infrastructure
                 IRegisterAuctionDocumentRepository,
                 RegisterAuctionDocumentRepository
             >();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<INotificationSender, NotificationSender>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             return services;
         }

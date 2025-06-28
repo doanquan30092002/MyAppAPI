@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Common.InformationBank;
 using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.RegisterAuctionDocument.Command;
-using MyApp.Application.Interfaces.RegisterAuctionDocument;
+using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
@@ -99,12 +99,12 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             }
         }
 
-        public async Task<bool> UpdateStatusTicketAsync(Guid auctionDocumentsId)
+        public async Task<string?> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId)
         {
             var auctionDocument = await _context.AuctionDocuments.FindAsync(auctionDocumentsId);
             if (auctionDocument == null)
             {
-                return false; // Auction document not found
+                return null; // Auction document not found
             }
             try
             {
@@ -112,11 +112,11 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
                 auctionDocument.UpdateAtTicket = DateTime.Now;
                 _context.AuctionDocuments.Update(auctionDocument);
                 await _context.SaveChangesAsync();
-                return true;
+                return auctionDocument.UserId.ToString();
             }
             catch (Exception)
             {
-                return false; // Handle the exception as needed
+                return null; // Handle the exception as needed
             }
         }
     }

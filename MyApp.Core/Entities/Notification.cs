@@ -16,5 +16,6 @@ namespace MyApp.Core.Entities
         public DateTime SentAt { get; set; } = DateTime.Now;
         public bool IsRead { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public string? UrlAction { get; set; }
     }
 }
