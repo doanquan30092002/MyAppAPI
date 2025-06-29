@@ -83,8 +83,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
                 UpdateAtTicket = DateTime.Now,
                 CreateAtDeposit = null,
                 StatusTicket = 0, // 0: chưa chuyển tiền phiếu đăng ký hồ sơ
-                StatusDeposit = false,
-                StatusRefundDeposit = false,
+                StatusDeposit = 0,
                 NumericalOrder = null,
             };
             try

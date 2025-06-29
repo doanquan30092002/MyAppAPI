@@ -212,7 +212,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             var documents = await _context
                 .AuctionDocuments.Where(doc =>
                     auctionAssetIds.Contains(doc.AuctionAssetId)
-                    && (doc.StatusTicket == 1 || doc.StatusDeposit == true)
+                    && (doc.StatusTicket == 1 || doc.StatusDeposit == 1)
                 )
                 .ToListAsync();
 

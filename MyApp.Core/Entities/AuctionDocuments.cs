@@ -36,9 +36,7 @@ namespace MyApp.Core.Entities
         */
         public int StatusTicket { get; set; }
 
-        public bool StatusDeposit { get; set; }
-
-        public bool StatusRefundDeposit { get; set; }
+        public int StatusDeposit { get; set; }
 
         public int? NumericalOrder { get; set; }
     }
