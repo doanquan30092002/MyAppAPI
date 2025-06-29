@@ -170,52 +170,57 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
 
                 // Header
                 worksheet.Cells[1, 1].Value = "STT";
-                worksheet.Cells[1, 2].Value = "Tên khách hàng";
-                worksheet.Cells[1, 3].Value = "Số CCCD";
-                worksheet.Cells[1, 4].Value = "Tài khoản ngân hàng";
-                worksheet.Cells[1, 5].Value = "Số tài khoản";
-                worksheet.Cells[1, 6].Value = "Chi nhánh";
-                worksheet.Cells[1, 7].Value = "Mã tài sản";
-                worksheet.Cells[1, 8].Value = "Tên tài sản";
-                worksheet.Cells[1, 9].Value = "Tiền đặt cọc";
-                worksheet.Cells[1, 10].Value = "Phí đăng ký";
-                worksheet.Cells[1, 11].Value = "Trạng thái phiếu hồ sơ";
-                worksheet.Cells[1, 12].Value = "Trạng thái tiền cọc";
+                worksheet.Cells[1, 2].Value = "Mã hồ sơ";
+                worksheet.Cells[1, 3].Value = "Tên khách hàng";
+                worksheet.Cells[1, 4].Value = "Số CCCD";
+                worksheet.Cells[1, 5].Value = "Tài khoản ngân hàng";
+                worksheet.Cells[1, 6].Value = "Số tài khoản";
+                worksheet.Cells[1, 7].Value = "Chi nhánh";
+                worksheet.Cells[1, 8].Value = "Mã tài sản";
+                worksheet.Cells[1, 9].Value = "Tên tài sản";
+                worksheet.Cells[1, 10].Value = "Tiền đặt cọc";
+                worksheet.Cells[1, 11].Value = "Phí đăng ký";
+                worksheet.Cells[1, 12].Value = "Trạng thái phiếu hồ sơ";
+                worksheet.Cells[1, 13].Value = "Trạng thái tiền cọc";
 
                 int row = 2,
                     stt = 1;
                 foreach (var doc in documents)
                 {
                     worksheet.Cells[row, 1].Value = stt++;
-                    worksheet.Cells[row, 2].Value = doc.User?.Name ?? "";
-                    worksheet.Cells[row, 3].Value = doc.User?.CitizenIdentification ?? "";
-                    worksheet.Cells[row, 4].Value = doc.BankAccount;
-                    worksheet.Cells[row, 5].Value = doc.BankAccountNumber;
-                    worksheet.Cells[row, 6].Value = doc.BankBranch;
-                    worksheet.Cells[row, 7].Value = doc.AuctionAsset?.TagName ?? "";
-                    worksheet.Cells[row, 8].Value = doc.AuctionAsset?.Description ?? "";
+                    worksheet.Cells[row, 2].Value =
+                        doc.AuctionDocumentsId != Guid.Empty
+                            ? doc.AuctionDocumentsId.ToString()
+                            : "";
+                    worksheet.Cells[row, 3].Value = doc.User?.Name ?? "";
+                    worksheet.Cells[row, 4].Value = doc.User?.CitizenIdentification ?? "";
+                    worksheet.Cells[row, 5].Value = doc.BankAccount;
+                    worksheet.Cells[row, 6].Value = doc.BankAccountNumber;
+                    worksheet.Cells[row, 7].Value = doc.BankBranch;
+                    worksheet.Cells[row, 8].Value = doc.AuctionAsset?.TagName ?? "";
+                    worksheet.Cells[row, 9].Value = doc.AuctionAsset?.Description ?? "";
 
                     // Tiền có dấu phẩy phân cách hàng nghìn
-                    worksheet.Cells[row, 9].Value = doc.AuctionAsset?.Deposit ?? 0;
-                    worksheet.Cells[row, 9].Style.Numberformat.Format = "#,##0";
-
-                    worksheet.Cells[row, 10].Value = doc.AuctionAsset?.RegistrationFee ?? 0;
+                    worksheet.Cells[row, 10].Value = doc.AuctionAsset?.Deposit ?? 0;
                     worksheet.Cells[row, 10].Style.Numberformat.Format = "#,##0";
 
-                    worksheet.Cells[row, 11].Value = GetStatusTicketText(doc.StatusTicket);
-                    worksheet.Cells[row, 12].Value = GetStatusDepositText(doc.StatusDeposit);
+                    worksheet.Cells[row, 11].Value = doc.AuctionAsset?.RegistrationFee ?? 0;
+                    worksheet.Cells[row, 11].Style.Numberformat.Format = "#,##0";
+
+                    worksheet.Cells[row, 12].Value = GetStatusTicketText(doc.StatusTicket);
+                    worksheet.Cells[row, 13].Value = GetStatusDepositText(doc.StatusDeposit);
 
                     row++;
                 }
 
                 // Format header bold
-                using (var range = worksheet.Cells[1, 1, 1, 12])
+                using (var range = worksheet.Cells[1, 1, 1, 13])
                 {
                     range.Style.Font.Bold = true;
                 }
                 worksheet.Cells.AutoFitColumns();
 
-                // Dropdown cho "Trạng thái phiếu hồ sơ" (cột 11)
+                // Dropdown cho "Trạng thái phiếu hồ sơ" (cột 12)
                 string[] statusTicketOptions = new[]
                 {
                     "Chưa chuyển tiền",
@@ -224,7 +229,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                     "Đã hoàn",
                     "Không xác định",
                 };
-                // Dropdown cho "Trạng thái tiền cọc" (cột 12)
+                // Dropdown cho "Trạng thái tiền cọc" (cột 13)
                 string[] statusDepositOptions = new[]
                 {
                     "Chưa cọc",
@@ -236,20 +241,32 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
 
                 for (int r = 2; r < row; r++)
                 {
-                    // Dropdown cho cột 11
+                    // Dropdown cho cột 12
                     var statusTicketValidation = worksheet.DataValidations.AddListValidation(
-                        $"K{r}"
+                        $"L{r}"
                     );
                     foreach (var opt in statusTicketOptions)
                         statusTicketValidation.Formula.Values.Add(opt);
 
-                    // Dropdown cho cột 12
+                    // Dropdown cho cột 13
                     var statusDepositValidation = worksheet.DataValidations.AddListValidation(
-                        $"L{r}"
+                        $"M{r}"
                     );
                     foreach (var opt in statusDepositOptions)
                         statusDepositValidation.Formula.Values.Add(opt);
                 }
+
+                // Khoá (locked) tất cả các ô
+                worksheet.Protection.IsProtected = true;
+                worksheet.Protection.SetPassword("1234"); // Có thể set password nếu muốn
+
+                // Mở khoá hai cột cuối cho phép chỉnh sửa (Trạng thái phiếu hồ sơ, Trạng thái tiền cọc)
+                for (int r = 2; r < row; r++)
+                {
+                    worksheet.Cells[r, 12].Style.Locked = false; // Trạng thái phiếu hồ sơ
+                    worksheet.Cells[r, 13].Style.Locked = false; // Trạng thái tiền cọc
+                }
+                worksheet.Cells[1, 12, 1, 13].Style.Locked = false; // Cho phép đổi tiêu đề nếu muốn
 
                 return await Task.FromResult(package.GetAsByteArray());
             }
