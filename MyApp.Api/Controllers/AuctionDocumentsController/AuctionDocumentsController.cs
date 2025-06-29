@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
+using MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund;
 using MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries;
@@ -181,6 +182,39 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
             //    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             //    fileName
             //);
+        }
+
+        /// <summary>
+        /// Xác nhận hoàn tiền cho danh sách hồ sơ đấu giá.
+        /// </summary>
+        /// <param name="command">Danh sách id hồ sơ đấu giá cần hoàn tiền</param>
+        /// <returns>Trả về true nếu thành công, false nếu thất bại</returns>
+        [HttpPost("confirm-refund")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> ConfirmRefund([FromBody] ConfirmRefundCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(
+                    new ApiResponse<object>
+                    {
+                        Code = 200,
+                        Message = "Xác nhận hoàn tiền thành công.",
+                    }
+                );
+            }
+            else
+            {
+                return BadRequest(
+                    new ApiResponse<object>
+                    {
+                        Code = 400,
+                        Message =
+                            "Xác nhận hoàn tiền thất bại. Vui lòng kiểm tra lại danh sách hồ sơ.",
+                    }
+                );
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.INofiticationsRepository;
 using MyApp.Application.Interfaces.IPaymentDeposit;
+using MyApp.Application.Interfaces.IRefundRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
@@ -34,6 +35,7 @@ using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.NotificationsRepository;
 using MyApp.Infrastructure.Repositories.PaymentDepositRepository;
+using MyApp.Infrastructure.Repositories.RefundRepository;
 using MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
 using MyApp.Infrastructure.Repositories.SignUpRepository;
@@ -87,6 +89,8 @@ namespace MyApp.Infrastructure
             >();
 
             services.AddScoped<INotificationRepository, NotificationsImplement>();
+
+            services.AddScoped<IRefundRepository, RefundRepository>();
 
             return services;
         }
