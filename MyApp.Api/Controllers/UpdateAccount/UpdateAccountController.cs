@@ -22,7 +22,7 @@ namespace MyApp.Api.Controllers.EditAccountAndProfile
             return Ok(
                 new
                 {
-                    Success = response ? 200 : 400,
+                    Code = response ? 200 : 400,
                     Message = response ? Message.SEND_OTP_SUCCESS : Message.SEND_OTP_FAIL,
                 }
             );
