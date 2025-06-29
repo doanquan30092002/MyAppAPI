@@ -51,5 +51,7 @@ namespace MyApp.Application.Interfaces.IAuctionRepository
         /// <param name="auctionId">Id phiên đấu giá.</param>
         /// <returns>Danh sách AuctionDocuments phù hợp.</returns>
         Task<List<AuctionDocuments>> GetPaidOrDepositedDocumentsByAuctionIdAsync(Guid auctionId);
+
+        Task<List<string>> GetEmailsByUserIdsAsync(List<Guid> userIds);
     }
 }

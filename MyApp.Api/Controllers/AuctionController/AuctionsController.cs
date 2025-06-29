@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
+using MyApp.Application.CQRS.Auction.CancelAuction.Commands;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Core.DTOs.AuctionDTO;
 
@@ -40,6 +41,22 @@ namespace MyApp.Api.Controllers.AuctionController
                 Code = 200,
                 Message = "Cập nhật phiên đấu giá thành công",
                 Data = new AuctionResponse { AuctionId = updatedAuctionId },
+            };
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Staff")]
+        [HttpPut("cancel")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CancelAuction([FromForm] CancelAuctionCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            var response = new ApiResponse<object>
+            {
+                Code = result ? 200 : 400,
+                Message = result ? "Hủy phiên đấu giá thành công" : "Hủy phiên đấu giá thất bại",
+                Data = null,
             };
             return Ok(response);
         }

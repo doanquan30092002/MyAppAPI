@@ -4,11 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
 {
-    public class CancelAuctionCommand
+    public class CancelAuctionCommand : IRequest<bool>
     {
         [Required(ErrorMessage = "Phiên đấu giá là bắt buộc.")]
         public Guid AuctionId { get; set; }

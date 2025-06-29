@@ -218,5 +218,17 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
 
             return documents;
         }
+
+        public async Task<List<string>> GetEmailsByUserIdsAsync(List<Guid> userIds)
+        {
+            var emails = await _context
+                .Accounts.Where(acc =>
+                    userIds.Contains(acc.UserId) && !string.IsNullOrEmpty(acc.Email)
+                )
+                .Select(acc => acc.Email)
+                .ToListAsync();
+
+            return emails;
+        }
     }
 }

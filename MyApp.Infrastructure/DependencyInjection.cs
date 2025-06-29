@@ -10,6 +10,7 @@ using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
+using MyApp.Application.Interfaces.INofiticationsRepository;
 using MyApp.Application.Interfaces.IPaymentDeposit;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
@@ -18,6 +19,7 @@ using MyApp.Application.Interfaces.RegisterAuctionDocument;
 using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Application.Interfaces.UpdateAccountRepository;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
+using MyApp.Core.Entities;
 using MyApp.Core.Options;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.ImplementUnitOfWork;
@@ -30,6 +32,7 @@ using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
+using MyApp.Infrastructure.Repositories.NotificationsRepository;
 using MyApp.Infrastructure.Repositories.PaymentDepositRepository;
 using MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
@@ -82,6 +85,8 @@ namespace MyApp.Infrastructure
                 IRegisterAuctionDocumentRepository,
                 RegisterAuctionDocumentRepository
             >();
+
+            services.AddScoped<INotificationRepository, NotificationsImplement>();
 
             return services;
         }
