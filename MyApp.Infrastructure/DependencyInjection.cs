@@ -18,7 +18,8 @@ using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Sender;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Service;
 using MyApp.Application.Interfaces.SearchUserAttendance;
-using MyApp.Application.Interfaces.UpdateAccountRepository;
+using MyApp.Application.Interfaces.UpdateAccount.Repository;
+using MyApp.Application.Interfaces.UpdateAccount.Service;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
 using MyApp.Core.Options;
 using MyApp.Infrastructure.Data;
@@ -41,6 +42,7 @@ using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
 using MyApp.Infrastructure.Repositories.UpdateExpiredProfile;
 using MyApp.Infrastructure.Services.RegisterAuctionDocument.Sender;
 using MyApp.Infrastructure.Services.RegisterAuctionDocument.Service;
+using MyApp.Infrastructure.Services.UpdateAccount;
 
 namespace MyApp.Infrastructure
 {
@@ -89,6 +91,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<INotificationSender, NotificationSender>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IOTPService_1, EmailOTPService_1>();
 
             return services;
         }
