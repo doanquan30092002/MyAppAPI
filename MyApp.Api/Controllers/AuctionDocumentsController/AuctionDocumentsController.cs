@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
+using MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -130,6 +131,56 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
                 };
                 return StatusCode(500, errorResponse);
             }
+        }
+
+        /// <summary>
+        /// Xuất danh sách hồ sơ hoàn tiền cho phiên đấu giá (Excel).
+        /// </summary>
+        /// <param name="auctionId">Id phiên đấu giá</param>
+        /// <returns>File Excel (base64)</returns>
+        [HttpGet("export-refund-excel")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> ExportRefundDocumentsExcel([FromQuery] Guid auctionId)
+        {
+            try
+            {
+                var command = new ExportExcelTransferCommand { AuctionId = auctionId };
+                var fileBytes = await _mediator.Send(command);
+                var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
+                var base64 = Convert.ToBase64String(fileBytes);
+
+                var response = new ApiResponse<object>
+                {
+                    Code = 200,
+                    Message = "Xuất file Excel thành công",
+                    Data = new
+                    {
+                        FileName = fileName,
+                        ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        Base64 = base64,
+                    },
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new ApiResponse<object>
+                {
+                    Code = 400,
+                    Message = "Lỗi xuất file Excel hoàn tiền",
+                    Data = null,
+                };
+                return StatusCode(500, errorResponse);
+            }
+
+            //var command = new ExportExcelTransferCommand { AuctionId = auctionId };
+            //var fileBytes = await _mediator.Send(command);
+            //var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
+            //return File(
+            //    fileBytes,
+            //    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            //    fileName
+            //);
         }
     }
 }

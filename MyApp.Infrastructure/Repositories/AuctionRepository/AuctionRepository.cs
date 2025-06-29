@@ -214,6 +214,8 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                     auctionAssetIds.Contains(doc.AuctionAssetId)
                     && (doc.StatusTicket == 1 || doc.StatusDeposit == 1)
                 )
+                .Include(doc => doc.User)
+                .Include(doc => doc.AuctionAsset)
                 .ToListAsync();
 
             return documents;

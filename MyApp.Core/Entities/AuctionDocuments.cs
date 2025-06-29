@@ -36,6 +36,11 @@ namespace MyApp.Core.Entities
         */
         public int StatusTicket { get; set; }
 
+        /*
+        0: chưa cọc
+        1: đẵ cọc
+        2: đã hoàn tiền cọc
+        */
         public int StatusDeposit { get; set; }
 
         public int? NumericalOrder { get; set; }
