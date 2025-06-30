@@ -23,7 +23,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             return _context.AuctionDocuments.AnyAsync(ad =>
                 ad.UserId.ToString() == userId
                 && ad.AuctionAssetId.ToString() == auctionAssetsId
-                && ad.StatusTicket != 0
+                && ad.StatusTicket != 1
             );
         }
 
