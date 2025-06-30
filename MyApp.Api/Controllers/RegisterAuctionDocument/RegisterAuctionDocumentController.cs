@@ -22,9 +22,23 @@ namespace MyApp.Api.Controllers.RegisterAuctionDocument
             var response = await _mediator.Send(registerAuctionDocumentRequest);
             if (response.Code != 200)
             {
-                return Ok(new { Code = 400, Message = response.Message });
+                return Ok(new { Code = response.Code, Message = response.Message });
             }
-            return Ok(response);
+            return Ok(
+                new
+                {
+                    Code = response.Code,
+                    Message = response.Message,
+                    Data = new RegisterAuctionDocumentResponseDTO
+                    {
+                        QrUrl = response.QrUrl,
+                        AccountNumber = response.AccountNumber,
+                        BeneficiaryBank = response.BeneficiaryBank,
+                        AmountTicket = response.AmountTicket,
+                        Description = response.Description,
+                    },
+                }
+            );
         }
 
         [HttpPost]

@@ -12,4 +12,13 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
         public decimal? AmountTicket { get; set; }
         public string? Description { get; set; }
     }
+
+    public class RegisterAuctionDocumentResponseDTO
+    {
+        public string? QrUrl { get; set; }
+        public string? AccountNumber { get; set; }
+        public string? BeneficiaryBank { get; set; }
+        public decimal? AmountTicket { get; set; }
+        public string? Description { get; set; }
+    }
 }
