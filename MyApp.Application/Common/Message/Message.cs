@@ -64,5 +64,13 @@
         public const string AUCTION_DOCUMENT_EXIST =
             "Bạn đã đăng ký mua hồ sơ tham gia đấu giá cho tài sản này. Vui lòng xem lịch sử mua hồ sơ";
         #endregion
+        #region AssginAuctioneerAndPublicAuction
+        public const string AUCTIONEER_ASSIGNED_ANOTHER_AUCTION =
+            "Đấu giá viên đã được phân công cho một phiên đấu giá khác cùng ngày. Vui lòng chọn đấu giá viên khác";
+        public const string ASSGIN_AUCTIONEER_AND_PUBLIC_AUCTION_SUCCESS =
+            "Phiên đấu giá đã được công khai";
+        public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
+        public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
+        #endregion
     }
 }

@@ -9,14 +9,14 @@ using MyApp.Application.Interfaces.IAuctionRepository;
 
 namespace MyApp.Application.JobBackgroud.AuctionJob
 {
-    public class SetAuctionUpdateableFalse
+    public class SetAuctionUpdateable
     {
         private readonly IAuctionRepository _AuctionRepository;
-        private readonly ILogger<SetAuctionUpdateableFalse> _logger;
+        private readonly ILogger<SetAuctionUpdateable> _logger;
 
-        public SetAuctionUpdateableFalse(
+        public SetAuctionUpdateable(
             IAuctionRepository auctionRepository,
-            ILogger<SetAuctionUpdateableFalse> logger
+            ILogger<SetAuctionUpdateable> logger
         )
         {
             _AuctionRepository = auctionRepository;
@@ -24,7 +24,7 @@ namespace MyApp.Application.JobBackgroud.AuctionJob
         }
 
         /// <summary>
-        /// Đặt trường Updateable của phiên đấu giá về false.
+        /// Đặt trường Updateable của phiên đấu giá về true hoặc false.
         /// </summary>
         /// <param name="auctionId">Id phiên đấu giá</param>
         [AutomaticRetry(
@@ -32,16 +32,16 @@ namespace MyApp.Application.JobBackgroud.AuctionJob
             DelaysInSeconds = new[] { 60, 300 },
             OnAttemptsExceeded = AttemptsExceededAction.Fail
         )]
-        public async Task SetAuctionUpdateableFalseAsync(Guid auctionId)
+        public async Task SetAuctionUpdateableAsync(Guid auctionId, bool status)
         {
             _logger.LogInformation(
-                "Hangfire Job Start: SetAuctionUpdateableFalseAsync for AuctionId={AuctionId} at {Time}",
+                $"Hangfire Job Start: SetAuctionUpdateableAsync for AuctionId={auctionId} at {DateTime.Now}",
                 auctionId,
                 DateTime.Now
             );
-            await _AuctionRepository.UpdateAuctionUpdateableAsync(auctionId, false);
+            await _AuctionRepository.UpdateAuctionUpdateableAsync(auctionId, status);
             _logger.LogInformation(
-                "Hangfire Job Complete: SetAuctionUpdateableFalseAsync for AuctionId={AuctionId} at {Time}",
+                $"Hangfire Job Complete: SetAuctionUpdateableAsync for AuctionId={auctionId} at {DateTime.Now}",
                 auctionId,
                 DateTime.Now
             );

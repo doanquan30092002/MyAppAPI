@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
+using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
@@ -24,12 +26,14 @@ using MyApp.Application.Interfaces.UpdateExpiredProfile;
 using MyApp.Core.Options;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.ImplementUnitOfWork;
+using MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction;
 using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
+using MyApp.Infrastructure.Repositories.GetAuctioneers;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -92,6 +96,11 @@ namespace MyApp.Infrastructure
             services.AddScoped<INotificationSender, NotificationSender>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IOTPService_1, EmailOTPService_1>();
+            services.AddScoped<
+                IAssginAuctioneerAndPublicAuctionRepository,
+                AssginAuctioneerAndPublicAuctionRepository
+            >();
+            services.AddScoped<IGetAuctioneersRepository, GetAuctioneersRepository>();
 
             return services;
         }
