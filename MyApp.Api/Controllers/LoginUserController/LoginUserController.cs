@@ -41,15 +41,16 @@ namespace MyApp.Api.Controllers.LoginUserController
                 {
                     Code = string.IsNullOrEmpty(response.Token) ? 400 : 200,
                     Message = response.Message,
-                    IsExpired = response.Message.Equals(Message.EXPIRED_CITIZEN_IDENTIFICATION)
-                        ? true
-                        : false,
+
                     Data = new LoginUserResponse
                     {
                         Id = response.Id,
                         Email = response.Email,
                         Name = response.Name,
                         RoleName = response.RoleName,
+                        IsExpired = response.Message.Equals(Message.EXPIRED_CITIZEN_IDENTIFICATION)
+                            ? true
+                            : false,
                     },
                 }
             );
