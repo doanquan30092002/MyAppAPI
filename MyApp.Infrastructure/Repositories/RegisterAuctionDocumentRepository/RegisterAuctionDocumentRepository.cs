@@ -21,7 +21,9 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
         public Task<bool> CheckAuctionDocumentExsit(string? userId, string auctionAssetsId)
         {
             return _context.AuctionDocuments.AnyAsync(ad =>
-                ad.UserId.ToString() == userId && ad.AuctionAssetId.ToString() == auctionAssetsId
+                ad.UserId.ToString() == userId
+                && ad.AuctionAssetId.ToString() == auctionAssetsId
+                && ad.StatusTicket != 1
             );
         }
 
