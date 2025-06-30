@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Sha256Hasher;
-using MyApp.Application.CQRS.UpdateAccountAndProfile.Command;
-using MyApp.Application.Interfaces.UpdateAccountRepository;
+using MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp;
+using MyApp.Application.Interfaces.UpdateAccount.Repository;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
@@ -151,6 +151,18 @@ namespace MyApp.Infrastructure.Repositories.UpdateAccountRepository
             {
                 account.PhoneNumber = phone;
             }
+        }
+
+        public async Task<string> GetEmailByUserIdAsync(string? userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return null;
+
+            var account = await _context
+                .Accounts.Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.User.Id.ToString() == userId);
+
+            return account?.Email;
         }
     }
 }

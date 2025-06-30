@@ -45,6 +45,13 @@
         public const string PASSWORD_OLD_NOT_EQUAL = "Mật khẩu cũ không khớp với mật khẩu hiện tại";
         public const string PASSWORD_OLD_OR_NEW_EMPTY = "Hãy nhập đủ mật khẩu cũ và mật khẩu mới";
         public const string NO_FIELDS_PROVIDED = "Không có thông tin nào được cập nhật";
+        public const string SEND_OTP_SUCCESS = "OTP đã được gửi thành công";
+        public const string SEND_OTP_FAIL = "Gửi OTP không thành công";
+        public const string OTP_CORRECT = "OTP hợp lệ";
+        public const string OTP_INCORRECT = "OTP không đúng";
+        public const string OTP_EXPIRED_OR_NOT_EXIST = "OTP đã hết hạn hoặc không tồn tại";
+        public const string EMAIL_SUBJECT = "Mã OTP xác thực";
+        public const string EMAIL_BODY = "Mã OTP của bạn là: ";
         #endregion
         #region UpdateExpiredProfile
         public const string CITIZEN_IDENTIFICATION_NOT_MATCH =

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.LoginUser.Queries;
 
@@ -36,16 +37,20 @@ namespace MyApp.Api.Controllers.LoginUserController
                 );
             }
             return Ok(
-                new ApiResponse<LoginUserResponse>
+                new
                 {
                     Code = string.IsNullOrEmpty(response.Token) ? 400 : 200,
                     Message = response.Message,
+
                     Data = new LoginUserResponse
                     {
                         Id = response.Id,
                         Email = response.Email,
                         Name = response.Name,
                         RoleName = response.RoleName,
+                        IsExpired = response.Message.Equals(Message.EXPIRED_CITIZEN_IDENTIFICATION)
+                            ? true
+                            : false,
                     },
                 }
             );
