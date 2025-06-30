@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using MyApp.Application.Interfaces.UpdateAccountRepository;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
 
 namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command
