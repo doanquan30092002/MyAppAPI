@@ -57,7 +57,7 @@ namespace MyApp.Application
 
             services.AddScoped<IJwtHelper, JwtHelper>();
 
-            services.AddTransient<SetAuctionUpdateable>();
+            services.AddTransient<SetAuctionUpdateableFalse>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
             services.AddSingleton(resolver =>

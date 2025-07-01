@@ -16,12 +16,12 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
     {
         private readonly IAssginAuctioneerAndPublicAuctionRepository _assginAuctioneerAndPublicAuctionRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly SetAuctionUpdateable _setAuctionUpdateableFalse;
+        private readonly SetAuctionUpdateableFalse _setAuctionUpdateableFalse;
 
         public AssginAuctioneerAndPublicAuctionHandler(
             IAssginAuctioneerAndPublicAuctionRepository assginAuctioneerAndPublicAuctionRepository,
             IHttpContextAccessor httpContextAccessor,
-            SetAuctionUpdateable setAuctionUpdateableFalse
+            SetAuctionUpdateableFalse setAuctionUpdateableFalse
         )
         {
             _assginAuctioneerAndPublicAuctionRepository =
@@ -64,16 +64,15 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                 var delay = DateTime.Parse(result.Item2) - DateTime.Now;
                 if (delay > TimeSpan.Zero)
                 {
-                    BackgroundJob.Schedule<SetAuctionUpdateable>(
-                        job => job.SetAuctionUpdateableAsync(request.AuctionId, true),
+                    BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
+                        job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
                         delay
                     );
                 }
                 else
                 {
-                    await _setAuctionUpdateableFalse.SetAuctionUpdateableAsync(
-                        request.AuctionId,
-                        true
+                    await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(
+                        request.AuctionId
                     );
                 }
                 return new AssginAuctioneerAndPublicAuctionResponse

@@ -27,7 +27,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
         private readonly IJwtHelper _jwtHelper;
         private readonly IExcelRepository _excelRepository;
         private readonly IAuctionAssetsRepository _auctionAssetRepository;
-        private readonly SetAuctionUpdateable _setAuctionUpdateableFalse;
+        private readonly SetAuctionUpdateableFalse _setAuctionUpdateableFalse;
 
         public UpdateAuctionHandler(
             IAuctionRepository auctionRepository,
@@ -37,7 +37,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             IJwtHelper jwtHelper,
             IExcelRepository excelRepository,
             IAuctionAssetsRepository auctionAssetRepository,
-            SetAuctionUpdateable setAuctionUpdateableFalse
+            SetAuctionUpdateableFalse setAuctionUpdateableFalse
         )
         {
             _auctionRepository = auctionRepository;
@@ -112,16 +112,15 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                 var delay = updateResult.AuctionEndDate - DateTime.Now;
                 if (delay > TimeSpan.Zero)
                 {
-                    BackgroundJob.Schedule<SetAuctionUpdateable>(
-                        job => job.SetAuctionUpdateableAsync(request.AuctionId, false),
+                    BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
+                        job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
                         delay
                     );
                 }
                 else
                 {
-                    await _setAuctionUpdateableFalse.SetAuctionUpdateableAsync(
-                        request.AuctionId,
-                        false
+                    await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(
+                        request.AuctionId
                     );
                 }
             }
