@@ -54,6 +54,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
                 Code = 200,
                 Message = Message.CREATE_QR_SUCCESS,
                 QrUrl = qrUrl.ToString(),
+                AuctionDocumentsId = auctionDocumentsId,
                 AccountNumber = accountNumber,
                 BeneficiaryBank = beneficiaryBank,
                 AmountTicket = auctionDocument.AuctionAsset.RegistrationFee,
@@ -69,10 +70,9 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             string? bankBranch
         )
         {
-            var auctionDocumentsId = Guid.NewGuid();
             var auctionDocument = new AuctionDocuments
             {
-                AuctionDocumentsId = auctionDocumentsId,
+                AuctionDocumentsId = Guid.NewGuid(),
                 UserId = Guid.Parse(userId),
                 AuctionAssetId = Guid.Parse(auctionAssetsId),
                 BankAccount = !string.IsNullOrWhiteSpace(bankAccount) ? bankAccount.Trim() : null,
@@ -93,7 +93,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             {
                 await _context.AuctionDocuments.AddAsync(auctionDocument);
                 await _context.SaveChangesAsync();
-                return auctionDocumentsId;
+                return auctionDocument.AuctionDocumentsId;
             }
             catch (Exception)
             {
@@ -101,12 +101,12 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             }
         }
 
-        public async Task<string?> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId)
+        public async Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId)
         {
             var auctionDocument = await _context.AuctionDocuments.FindAsync(auctionDocumentsId);
             if (auctionDocument == null)
             {
-                return null; // Auction document not found
+                return false; // Auction document not found
             }
             try
             {
@@ -114,11 +114,11 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
                 auctionDocument.UpdateAtTicket = DateTime.Now;
                 _context.AuctionDocuments.Update(auctionDocument);
                 await _context.SaveChangesAsync();
-                return auctionDocument.UserId.ToString();
+                return true;
             }
             catch (Exception)
             {
-                return null; // Handle the exception as needed
+                return false; // Handle the exception as needed
             }
         }
     }

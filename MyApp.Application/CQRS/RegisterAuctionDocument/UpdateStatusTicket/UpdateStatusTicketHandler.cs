@@ -23,20 +23,11 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.UpdateStatusTicket
             CancellationToken cancellationToken
         )
         {
-            var userId =
+            var result =
                 await _registerAuctionDocumentRepository.UpdateStatusTicketAndGetUserIdAsync(
                     request.AuctionDocumentsId
                 );
-            if (string.IsNullOrEmpty(userId))
-                return false;
-
-            await _notificationService.NotifyUserAsync(
-                userId,
-                "Bạn đã chuyển tiền phiếu đăng ký hồ sơ thành công.",
-                1
-            );
-
-            return true;
+            return result;
         }
     }
 }
