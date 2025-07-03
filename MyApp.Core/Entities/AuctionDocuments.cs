@@ -45,5 +45,7 @@ namespace MyApp.Core.Entities
         public int StatusDeposit { get; set; }
 
         public int? NumericalOrder { get; set; }
+
+        public string? Note { get; set; }
     }
 }

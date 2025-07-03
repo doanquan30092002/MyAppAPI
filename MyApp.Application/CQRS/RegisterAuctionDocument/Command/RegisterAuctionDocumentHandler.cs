@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using MyApp.Application.Common.Message;
-using MyApp.Application.Interfaces.RegisterAuctionDocument;
+using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
 
 namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
 {

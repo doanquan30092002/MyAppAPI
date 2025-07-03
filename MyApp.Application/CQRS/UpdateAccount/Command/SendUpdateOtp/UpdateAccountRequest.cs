@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using MediatR;
 
-namespace MyApp.Application.CQRS.UpdateAccountAndProfile.Command
+namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp
 {
-    public class UpdateAccountRequest : IRequest<UpdateAccountResponse>
+    public class UpdateAccountRequest : IRequest<bool>
     {
         [RegularExpression(
             @"^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$",

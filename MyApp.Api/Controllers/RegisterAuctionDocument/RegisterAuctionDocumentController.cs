@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyApp.Application.Common.Response;
 using MyApp.Application.Common.Utils;
 using MyApp.Application.CQRS.RegisterAuctionDocument.Command;
 using MyApp.Application.CQRS.RegisterAuctionDocument.UpdateStatusTicket;
@@ -10,21 +9,36 @@ namespace MyApp.Api.Controllers.RegisterAuctionDocument
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class RegisterAuctionDocumentController(IMediator _mediator) : ControllerBase
     {
         [HttpPost]
         [Route("Register-Auction-Document")]
-        public async Task<ActionResult<RegisterAuctionDocumentResponse>> RegisterAuctionDocument(
+        [Authorize(Roles = "Customer")]
+        public async Task<ActionResult> RegisterAuctionDocument(
             [FromBody] RegisterAuctionDocumentRequest registerAuctionDocumentRequest
         )
         {
             var response = await _mediator.Send(registerAuctionDocumentRequest);
             if (response.Code != 200)
             {
-                return Ok(new { Code = 400, Message = response.Message });
+                return Ok(new { Code = response.Code, Message = response.Message });
             }
-            return Ok(response);
+            return Ok(
+                new
+                {
+                    Code = response.Code,
+                    Message = response.Message,
+                    Data = new RegisterAuctionDocumentResponseDTO
+                    {
+                        QrUrl = response.QrUrl,
+                        AuctionDocumentsId = response.AuctionDocumentsId,
+                        AccountNumber = response.AccountNumber,
+                        BeneficiaryBank = response.BeneficiaryBank,
+                        AmountTicket = response.AmountTicket,
+                        Description = response.Description,
+                    },
+                }
+            );
         }
 
         [HttpPost]
