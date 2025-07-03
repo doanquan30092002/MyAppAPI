@@ -10,6 +10,7 @@ namespace MyApp.Application.CQRS.Auction.GetListAution.Querries
 {
     public class GetListAuctionDocumentsRequest : IRequest<GetListAuctionDocumentsResponse>
     {
+        public Guid AuctionId { get; set; }
         public string? CitizenIdentification { get; set; }
         public string? Name { get; set; }
 

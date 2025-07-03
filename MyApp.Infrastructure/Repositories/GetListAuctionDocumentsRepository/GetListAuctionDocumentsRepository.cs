@@ -32,6 +32,10 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                     .Include(ad => ad.AuctionAsset)
                     .AsQueryable();
 
+                //query = query.Where(ad =>
+                //    ad.AuctionAsset.AuctionId == getListAuctionDocumentsRequest.AuctionId
+                //);
+
                 // Filter by CitizenIdentification if provided
                 if (!string.IsNullOrEmpty(getListAuctionDocumentsRequest.CitizenIdentification))
                 {

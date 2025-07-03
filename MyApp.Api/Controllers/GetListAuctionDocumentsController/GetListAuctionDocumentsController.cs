@@ -12,16 +12,20 @@ namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
     public class GetListAuctionDocumentsController(IMediator _mediator) : ControllerBase
     {
         [HttpGet]
-        [Route("ListDocuments")]
+        [Route("ListDocuments/{auction_id}")]
         [AllowAnonymous]
         public async Task<
             ActionResult<ApiResponse<GetListAuctionDocumentsResponse>>
         > GetListAuctionDocuments(
+            [FromRoute] Guid auction_id,
             [FromQuery] GetListAuctionDocumentsRequest getListAuctionDocumentsRequest
         )
         {
             try
             {
+                // Set the auction_id in the request object
+                getListAuctionDocumentsRequest.AuctionId = auction_id;
+
                 var response = await _mediator.Send(getListAuctionDocumentsRequest);
                 if (response == null)
                 {
