@@ -9,6 +9,7 @@ using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
 using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
+using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
@@ -34,6 +35,7 @@ using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetAuctioneers;
+using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -101,6 +103,7 @@ namespace MyApp.Infrastructure
                 AssginAuctioneerAndPublicAuctionRepository
             >();
             services.AddScoped<IGetAuctioneersRepository, GetAuctioneersRepository>();
+            services.AddScoped<IGetListDocumentsRepository, GetListAuctionDocumentsRepository>();
 
             return services;
         }
