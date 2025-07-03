@@ -22,14 +22,14 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEnumerable<ISendMessage> _sendMessages;
-        private readonly INotificationRepository _notificationRepository;
+        private readonly INotificationsRepository _notificationRepository;
 
         public CancelAuctionHandler(
             IAuctionRepository auctionRepository,
             IHttpContextAccessor httpContextAccessor,
             IUnitOfWork unitOfWork,
             IEnumerable<ISendMessage> sendMessages,
-            INotificationRepository notificationRepository
+            INotificationsRepository notificationRepository
         )
         {
             _auctionRepository = auctionRepository;

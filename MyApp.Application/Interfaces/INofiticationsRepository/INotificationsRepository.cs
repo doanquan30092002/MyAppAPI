@@ -7,7 +7,7 @@ using MyApp.Core.Entities;
 
 namespace MyApp.Application.Interfaces.INofiticationsRepository
 {
-    public interface INotificationRepository
+    public interface INotificationsRepository
     {
         /// <summary>
         /// Lưu danh sách Notification vào database.

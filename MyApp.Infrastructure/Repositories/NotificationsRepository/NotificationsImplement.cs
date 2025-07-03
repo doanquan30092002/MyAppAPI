@@ -9,7 +9,7 @@ using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.NotificationsRepository
 {
-    public class NotificationsImplement : INotificationRepository
+    public class NotificationsImplement : INotificationsRepository
     {
         private readonly AppDbContext _context;
 

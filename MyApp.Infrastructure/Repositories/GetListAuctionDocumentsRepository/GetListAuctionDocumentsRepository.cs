@@ -150,7 +150,6 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                         RegistrationFee =
                             ad.AuctionAsset != null ? ad.AuctionAsset.RegistrationFee : 0,
                         StatusTicket = ad.StatusTicket,
-                        StatusRefundDeposit = ad.StatusRefundDeposit,
                         NumericalOrder = ad.NumericalOrder,
                         Note = ad.Note,
                     })

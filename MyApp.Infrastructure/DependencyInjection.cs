@@ -110,7 +110,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<IGetAuctioneersRepository, GetAuctioneersRepository>();
             services.AddScoped<IGetListDocumentsRepository, GetListAuctionDocumentsRepository>();
 
-            services.AddScoped<INotificationRepository, NotificationsImplement>();
+            services.AddScoped<INotificationsRepository, NotificationsImplement>();
 
             services.AddScoped<IRefundRepository, RefundRepository>();
 

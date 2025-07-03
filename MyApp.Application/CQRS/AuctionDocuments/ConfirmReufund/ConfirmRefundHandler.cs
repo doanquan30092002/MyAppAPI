@@ -14,12 +14,12 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund
     public class ConfirmRefundHandler : IRequestHandler<ConfirmRefundCommand, bool>
     {
         private readonly IRefundRepository _refundRepository;
-        private readonly INotificationRepository _notificationRepository;
+        private readonly INotificationsRepository _notificationRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public ConfirmRefundHandler(
             IRefundRepository refundRepository,
-            INotificationRepository notificationRepository,
+            INotificationsRepository notificationRepository,
             IUnitOfWork unitOfWork
         )
         {
