@@ -41,5 +41,7 @@ namespace MyApp.Core.Entities
         public bool StatusRefundDeposit { get; set; }
 
         public int? NumericalOrder { get; set; }
+
+        public string? Note { get; set; }
     }
 }

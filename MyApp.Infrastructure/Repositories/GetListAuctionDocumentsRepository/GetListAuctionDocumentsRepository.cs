@@ -1,0 +1,170 @@
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MyApp.Application.CQRS.Auction.GetListAuction.Querries;
+using MyApp.Application.CQRS.Auction.GetListAution.Querries;
+using MyApp.Application.Interfaces.IGetListDocumentsRepository;
+using MyApp.Core.Entities;
+using MyApp.Infrastructure.Data;
+
+namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
+{
+    public class GetListAuctionDocumentsRepository : IGetListDocumentsRepository
+    {
+        private readonly AppDbContext context;
+
+        public GetListAuctionDocumentsRepository(AppDbContext context)
+        {
+            this.context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+
+        public async Task<GetListAuctionDocumentsResponse> GetListAuctionDocumentsAsync(
+            GetListAuctionDocumentsRequest getListAuctionDocumentsRequest
+        )
+        {
+            try
+            {
+                // Initialize query with includes
+                var query = context
+                    .AuctionDocuments.AsNoTracking()
+                    .Include(ad => ad.User)
+                    .Include(ad => ad.AuctionAsset)
+                    .AsQueryable();
+
+                // Filter by CitizenIdentification if provided
+                if (!string.IsNullOrEmpty(getListAuctionDocumentsRequest.CitizenIdentification))
+                {
+                    query = query.Where(ad =>
+                        ad.User != null
+                        && ad.User.CitizenIdentification.ToLower()
+                            .Contains(
+                                getListAuctionDocumentsRequest.CitizenIdentification.ToLower()
+                            )
+                    );
+                }
+
+                // Filter by Name if provided
+                if (!string.IsNullOrEmpty(getListAuctionDocumentsRequest.Name))
+                {
+                    query = query.Where(ad =>
+                        ad.User != null
+                        && ad.User.Name.ToLower()
+                            .Contains(getListAuctionDocumentsRequest.Name.ToLower())
+                    );
+                }
+
+                // Filter by TagName if provided
+                if (!string.IsNullOrEmpty(getListAuctionDocumentsRequest.TagName))
+                {
+                    query = query.Where(ad =>
+                        ad.AuctionAsset != null
+                        && ad.AuctionAsset.TagName.ToLower()
+                            .Contains(getListAuctionDocumentsRequest.TagName.ToLower())
+                    );
+                }
+
+                // Calculate total count before pagination
+                int totalCount = await query.CountAsync();
+
+                // Sort by specified field
+                if (!string.IsNullOrEmpty(getListAuctionDocumentsRequest.SortBy))
+                {
+                    switch (getListAuctionDocumentsRequest.SortBy.ToLower())
+                    {
+                        case "citizenidentification":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad =>
+                                    ad.User != null ? ad.User.CitizenIdentification : string.Empty
+                                )
+                                : query.OrderByDescending(ad =>
+                                    ad.User != null ? ad.User.CitizenIdentification : string.Empty
+                                );
+                            break;
+                        case "name":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad => ad.User != null ? ad.User.Name : string.Empty)
+                                : query.OrderByDescending(ad =>
+                                    ad.User != null ? ad.User.Name : string.Empty
+                                );
+                            break;
+                        case "tagname":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad =>
+                                    ad.AuctionAsset != null ? ad.AuctionAsset.TagName : string.Empty
+                                )
+                                : query.OrderByDescending(ad =>
+                                    ad.AuctionAsset != null ? ad.AuctionAsset.TagName : string.Empty
+                                );
+                            break;
+                        case "deposit":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad =>
+                                    ad.AuctionAsset != null ? ad.AuctionAsset.Deposit : 0
+                                )
+                                : query.OrderByDescending(ad =>
+                                    ad.AuctionAsset != null ? ad.AuctionAsset.Deposit : 0
+                                );
+                            break;
+                        case "statusticket":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad => ad.StatusTicket)
+                                : query.OrderByDescending(ad => ad.StatusTicket);
+                            break;
+                        case "numericalorder":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad => ad.NumericalOrder)
+                                : query.OrderByDescending(ad => ad.NumericalOrder);
+                            break;
+                        default:
+                            query = query.OrderBy(ad => ad.User.Name); // Default sort by user name
+                            break;
+                    }
+                }
+                else
+                {
+                    query = query.OrderBy(ad => ad.User.Name); // Default sort by user name
+                }
+
+                // Apply pagination
+                var pageNumber = getListAuctionDocumentsRequest.PageNumber ?? 1;
+                var pageSize = getListAuctionDocumentsRequest.PageSize ?? 2;
+
+                query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+                // Map to ListAuctionDocumentsDTO
+                var auctionDocuments = await query
+                    .Select(ad => new ListAuctionDocumentsDTO
+                    {
+                        AuctionDocumentsId = ad.AuctionDocumentsId,
+                        CitizenIdentification =
+                            ad.User != null ? ad.User.CitizenIdentification : string.Empty,
+                        Name = ad.User != null ? ad.User.Name : string.Empty,
+                        TagName = ad.AuctionAsset != null ? ad.AuctionAsset.TagName : string.Empty,
+                        Deposit = ad.AuctionAsset != null ? ad.AuctionAsset.Deposit : 0,
+                        StatusDeposit = ad.StatusDeposit,
+                        RegistrationFee =
+                            ad.AuctionAsset != null ? ad.AuctionAsset.RegistrationFee : 0,
+                        StatusTicket = ad.StatusTicket,
+                        StatusRefundDeposit = ad.StatusRefundDeposit,
+                        NumericalOrder = ad.NumericalOrder,
+                        Note = ad.Note,
+                    })
+                    .ToListAsync();
+
+                // Create response
+                var response = new GetListAuctionDocumentsResponse
+                {
+                    TotalCount = totalCount,
+                    AuctionDocuments = auctionDocuments,
+                };
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Đã xảy ra lỗi khi truy xuất danh sách hồ sơ đấu giá.", ex);
+            }
+        }
+    }
+}
