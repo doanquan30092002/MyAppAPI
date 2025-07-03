@@ -42,7 +42,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
                 .ThenInclude(aa => aa.Auction)
                 .FirstOrDefaultAsync(ad => ad.AuctionDocumentsId == auctionDocumentsId);
             string amount = auctionDocument.AuctionAsset.RegistrationFee.ToString("0");
-            string content = $"Chuyen tien dang ky ho so DH{auctionDocumentsId}";
+            string content = $"DH{auctionDocumentsId}";
             string template = "compact";
             string download = "false";
             string accountNumber = InformationBank.ACCOUNT_NUMBER_TUAN_LINH;
