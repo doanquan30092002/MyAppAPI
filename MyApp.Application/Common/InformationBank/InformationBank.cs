@@ -9,7 +9,7 @@ namespace MyApp.Application.Common.InformationBank
     public class InformationBank
     {
         #region InforBankTuanLinh
-        public const string ACCOUNT_NUMBER_TUAN_LINH = "4830740379";
+        public const string ACCOUNT_NUMBER_TUAN_LINH = "96247E9EMO";
         public const string INFOR_BANK_BENEFICIARY_BANK = "BIDV";
         #endregion InforBankTuanLinh
     }
