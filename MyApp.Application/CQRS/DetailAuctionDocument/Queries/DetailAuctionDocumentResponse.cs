@@ -1,21 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using MyApp.Core.Entities;
 
-namespace MyApp.Core.Entities
+namespace MyApp.Application.CQRS.DetailAuctionDocument.Queries
 {
-    public class AuctionDocuments
+    public class DetailAuctionDocumentResponse
     {
-        [Key]
         public Guid AuctionDocumentsId { get; set; }
         public Guid UserId { get; set; }
 
-        [ForeignKey("UserId")]
-        public User User { get; set; }
-
         public Guid AuctionAssetId { get; set; }
-
-        [ForeignKey("AuctionAssetId")]
-        public AuctionAssets AuctionAsset { get; set; }
 
         public string BankAccount { get; set; }
         public string BankAccountNumber { get; set; }
@@ -23,9 +16,9 @@ namespace MyApp.Core.Entities
 
         public Guid CreateByTicket { get; set; }
 
-        public DateTime CreateAtTicket { get; set; } = DateTime.Now;
+        public DateTime CreateAtTicket { get; set; }
 
-        public DateTime UpdateAtTicket { get; set; } = DateTime.Now;
+        public DateTime UpdateAtTicket { get; set; }
 
         public DateTime? CreateAtDeposit { get; set; }
 

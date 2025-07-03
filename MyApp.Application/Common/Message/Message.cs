@@ -72,5 +72,9 @@
         public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
         public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
         #endregion
+        #region DetailAuctionDocument
+        public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
+        public const string GET_AUCTION_DOCUMENT_SUCCESS = "Lấy thông tin thành công";
+        #endregion
     }
 }

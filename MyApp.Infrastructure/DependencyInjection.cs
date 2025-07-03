@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
+using MyApp.Application.Interfaces.DetailAuctionDocument;
 using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
@@ -30,6 +31,7 @@ using MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction;
 using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
+using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
@@ -101,6 +103,7 @@ namespace MyApp.Infrastructure
                 AssginAuctioneerAndPublicAuctionRepository
             >();
             services.AddScoped<IGetAuctioneersRepository, GetAuctioneersRepository>();
+            services.AddScoped<IDetailAuctionDocumentRepository, DetailAuctionDocumentRepository>();
 
             return services;
         }
