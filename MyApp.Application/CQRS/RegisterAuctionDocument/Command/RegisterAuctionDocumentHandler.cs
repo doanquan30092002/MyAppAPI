@@ -35,19 +35,6 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
                 userId,
                 request.AuctionAssetsId
             );
-            if (auctionDocument.StatusTicket == Message.REGISTER_TICKET_PAID)
-            {
-                return new RegisterAuctionDocumentResponse
-                {
-                    Code = 400,
-                    Message = Message.AUCTION_DOCUMENT_EXIST,
-                };
-            }
-            if (auctionDocument.StatusTicket == Message.REGISTER_TICKET_NOT_PAID)
-            {
-                result = await _repository.CreateQRForPayTicket(auctionDocument.AuctionDocumentsId);
-            }
-
             if (auctionDocument == null)
             {
                 Guid auctionDocumentId = await _repository.InsertAuctionDocumentAsync(
@@ -65,6 +52,23 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
                     };
 
                 result = await _repository.CreateQRForPayTicket(auctionDocumentId);
+            }
+            else
+            {
+                if (auctionDocument.StatusTicket == Message.REGISTER_TICKET_PAID)
+                {
+                    return new RegisterAuctionDocumentResponse
+                    {
+                        Code = 400,
+                        Message = Message.AUCTION_DOCUMENT_EXIST,
+                    };
+                }
+                if (auctionDocument.StatusTicket == Message.REGISTER_TICKET_NOT_PAID)
+                {
+                    result = await _repository.CreateQRForPayTicket(
+                        auctionDocument.AuctionDocumentsId
+                    );
+                }
             }
 
             return result;
