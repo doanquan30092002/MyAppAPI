@@ -128,10 +128,21 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             int oldStatus = auction.Status;
             int newStatus = command.Status;
 
-            if (newStatus == 1 && DateTime.Now > auction.AuctionEndDate)
-                throw new ValidationException(
-                    "Không thể công khai phiên đấu giá do ngày kết thúc phiên đấu giá đã qua."
-                );
+            if (newStatus == 1)
+            {
+                var account = await _context.Accounts.FirstOrDefaultAsync(a => a.UserId == userId);
+
+                if (account == null)
+                    throw new ValidationException("Tài khoản không tồn tại.");
+
+                if (account.RoleId != 4)
+                    throw new ValidationException("Bạn không có quyền công khai phiên đấu giá.");
+
+                if (DateTime.Now > auction.AuctionEndDate)
+                    throw new ValidationException(
+                        "Không thể công khai phiên đấu giá do ngày kết thúc phiên đấu giá đã qua."
+                    );
+            }
 
             if (oldStatus == 1)
             {
