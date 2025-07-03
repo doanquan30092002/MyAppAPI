@@ -60,6 +60,11 @@
         #endregion
         #region RegisterAuctionDocument
         public const string CREATE_QR_SUCCESS = "Tạo QR thành công";
+
+        // 0: chưa tồn tại hồ sơ đăng ký
+        // 1: đã thanh toán hồ sơ đăng ký
+        public const int REGISTER_TICKET_NOT_PAID = 0;
+        public const int REGISTER_TICKET_PAID = 1;
         public const string REGISTER_AUCTION_DOCUMENT_FAIL = "Lỗi khi tạo phiếu đăng ký hồ sơ";
         public const string AUCTION_DOCUMENT_EXIST =
             "Bạn đã đăng ký mua hồ sơ tham gia đấu giá cho tài sản này. Vui lòng xem lịch sử mua hồ sơ";

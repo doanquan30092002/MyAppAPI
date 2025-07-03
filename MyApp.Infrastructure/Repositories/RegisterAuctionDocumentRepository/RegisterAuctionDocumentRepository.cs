@@ -18,13 +18,19 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             this._context = context;
         }
 
-        public Task<bool> CheckAuctionDocumentExsit(string? userId, string auctionAssetsId)
+        public async Task<AuctionDocuments?> CheckAuctionDocumentPaid(
+            string? userId,
+            string auctionAssetsId
+        )
         {
-            return _context.AuctionDocuments.AnyAsync(ad =>
-                ad.UserId.ToString() == userId
-                && ad.AuctionAssetId.ToString() == auctionAssetsId
-                && ad.StatusTicket != 1
+            var auctionDocument = await _context.AuctionDocuments.FirstOrDefaultAsync(ad =>
+                ad.UserId.ToString() == userId && ad.AuctionAssetId.ToString() == auctionAssetsId
             );
+            if (auctionDocument == null)
+            {
+                return null;
+            }
+            return auctionDocument;
         }
 
         public async Task<RegisterAuctionDocumentResponse> CreateQRForPayTicket(

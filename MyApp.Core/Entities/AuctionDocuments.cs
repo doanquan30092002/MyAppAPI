@@ -17,9 +17,9 @@ namespace MyApp.Core.Entities
         [ForeignKey("AuctionAssetId")]
         public AuctionAssets AuctionAsset { get; set; }
 
-        public string BankAccount { get; set; }
-        public string BankAccountNumber { get; set; }
-        public string BankBranch { get; set; }
+        public string? BankAccount { get; set; }
+        public string? BankAccountNumber { get; set; }
+        public string? BankBranch { get; set; }
 
         public Guid CreateByTicket { get; set; }
 

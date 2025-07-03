@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MyApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDatabase : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -127,9 +127,13 @@ namespace MyApp.Infrastructure.Migrations
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QRLink = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NumberRoundMax = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     WinnerData = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    Updateable = table.Column<bool>(type: "bit", nullable: true),
+                    CancelReasonFile = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CancelReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Auctioneer = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -140,6 +144,11 @@ namespace MyApp.Infrastructure.Migrations
                         principalTable: "AuctionCategories",
                         principalColumn: "CategoryId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Auctions_Users_Auctioneer",
+                        column: x => x.Auctioneer,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Auctions_Users_CreatedBy",
                         column: x => x.CreatedBy,
@@ -239,7 +248,8 @@ namespace MyApp.Infrastructure.Migrations
                     NotificationType = table.Column<int>(type: "int", nullable: false),
                     SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsRead = table.Column<bool>(type: "bit", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UrlAction = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -316,11 +326,11 @@ namespace MyApp.Infrastructure.Migrations
                     CreateByTicket = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreateAtTicket = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateAtTicket = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreateAtDeposit = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    StatusTicket = table.Column<bool>(type: "bit", nullable: false),
-                    StatusDeposit = table.Column<bool>(type: "bit", nullable: false),
-                    StatusRefundDeposit = table.Column<bool>(type: "bit", nullable: false),
-                    NumericalOrder = table.Column<int>(type: "int", nullable: true)
+                    CreateAtDeposit = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    StatusTicket = table.Column<int>(type: "int", nullable: false),
+                    StatusDeposit = table.Column<int>(type: "int", nullable: false),
+                    NumericalOrder = table.Column<int>(type: "int", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -398,6 +408,11 @@ namespace MyApp.Infrastructure.Migrations
                 name: "IX_AuctionRounds_AuctionId",
                 table: "AuctionRounds",
                 column: "AuctionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Auctions_Auctioneer",
+                table: "Auctions",
+                column: "Auctioneer");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Auctions_CategoryId",

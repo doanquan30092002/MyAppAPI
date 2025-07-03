@@ -12,8 +12,8 @@ using MyApp.Infrastructure.Data;
 namespace MyApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250701155535_add Note in table AuctionDocuments")]
-    partial class addNoteintableAuctionDocuments
+    [Migration("20250703142025_update allow null")]
+    partial class updateallownull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -236,15 +236,12 @@ namespace MyApp.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BankAccount")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BankAccountNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BankBranch")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreateAtDeposit")
@@ -262,11 +259,8 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<int?>("NumericalOrder")
                         .HasColumnType("int");
 
-                    b.Property<bool>("StatusDeposit")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("StatusRefundDeposit")
-                        .HasColumnType("bit");
+                    b.Property<int>("StatusDeposit")
+                        .HasColumnType("int");
 
                     b.Property<int>("StatusTicket")
                         .HasColumnType("int");

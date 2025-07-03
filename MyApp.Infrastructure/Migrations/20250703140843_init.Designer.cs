@@ -12,8 +12,8 @@ using MyApp.Infrastructure.Data;
 namespace MyApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250611142148_Init Database")]
-    partial class InitDatabase
+    [Migration("20250703140843_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,6 +103,15 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("AuctionStartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("Auctioneer")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CancelReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CancelReasonFile")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -125,7 +134,10 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("RegisterOpenDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Status")
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("Updateable")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -138,6 +150,8 @@ namespace MyApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AuctionId");
+
+                    b.HasIndex("Auctioneer");
 
                     b.HasIndex("CategoryId");
 
@@ -233,7 +247,7 @@ namespace MyApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreateAtDeposit")
+                    b.Property<DateTime?>("CreateAtDeposit")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreateAtTicket")
@@ -242,17 +256,17 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<Guid>("CreateByTicket")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("NumericalOrder")
                         .HasColumnType("int");
 
-                    b.Property<bool>("StatusDeposit")
-                        .HasColumnType("bit");
+                    b.Property<int>("StatusDeposit")
+                        .HasColumnType("int");
 
-                    b.Property<bool>("StatusRefundDeposit")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("StatusTicket")
-                        .HasColumnType("bit");
+                    b.Property<int>("StatusTicket")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateAtTicket")
                         .HasColumnType("datetime2");
@@ -501,6 +515,9 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UrlAction")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -608,6 +625,10 @@ namespace MyApp.Infrastructure.Migrations
 
             modelBuilder.Entity("MyApp.Core.Entities.Auction", b =>
                 {
+                    b.HasOne("MyApp.Core.Entities.User", "AuctioneerUser")
+                        .WithMany()
+                        .HasForeignKey("Auctioneer");
+
                     b.HasOne("MyApp.Core.Entities.AuctionCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
@@ -619,6 +640,8 @@ namespace MyApp.Infrastructure.Migrations
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("AuctioneerUser");
 
                     b.Navigation("Category");
 

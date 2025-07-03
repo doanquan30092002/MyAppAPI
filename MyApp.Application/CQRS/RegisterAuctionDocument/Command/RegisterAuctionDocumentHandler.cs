@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
+using MyApp.Core.Entities;
 
 namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
 {
@@ -26,10 +27,15 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
             CancellationToken cancellationToken
         )
         {
+            var result = new RegisterAuctionDocumentResponse();
             string? userId = _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
-            if (await _repository.CheckAuctionDocumentExsit(userId, request.AuctionAssetsId))
+            var auctionDocument = await _repository.CheckAuctionDocumentPaid(
+                userId,
+                request.AuctionAssetsId
+            );
+            if (auctionDocument.StatusTicket == Message.REGISTER_TICKET_PAID)
             {
                 return new RegisterAuctionDocumentResponse
                 {
@@ -37,21 +43,29 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
                     Message = Message.AUCTION_DOCUMENT_EXIST,
                 };
             }
-            Guid auctionDocumentId = await _repository.InsertAuctionDocumentAsync(
-                request.AuctionAssetsId,
-                userId,
-                request.BankAccount,
-                request.BankAccountNumber,
-                request.BankBranch
-            );
-            if (auctionDocumentId == Guid.Empty)
-                return new RegisterAuctionDocumentResponse
-                {
-                    Code = 400,
-                    Message = Message.REGISTER_AUCTION_DOCUMENT_FAIL,
-                };
+            if (auctionDocument.StatusTicket == Message.REGISTER_TICKET_NOT_PAID)
+            {
+                result = await _repository.CreateQRForPayTicket(auctionDocument.AuctionDocumentsId);
+            }
 
-            var result = await _repository.CreateQRForPayTicket(auctionDocumentId);
+            if (auctionDocument == null)
+            {
+                Guid auctionDocumentId = await _repository.InsertAuctionDocumentAsync(
+                    request.AuctionAssetsId,
+                    userId,
+                    request.BankAccount,
+                    request.BankAccountNumber,
+                    request.BankBranch
+                );
+                if (auctionDocumentId == Guid.Empty)
+                    return new RegisterAuctionDocumentResponse
+                    {
+                        Code = 400,
+                        Message = Message.REGISTER_AUCTION_DOCUMENT_FAIL,
+                    };
+
+                result = await _repository.CreateQRForPayTicket(auctionDocumentId);
+            }
 
             return result;
         }
