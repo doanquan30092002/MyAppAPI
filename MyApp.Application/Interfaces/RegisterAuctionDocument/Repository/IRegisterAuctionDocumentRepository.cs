@@ -14,6 +14,12 @@ namespace MyApp.Application.Interfaces.RegisterAuctionDocument.Repository
             string? bankAccountNumber,
             string? bankBranch
         );
+        Task<bool> UpdateInforBankFromUser(
+            Guid auctionDocumentsId,
+            string? bankAccount,
+            string? bankAccountNumber,
+            string? bankBranch
+        );
         Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId);
     }
 }

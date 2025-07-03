@@ -106,6 +106,42 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             }
         }
 
+        public async Task<bool> UpdateInforBankFromUser(
+            Guid auctionDocumentsId,
+            string? bankAccount,
+            string? bankAccountNumber,
+            string? bankBranch
+        )
+        {
+            var auctionDocument = await _context.AuctionDocuments.FirstOrDefaultAsync(x =>
+                x.AuctionDocumentsId == auctionDocumentsId
+            );
+            if (auctionDocument == null)
+            {
+                return false; // Auction document not found
+            }
+            try
+            {
+                auctionDocument.BankAccount = !string.IsNullOrWhiteSpace(bankAccount)
+                    ? bankAccount.Trim()
+                    : null;
+                auctionDocument.BankAccountNumber = !string.IsNullOrWhiteSpace(bankAccountNumber)
+                    ? bankAccountNumber.Trim()
+                    : null;
+                auctionDocument.BankBranch = !string.IsNullOrWhiteSpace(bankBranch)
+                    ? bankBranch.Trim()
+                    : null;
+                auctionDocument.UpdateAtTicket = DateTime.Now;
+                _context.AuctionDocuments.Update(auctionDocument);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId)
         {
             var auctionDocument = await _context.AuctionDocuments.FindAsync(auctionDocumentsId);

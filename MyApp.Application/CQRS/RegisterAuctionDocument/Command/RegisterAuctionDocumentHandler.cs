@@ -65,6 +65,12 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
                 }
                 if (auctionDocument.StatusTicket == Message.REGISTER_TICKET_NOT_PAID)
                 {
+                    bool checkUpdate = await _repository.UpdateInforBankFromUser(
+                        auctionDocument.AuctionDocumentsId,
+                        request.BankAccount,
+                        request.BankAccountNumber,
+                        request.BankBranch
+                    );
                     result = await _repository.CreateQRForPayTicket(
                         auctionDocument.AuctionDocumentsId
                     );
