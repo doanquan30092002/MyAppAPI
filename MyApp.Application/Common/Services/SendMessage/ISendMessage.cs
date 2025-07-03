@@ -11,6 +11,11 @@ namespace MyApp.Application.Common.Services.SendMessage
     {
         SendMessageChannel Channel { get; }
 
-        Task<bool> SendAsync(string to, string subject, string content);
+        Task<bool> SendAsync(
+            string to,
+            string subject,
+            string content,
+            List<string>? toList = null
+        );
     }
 }

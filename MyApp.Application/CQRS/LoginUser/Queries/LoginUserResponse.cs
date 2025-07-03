@@ -12,5 +12,6 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
         public string Email { get; set; }
         public string Name { get; set; }
         public string RoleName { get; set; }
+        public bool IsExpired { get; set; }
     }
 }

@@ -1,9 +1,10 @@
-﻿using MyApp.Application.CQRS.UpdateAccountAndProfile.Command;
+﻿using MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp;
 
-namespace MyApp.Application.Interfaces.UpdateAccountRepository
+namespace MyApp.Application.Interfaces.UpdateAccount.Repository
 {
     public interface IUpdateAccountRepository
     {
+        Task<string> GetEmailByUserIdAsync(string? userId);
         Task<UpdateAccountResponse> UpdateAccountInfo(
             string? userId,
             string? emailNew,

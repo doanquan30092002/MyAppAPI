@@ -10,6 +10,6 @@ namespace MyApp.Core.DTOs.AuctionDocumentsDTO
     {
         public int StatusTicket { get; set; }
 
-        public bool StatusDeposit { get; set; }
+        public int StatusDeposit { get; set; }
     }
 }

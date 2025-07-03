@@ -21,7 +21,12 @@ namespace MyApp.Application.Common.Services.SendMessage
             _settings = settings.Value;
         }
 
-        public async Task<bool> SendAsync(string to, string subject, string content)
+        public async Task<bool> SendAsync(
+            string to,
+            string subject,
+            string content,
+            List<string>? toList = null
+        )
         {
             try
             {
@@ -38,7 +43,24 @@ namespace MyApp.Application.Common.Services.SendMessage
                 using (var mail = new MailMessage())
                 {
                     mail.From = new MailAddress(_settings.SenderEmail, _settings.SenderName);
-                    mail.To.Add(to);
+
+                    if (toList != null && toList.Any())
+                    {
+                        foreach (var email in toList)
+                        {
+                            if (!string.IsNullOrWhiteSpace(email))
+                                mail.To.Add(email);
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(to))
+                    {
+                        mail.To.Add(to);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
                     mail.Subject = subject ?? "No Subject";
                     mail.Body = content;
                     mail.IsBodyHtml = true;

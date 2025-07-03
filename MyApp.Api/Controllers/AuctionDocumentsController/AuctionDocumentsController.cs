@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
+using MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund;
+using MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -129,6 +131,89 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
                     Data = null,
                 };
                 return StatusCode(500, errorResponse);
+            }
+        }
+
+        /// <summary>
+        /// Xuất danh sách hồ sơ hoàn tiền cho phiên đấu giá (Excel).
+        /// </summary>
+        /// <param name="auctionId">Id phiên đấu giá</param>
+        /// <returns>File Excel (base64)</returns>
+        [HttpGet("export-refund-excel")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> ExportRefundDocumentsExcel([FromQuery] Guid auctionId)
+        {
+            try
+            {
+                var command = new ExportExcelTransferCommand { AuctionId = auctionId };
+                var fileBytes = await _mediator.Send(command);
+                var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
+                var base64 = Convert.ToBase64String(fileBytes);
+
+                var response = new ApiResponse<object>
+                {
+                    Code = 200,
+                    Message = "Xuất file Excel thành công",
+                    Data = new
+                    {
+                        FileName = fileName,
+                        ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        Base64 = base64,
+                    },
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new ApiResponse<object>
+                {
+                    Code = 400,
+                    Message = "Lỗi xuất file Excel hoàn tiền",
+                    Data = null,
+                };
+                return StatusCode(500, errorResponse);
+            }
+
+            //var command = new ExportExcelTransferCommand { AuctionId = auctionId };
+            //var fileBytes = await _mediator.Send(command);
+            //var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
+            //return File(
+            //    fileBytes,
+            //    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            //    fileName
+            //);
+        }
+
+        /// <summary>
+        /// Xác nhận hoàn tiền cho danh sách hồ sơ đấu giá.
+        /// </summary>
+        /// <param name="command">Danh sách id hồ sơ đấu giá cần hoàn tiền</param>
+        /// <returns>Trả về true nếu thành công, false nếu thất bại</returns>
+        [HttpPost("confirm-refund")]
+        [Authorize(Roles = "Staff")]
+        public async Task<IActionResult> ConfirmRefund([FromBody] ConfirmRefundCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result)
+            {
+                return Ok(
+                    new ApiResponse<object>
+                    {
+                        Code = 200,
+                        Message = "Xác nhận hoàn tiền thành công.",
+                    }
+                );
+            }
+            else
+            {
+                return BadRequest(
+                    new ApiResponse<object>
+                    {
+                        Code = 400,
+                        Message =
+                            "Xác nhận hoàn tiền thất bại. Vui lòng kiểm tra lại danh sách hồ sơ.",
+                    }
+                );
             }
         }
     }

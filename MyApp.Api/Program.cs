@@ -11,6 +11,7 @@ using MyApp.Api;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.PaymentDeposit.RealTimeStatusDeposit;
 using MyApp.Application.Exceptions;
+using MyApp.Infrastructure.Services.Realtime;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -180,4 +181,5 @@ app.UseStaticFiles(
 );
 app.MapControllers();
 app.MapHub<AuctionDepositHub>("/hubs/auctionDeposit");
+app.MapHub<NotificationHub>("/hub/notification");
 app.Run();

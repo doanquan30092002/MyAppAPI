@@ -33,13 +33,19 @@ namespace MyApp.Core.Entities
         0: chưa chuyển tiền phiếu đăng ký hồ sơ
         1: đã chuyển tiền phiếu đăng ký hồ sơ
         2: đã ký phiếu đăng ký hồ sơ
+        3: da hoan tien ho so
         */
         public int StatusTicket { get; set; }
 
-        public bool StatusDeposit { get; set; }
-
-        public bool StatusRefundDeposit { get; set; }
+        /*
+        0: chưa cọc
+        1: đẵ cọc
+        2: đã hoàn tiền cọc
+        */
+        public int StatusDeposit { get; set; }
 
         public int? NumericalOrder { get; set; }
+
+        public string? Note { get; set; }
     }
 }

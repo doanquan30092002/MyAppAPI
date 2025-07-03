@@ -12,7 +12,7 @@ namespace MyApp.Application.CQRS.PaymentDeposit.WebHookPaymentDeposit
     {
         public Guid AuctionDocumentsId { get; set; }
 
-        public bool Status { get; set; }
+        public int Status { get; set; }
 
         public decimal Amount { get; set; }
     }

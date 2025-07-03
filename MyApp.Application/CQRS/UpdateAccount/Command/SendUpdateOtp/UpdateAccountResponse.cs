@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyApp.Application.CQRS.UpdateAccountAndProfile.Command
+namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp
 {
     public class UpdateAccountResponse
     {

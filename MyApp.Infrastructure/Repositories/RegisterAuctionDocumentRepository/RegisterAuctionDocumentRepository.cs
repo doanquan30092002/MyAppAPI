@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Common.InformationBank;
 using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.RegisterAuctionDocument.Command;
-using MyApp.Application.Interfaces.RegisterAuctionDocument;
+using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
@@ -21,7 +21,9 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
         public Task<bool> CheckAuctionDocumentExsit(string? userId, string auctionAssetsId)
         {
             return _context.AuctionDocuments.AnyAsync(ad =>
-                ad.UserId.ToString() == userId && ad.AuctionAssetId.ToString() == auctionAssetsId
+                ad.UserId.ToString() == userId
+                && ad.AuctionAssetId.ToString() == auctionAssetsId
+                && ad.StatusTicket != 1
             );
         }
 
@@ -52,6 +54,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
                 Code = 200,
                 Message = Message.CREATE_QR_SUCCESS,
                 QrUrl = qrUrl.ToString(),
+                AuctionDocumentsId = auctionDocumentsId,
                 AccountNumber = accountNumber,
                 BeneficiaryBank = beneficiaryBank,
                 AmountTicket = auctionDocument.AuctionAsset.RegistrationFee,
@@ -67,10 +70,9 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             string? bankBranch
         )
         {
-            var auctionDocumentsId = Guid.NewGuid();
             var auctionDocument = new AuctionDocuments
             {
-                AuctionDocumentsId = auctionDocumentsId,
+                AuctionDocumentsId = Guid.NewGuid(),
                 UserId = Guid.Parse(userId),
                 AuctionAssetId = Guid.Parse(auctionAssetsId),
                 BankAccount = !string.IsNullOrWhiteSpace(bankAccount) ? bankAccount.Trim() : null,
@@ -83,15 +85,14 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
                 UpdateAtTicket = DateTime.Now,
                 CreateAtDeposit = null,
                 StatusTicket = 0, // 0: chưa chuyển tiền phiếu đăng ký hồ sơ
-                StatusDeposit = false,
-                StatusRefundDeposit = false,
+                StatusDeposit = 0,
                 NumericalOrder = null,
             };
             try
             {
                 await _context.AuctionDocuments.AddAsync(auctionDocument);
                 await _context.SaveChangesAsync();
-                return auctionDocumentsId;
+                return auctionDocument.AuctionDocumentsId;
             }
             catch (Exception)
             {
@@ -99,7 +100,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             }
         }
 
-        public async Task<bool> UpdateStatusTicketAsync(Guid auctionDocumentsId)
+        public async Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId)
         {
             var auctionDocument = await _context.AuctionDocuments.FindAsync(auctionDocumentsId);
             if (auctionDocument == null)

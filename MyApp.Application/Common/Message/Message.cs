@@ -45,6 +45,13 @@
         public const string PASSWORD_OLD_NOT_EQUAL = "Mật khẩu cũ không khớp với mật khẩu hiện tại";
         public const string PASSWORD_OLD_OR_NEW_EMPTY = "Hãy nhập đủ mật khẩu cũ và mật khẩu mới";
         public const string NO_FIELDS_PROVIDED = "Không có thông tin nào được cập nhật";
+        public const string SEND_OTP_SUCCESS = "OTP đã được gửi thành công";
+        public const string SEND_OTP_FAIL = "Gửi OTP không thành công";
+        public const string OTP_CORRECT = "OTP hợp lệ";
+        public const string OTP_INCORRECT = "OTP không đúng";
+        public const string OTP_EXPIRED_OR_NOT_EXIST = "OTP đã hết hạn hoặc không tồn tại";
+        public const string EMAIL_SUBJECT = "Mã OTP xác thực";
+        public const string EMAIL_BODY = "Mã OTP của bạn là: ";
         #endregion
         #region UpdateExpiredProfile
         public const string CITIZEN_IDENTIFICATION_NOT_MATCH =
@@ -56,6 +63,14 @@
         public const string REGISTER_AUCTION_DOCUMENT_FAIL = "Lỗi khi tạo phiếu đăng ký hồ sơ";
         public const string AUCTION_DOCUMENT_EXIST =
             "Bạn đã đăng ký mua hồ sơ tham gia đấu giá cho tài sản này. Vui lòng xem lịch sử mua hồ sơ";
+        #endregion
+        #region AssginAuctioneerAndPublicAuction
+        public const string AUCTIONEER_ASSIGNED_ANOTHER_AUCTION =
+            "Đấu giá viên đã được phân công cho một phiên đấu giá khác cùng ngày. Vui lòng chọn đấu giá viên khác";
+        public const string ASSGIN_AUCTIONEER_AND_PUBLIC_AUCTION_SUCCESS =
+            "Phiên đấu giá đã được công khai";
+        public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
+        public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
         #endregion
     }
 }

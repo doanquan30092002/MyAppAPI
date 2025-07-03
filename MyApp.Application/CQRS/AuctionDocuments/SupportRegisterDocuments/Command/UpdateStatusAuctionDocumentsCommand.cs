@@ -26,6 +26,6 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
         /// Trạng thái đặt cọc (bắt buộc)
         /// </summary>
         [Required(ErrorMessage = "Trạng thái đặt cọc là bắt buộc.")]
-        public bool StatusDeposit { get; set; }
+        public int StatusDeposit { get; set; }
     }
 }

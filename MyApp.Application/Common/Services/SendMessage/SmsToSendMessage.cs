@@ -23,7 +23,12 @@ namespace MyApp.Application.Common.Services.SendMessage
             _httpClient = httpClient;
         }
 
-        public async Task<bool> SendAsync(string to, string subject, string content)
+        public async Task<bool> SendAsync(
+            string to,
+            string subject,
+            string content,
+            List<string>? toList = null
+        )
         {
             var url = $"https://api.sms.to/sms/send";
             var query =
