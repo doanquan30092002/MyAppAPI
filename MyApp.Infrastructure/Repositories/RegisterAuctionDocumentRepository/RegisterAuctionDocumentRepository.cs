@@ -142,7 +142,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             }
         }
 
-        public async Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId)
+        public async Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid? auctionDocumentsId)
         {
             var auctionDocument = await _context.AuctionDocuments.FindAsync(auctionDocumentsId);
             if (auctionDocument == null)

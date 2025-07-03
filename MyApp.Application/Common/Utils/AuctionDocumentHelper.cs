@@ -33,5 +33,29 @@ namespace MyApp.Application.Common.Utils
 
             return Guid.Empty;
         }
+
+        public static Guid? ExtractAuctionDocumentId_1(string input)
+        {
+            const string prefix = "DH";
+
+            // Tìm vị trí xuất hiện "DH"
+            int index = input.IndexOf(prefix);
+            if (index == -1 || input.Length < index + prefix.Length + 32)
+            {
+                // Không tìm thấy "DH" hoặc không đủ 32 ký tự phía sau
+                return null;
+            }
+
+            // Lấy chuỗi 32 ký tự sau "DH"
+            string hex = input.Substring(index + prefix.Length, 32);
+
+            // Kiểm tra và parse
+            if (Guid.TryParseExact(hex, "N", out Guid guid))
+            {
+                return guid;
+            }
+
+            return null;
+        }
     }
 }

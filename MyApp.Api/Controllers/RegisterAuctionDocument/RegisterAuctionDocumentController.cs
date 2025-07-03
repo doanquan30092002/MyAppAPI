@@ -47,7 +47,7 @@ namespace MyApp.Api.Controllers.RegisterAuctionDocument
             [FromBody] SePayWebhook sePayWebhookRequest
         )
         {
-            Guid auctionDocumentId = AuctionDocumentHelper.ExtractAuctionDocumentId(
+            Guid? auctionDocumentId = AuctionDocumentHelper.ExtractAuctionDocumentId_1(
                 sePayWebhookRequest.Content
             );
             bool statusDeposit =

@@ -4,7 +4,7 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.UpdateStatusTicket
 {
     public class UpdateStatusTicketRequest : IRequest<bool>
     {
-        public Guid AuctionDocumentsId { get; set; }
+        public Guid? AuctionDocumentsId { get; set; }
     }
 
     public class SePayWebhook

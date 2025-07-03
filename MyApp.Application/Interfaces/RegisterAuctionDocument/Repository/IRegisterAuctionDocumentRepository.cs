@@ -20,6 +20,6 @@ namespace MyApp.Application.Interfaces.RegisterAuctionDocument.Repository
             string? bankAccountNumber,
             string? bankBranch
         );
-        Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid auctionDocumentsId);
+        Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid? auctionDocumentsId);
     }
 }
