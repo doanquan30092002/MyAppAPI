@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyApp.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using MyApp.Infrastructure.Data;
 namespace MyApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250629041956_update-field")]
+    partial class updatefield
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,9 +103,6 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("AuctionStartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("Auctioneer")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("CancelReason")
                         .HasColumnType("nvarchar(max)");
 
@@ -147,8 +147,6 @@ namespace MyApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AuctionId");
-
-                    b.HasIndex("Auctioneer");
 
                     b.HasIndex("CategoryId");
 
@@ -252,9 +250,6 @@ namespace MyApp.Infrastructure.Migrations
 
                     b.Property<Guid>("CreateByTicket")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("NumericalOrder")
                         .HasColumnType("int");
@@ -622,10 +617,6 @@ namespace MyApp.Infrastructure.Migrations
 
             modelBuilder.Entity("MyApp.Core.Entities.Auction", b =>
                 {
-                    b.HasOne("MyApp.Core.Entities.User", "AuctioneerUser")
-                        .WithMany()
-                        .HasForeignKey("Auctioneer");
-
                     b.HasOne("MyApp.Core.Entities.AuctionCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
@@ -637,8 +628,6 @@ namespace MyApp.Infrastructure.Migrations
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("AuctioneerUser");
 
                     b.Navigation("Category");
 

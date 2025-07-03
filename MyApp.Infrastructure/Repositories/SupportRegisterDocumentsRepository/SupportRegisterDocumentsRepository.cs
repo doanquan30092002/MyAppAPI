@@ -175,8 +175,7 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
                     UpdateAtTicket = DateTime.Now,
                     CreateAtDeposit = DateTime.Now,
                     StatusTicket = 0,
-                    StatusDeposit = false,
-                    StatusRefundDeposit = false,
+                    StatusDeposit = 0,
                     NumericalOrder = numericalOrder,
                 };
                 documents.Add(doc);

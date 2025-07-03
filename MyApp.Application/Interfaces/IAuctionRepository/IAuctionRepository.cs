@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
+using MyApp.Application.CQRS.Auction.CancelAuction.Commands;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Core.Entities;
 
@@ -35,5 +36,22 @@ namespace MyApp.Application.Interfaces.IAuctionRepository
         /// <param name="updateable">Giá trị Updateable mới.</param>
         /// <returns>Task hoàn thành.</returns>
         Task UpdateAuctionUpdateableAsync(Guid auctionId, bool updateable);
+
+        /// <summary>
+        /// Huỷ phiên đấu giá.
+        /// </summary>
+        /// <param name="command">Lệnh huỷ phiên đấu giá.</param>
+        /// <param name="userId">Id người thực hiện huỷ.</param>
+        /// <returns>True nếu huỷ thành công, false nếu thất bại.</returns>
+        Task<bool> CancelAuctionAsync(CancelAuctionCommand command, Guid userId);
+
+        /// <summary>
+        /// Lấy danh sách hồ sơ đã chuyển tiền phiếu đăng ký hồ sơ hoặc đã cọc theo auctionId.
+        /// </summary>
+        /// <param name="auctionId">Id phiên đấu giá.</param>
+        /// <returns>Danh sách AuctionDocuments phù hợp.</returns>
+        Task<List<AuctionDocuments>> GetPaidOrDepositedDocumentsByAuctionIdAsync(Guid auctionId);
+
+        Task<List<string>> GetEmailsByUserIdsAsync(List<Guid> userIds);
     }
 }

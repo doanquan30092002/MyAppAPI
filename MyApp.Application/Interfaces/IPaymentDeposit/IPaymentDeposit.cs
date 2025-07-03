@@ -19,7 +19,7 @@ namespace MyApp.Application.Interfaces.IPaymentDeposit
 
         Task<bool> UpdateStatusDepositAsync(
             Guid auctionDocumentId,
-            bool statusDeposit,
+            int statusDeposit,
             decimal amount
         );
     }

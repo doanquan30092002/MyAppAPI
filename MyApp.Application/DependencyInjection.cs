@@ -13,8 +13,11 @@ using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
 using MyApp.Application.Interfaces.IJwtHelper;
+using MyApp.Application.Interfaces.INofiticationsRepository;
+using MyApp.Application.Interfaces.IRefundRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.JobBackgroud.AuctionJob;
+using MyApp.Core.Entities;
 using MyApp.Core.Models;
 
 namespace MyApp.Application

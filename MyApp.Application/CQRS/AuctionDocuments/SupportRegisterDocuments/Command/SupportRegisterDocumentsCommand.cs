@@ -22,23 +22,11 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
         [Required(ErrorMessage = "Danh sách tài sản đấu giá là bắt buộc.")]
         public List<Guid> AuctionAssetsIds { get; set; }
 
-        /// <summary>
-        /// Tên chủ tài khoản ngân hàng
-        /// </summary>
-        [Required(ErrorMessage = "Tên chủ tài khoản là bắt buộc.")]
-        public string BankAccount { get; set; }
+        public string? BankAccount { get; set; }
 
-        /// <summary>
-        /// Số tài khoản ngân hàng
-        /// </summary>
-        [Required(ErrorMessage = "Số tài khoản ngân hàng là bắt buộc.")]
-        public string BankAccountNumber { get; set; }
+        public string? BankAccountNumber { get; set; }
 
-        /// <summary>
-        /// Chi nhánh ngân hàng
-        /// </summary>
-        [Required(ErrorMessage = "Chi nhánh ngân hàng là bắt buộc.")]
-        public string BankBranch { get; set; }
+        public string? BankBranch { get; set; }
 
         [Required(ErrorMessage = "Phiên đấu giá là bắt buộc.")]
         public Guid AuctionId { get; set; }

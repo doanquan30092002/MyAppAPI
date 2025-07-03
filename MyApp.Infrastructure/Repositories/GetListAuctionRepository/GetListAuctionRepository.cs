@@ -167,7 +167,7 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
             }
             catch (Exception ex)
             {
-                throw new Exception("An error occurred while retrieving the auction list.", ex);
+                throw new Exception("Đã xảy ra lỗi khi lấy danh sách phiên đấu giá.", ex);
             }
         }
     }

@@ -33,7 +33,7 @@ namespace MyApp.Infrastructure.Repositories.PaymentDepositRepository
                     "Không tìm thấy hồ sơ đấu giá hoặc tài sản đấu giá tương ứng."
                 );
 
-            if (auctionDocument.StatusDeposit)
+            if (auctionDocument.StatusDeposit == 1)
                 throw new InvalidOperationException("Hồ sơ này đã nộp cọc, không thể nộp lại.");
 
             var auction = auctionDocument.AuctionAsset.Auction;
@@ -83,7 +83,7 @@ namespace MyApp.Infrastructure.Repositories.PaymentDepositRepository
 
         public async Task<bool> UpdateStatusDepositAsync(
             Guid auctionDocumentId,
-            bool statusDeposit,
+            int statusDeposit,
             decimal amount
         )
         {

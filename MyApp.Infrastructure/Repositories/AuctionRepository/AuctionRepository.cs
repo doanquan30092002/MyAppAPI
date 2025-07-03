@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
+using MyApp.Application.CQRS.Auction.CancelAuction.Commands;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Core.Entities;
@@ -73,6 +74,41 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             return auction.AuctionId;
         }
 
+        public async Task<bool> CancelAuctionAsync(CancelAuctionCommand command, Guid userId)
+        {
+            var auction = await FindAuctionByIdAsync(command.AuctionId);
+            if (auction == null)
+            {
+                throw new ValidationException("Phiên đấu giá không tồn tại.");
+            }
+
+            if (auction.Status != 1)
+            {
+                throw new ValidationException(
+                    "Chỉ được phép huỷ phiên đấu giá khi trạng thái là công khai."
+                );
+            }
+
+            string? cancelReasonFileUrl = auction.CancelReasonFile;
+            if (command.CancelReasonFile != null && command.CancelReasonFile.Length > 0)
+            {
+                cancelReasonFileUrl = await _uploadFileService.UploadAsync(
+                    command.CancelReasonFile
+                );
+            }
+
+            auction.CancelReason = command.CancelReason;
+            auction.CancelReasonFile = cancelReasonFileUrl ?? "No file uploaded";
+            auction.Status = 3;
+            auction.Updateable = false;
+            auction.UpdatedAt = DateTime.Now;
+            auction.UpdatedBy = userId;
+
+            _context.Auctions.Update(auction);
+
+            return true;
+        }
+
         public async Task<Auction?> FindAuctionByIdAsync(Guid auctionId)
         {
             return await _context.Auctions.FirstOrDefaultAsync(a => a.AuctionId == auctionId);
@@ -87,15 +123,26 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 a.AuctionId == command.AuctionId
             );
             if (auction == null)
-                throw new ValidationException("Auction không tồn tại.");
+                throw new ValidationException("Phiên đấu giá không tồn tại.");
 
             int oldStatus = auction.Status;
             int newStatus = command.Status;
 
-            if (newStatus == 1 && DateTime.Now > auction.AuctionEndDate)
-                throw new ValidationException(
-                    "Không thể công khai phiên đấu giá do ngày kết thúc phiên đấu giá đã qua."
-                );
+            if (newStatus == 1)
+            {
+                var account = await _context.Accounts.FirstOrDefaultAsync(a => a.UserId == userId);
+
+                if (account == null)
+                    throw new ValidationException("Tài khoản không tồn tại.");
+
+                if (account.RoleId != 4)
+                    throw new ValidationException("Bạn không có quyền công khai phiên đấu giá.");
+
+                if (DateTime.Now > auction.AuctionEndDate)
+                    throw new ValidationException(
+                        "Không thể công khai phiên đấu giá do ngày kết thúc phiên đấu giá đã qua."
+                    );
+            }
 
             if (oldStatus == 1)
             {
@@ -162,6 +209,39 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             auction.UpdatedAt = DateTime.Now;
             _context.Auctions.Update(auction);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<AuctionDocuments>> GetPaidOrDepositedDocumentsByAuctionIdAsync(
+            Guid auctionId
+        )
+        {
+            var auctionAssetIds = await _context
+                .AuctionAssets.Where(x => x.AuctionId == auctionId)
+                .Select(x => x.AuctionAssetsId)
+                .ToListAsync();
+
+            var documents = await _context
+                .AuctionDocuments.Where(doc =>
+                    auctionAssetIds.Contains(doc.AuctionAssetId)
+                    && (doc.StatusTicket == 1 || doc.StatusDeposit == 1)
+                )
+                .Include(doc => doc.User)
+                .Include(doc => doc.AuctionAsset)
+                .ToListAsync();
+
+            return documents;
+        }
+
+        public async Task<List<string>> GetEmailsByUserIdsAsync(List<Guid> userIds)
+        {
+            var emails = await _context
+                .Accounts.Where(acc =>
+                    userIds.Contains(acc.UserId) && !string.IsNullOrEmpty(acc.Email)
+                )
+                .Select(acc => acc.Email)
+                .ToListAsync();
+
+            return emails;
         }
     }
 }

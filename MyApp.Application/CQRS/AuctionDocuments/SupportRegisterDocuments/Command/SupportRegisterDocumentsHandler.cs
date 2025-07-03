@@ -79,9 +79,9 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
             {
                 UserId = userId,
                 AuctionAssetsIds = request.AuctionAssetsIds,
-                BankAccount = request.BankAccount,
-                BankAccountNumber = request.BankAccountNumber,
-                BankBranch = request.BankBranch,
+                BankAccount = request.BankAccount ?? "",
+                BankAccountNumber = request.BankAccountNumber ?? "",
+                BankBranch = request.BankBranch ?? "",
                 AuctionId = request.AuctionId,
             };
 

@@ -43,7 +43,8 @@ namespace MyApp.Api.Controllers.PaymentDepositController
             Guid auctionDocumentId = AuctionDocumentHelper.ExtractAuctionDocumentId(
                 request.Content
             );
-            bool statusDeposit = request.TransferType == "in" && request.TransferAmount > 0;
+            int statusDeposit =
+                (request.TransferType == "in" && request.TransferAmount > 0) ? 1 : 0;
 
             var command = new WebHookPaymentDepositCommand
             {
