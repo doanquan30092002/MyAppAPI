@@ -29,9 +29,7 @@ namespace MyApp.Application.CQRS.DetailAuctionDocument.Queries
         */
         public int StatusTicket { get; set; }
 
-        public bool StatusDeposit { get; set; }
-
-        public bool StatusRefundDeposit { get; set; }
+        public int StatusDeposit { get; set; }
 
         public int? NumericalOrder { get; set; }
         public string? Note { get; set; }

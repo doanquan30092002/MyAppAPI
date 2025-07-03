@@ -43,7 +43,6 @@ namespace MyApp.Infrastructure.Repositories.DetailAuctionDocument
                 CreateAtDeposit = auctionDocument.CreateAtDeposit,
                 StatusTicket = auctionDocument.StatusTicket,
                 StatusDeposit = auctionDocument.StatusDeposit,
-                StatusRefundDeposit = auctionDocument.StatusRefundDeposit,
                 NumericalOrder = auctionDocument.NumericalOrder,
                 Note = auctionDocument.Note,
             };
