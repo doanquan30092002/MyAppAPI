@@ -7,7 +7,7 @@ using MyApp.Application.CQRS.Auction.GetListAution.Querries;
 
 namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class GetListAuctionDocumentsController(IMediator _mediator) : ControllerBase
     {
@@ -33,7 +33,7 @@ namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
                         new ApiResponse<GetListAuctionDocumentsResponse>
                         {
                             Code = 404,
-                            Message = "List of auction documents not found.",
+                            Message = "Không tìm thấy danh sách hồ sơ đăng ký.",
                             Data = null,
                         }
                     );
@@ -43,7 +43,7 @@ namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
                     new ApiResponse<GetListAuctionDocumentsResponse>
                     {
                         Code = 200,
-                        Message = "Auction documents retrieved successfully.",
+                        Message = "Lấy danh sách hồ sơ thành công.",
                         Data = response,
                     }
                 );
@@ -55,8 +55,7 @@ namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
                     new ApiResponse<GetListAuctionDocumentsResponse>
                     {
                         Code = 500,
-                        Message =
-                            $"An error occurred while retrieving the auction documents: {ex.Message}",
+                        Message = "Xảy ra lỗi trong quá trình lấy danh sách hồ sơ.",
                         Data = null,
                     }
                 );
