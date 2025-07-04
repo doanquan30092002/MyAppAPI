@@ -25,16 +25,14 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
         {
             try
             {
-                // Initialize query with includes
                 var query = context
-                    .AuctionDocuments.AsNoTracking()
-                    .Include(ad => ad.User)
-                    .Include(ad => ad.AuctionAsset)
+                    .AuctionDocuments.Include(a => a.User)
+                    .Include(a => a.AuctionAsset)
                     .AsQueryable();
 
-                //query = query.Where(ad =>
-                //    ad.AuctionAsset.AuctionId == getListAuctionDocumentsRequest.AuctionId
-                //);
+                query = query.Where(ad =>
+                    ad.AuctionAsset.AuctionId == getListAuctionDocumentsRequest.AuctionId
+                );
 
                 // Filter by CitizenIdentification if provided
                 if (!string.IsNullOrEmpty(getListAuctionDocumentsRequest.CitizenIdentification))

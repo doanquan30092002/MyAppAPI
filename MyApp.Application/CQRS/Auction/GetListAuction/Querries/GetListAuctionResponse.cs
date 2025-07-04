@@ -12,6 +12,8 @@
         public Guid AuctionId { get; set; }
         public string AuctionName { get; set; }
         public int CategoryId { get; set; }
+
+        public int Status { get; set; }
         public DateTime RegisterOpenDate { get; set; }
         public DateTime RegisterEndDate { get; set; }
         public DateTime AuctionStartDate { get; set; }

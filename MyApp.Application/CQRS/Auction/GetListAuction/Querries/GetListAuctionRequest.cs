@@ -16,6 +16,8 @@ namespace MyApp.Application.CQRS.Auction.GetListAution.Querries
 
         public int? CategoryId { get; set; }
 
+        public int? Status { get; set; }
+
         public DateTime? RegisterOpenDate { get; set; }
         public DateTime? RegisterEndDate { get; set; }
 
