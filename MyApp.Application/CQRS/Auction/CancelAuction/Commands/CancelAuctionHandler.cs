@@ -10,7 +10,7 @@ using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Application.Interfaces.IAuctionRepository;
-using MyApp.Application.Interfaces.INofiticationsRepository;
+using MyApp.Application.Interfaces.INotificationsRepository;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Core.Entities;
 
