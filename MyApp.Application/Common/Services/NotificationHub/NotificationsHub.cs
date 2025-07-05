@@ -23,5 +23,10 @@ namespace MyApp.Application.Common.Services.NotificationHub
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
             await base.OnDisconnectedAsync(exception);
         }
+
+        public async Task JoinGroup(string groupName)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        }
     }
 }
