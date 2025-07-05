@@ -14,7 +14,7 @@ using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
-using MyApp.Application.Interfaces.INofiticationsRepository;
+using MyApp.Application.Interfaces.INotificationsRepository;
 using MyApp.Application.Interfaces.IPaymentDeposit;
 using MyApp.Application.Interfaces.IRefundRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
