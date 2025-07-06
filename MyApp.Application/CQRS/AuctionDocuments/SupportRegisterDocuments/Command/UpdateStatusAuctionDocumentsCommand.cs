@@ -13,7 +13,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
         /// <summary>
         /// Id của hồ sơ đấu giá (bắt buộc)
         /// </summary>
-        [Required(ErrorMessage = "Id hồ sơ đấu giá là bắt buộc.")]
+        [Required(ErrorMessage = "Mã hồ sơ đấu giá là bắt buộc.")]
         public Guid AuctionDocumentId { get; set; }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
         /// <summary>
         /// Trạng thái đặt cọc (bắt buộc)
         /// </summary>
-        [Required(ErrorMessage = "Trạng thái đặt cọc là bắt buộc.")]
-        public int StatusDeposit { get; set; }
+        //[Required(ErrorMessage = "Trạng thái đặt cọc là bắt buộc.")]
+        //public int StatusDeposit { get; set; }
     }
 }

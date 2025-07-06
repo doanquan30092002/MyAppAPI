@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using MimeKit;
+using MyApp.Application.Common.Utils;
 using MyApp.Application.CQRS.ForgotPassword.Enums;
 using MyApp.Core.Models;
 
@@ -32,12 +33,14 @@ namespace MyApp.Application.CQRS.ForgotPassword.Service
             var otp = new Random().Next(100000, 999999).ToString();
             _cache.Set($"otp_{to}", otp, _otpExpire);
 
+            var htmlBody = GenTemplate.GenerateOtpEmailTemplate(otp, _otpExpire.TotalMinutes);
+
             var message = new MailMessage
             {
                 From = new MailAddress(_emailSettings.SenderEmail, _emailSettings.SenderName),
                 Subject = "Mã xác thực OTP",
-                Body = messageTemplate ?? $"Mã OTP của bạn là: {otp}",
-                IsBodyHtml = false,
+                Body = htmlBody,
+                IsBodyHtml = true,
             };
             message.To.Add(to);
 
