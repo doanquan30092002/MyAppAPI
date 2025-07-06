@@ -40,9 +40,7 @@ namespace MyApp.Application.CQRS.ForgotPassword.Commands
 
             if (!_otpServices.TryGetValue(request.Channel, out var otpService))
             {
-                throw new NotSupportedException(
-                    $"OTP channel '{request.Channel}' is not supported."
-                );
+                throw new NotSupportedException($"Kênh gửi OTP '{request.Channel}' không hỗ trợ.");
             }
 
             var result = await otpService.SendOtpAsync(request.Contact);
