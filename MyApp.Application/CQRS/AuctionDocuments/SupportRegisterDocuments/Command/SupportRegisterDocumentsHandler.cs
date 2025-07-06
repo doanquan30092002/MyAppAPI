@@ -66,7 +66,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
             );
             if (invalidIds.Count > 0)
                 throw new ValidationException(
-                    $"Các AuctionAssetId sau không tồn tại: {string.Join(", ", invalidIds)}"
+                    $"Các tài sản đấu giá sau không tồn tại: {string.Join(", ", invalidIds)}"
                 );
 
             var now = DateTime.Now;

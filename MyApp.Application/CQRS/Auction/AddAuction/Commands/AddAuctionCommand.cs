@@ -35,7 +35,7 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
         public int Status { get; } = 0;
         public string? WinnerData { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "CategoryId là bắt buộc.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Loại tài sản là bắt buộc.")]
         public int CategoryId { get; set; }
         public IFormFile AuctionAssetFile { get; set; }
 
@@ -57,10 +57,17 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
                 );
             }
 
-            if (RegisterEndDate >= AuctionStartDate)
+            if (RegisterEndDate <= RegisterOpenDate)
             {
                 yield return new ValidationResult(
-                    "Ngày kết thúc đăng ký phải trước ngày bắt đầu đấu giá.",
+                    "Ngày kết thúc đăng ký phải sau ngày mở đăng ký.",
+                    new[] { "RegisterOpenDate", "RegisterEndDate" }
+                );
+            }
+            if ((AuctionStartDate - RegisterEndDate).TotalDays < 3)
+            {
+                yield return new ValidationResult(
+                    "Ngày kết thúc đăng ký phải trước ngày bắt đầu đấu giá ít nhất 3 ngày.",
                     new[] { "RegisterEndDate", "AuctionStartDate" }
                 );
             }
