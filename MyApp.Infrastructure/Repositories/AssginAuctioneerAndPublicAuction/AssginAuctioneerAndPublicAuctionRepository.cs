@@ -14,7 +14,7 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
             this._context = context;
         }
 
-        public async Task<(bool, string)> AssignAuctioneerToAuctionAndPublicAuctionAsync(
+        public async Task<(bool, string, string)> AssignAuctioneerToAuctionAndPublicAuctionAsync(
             Guid auctionId,
             Guid auctioneerId,
             string userId
@@ -32,11 +32,15 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
                 auction.UpdatedBy = Guid.Parse(userId);
                 _context.Auctions.Update(auction);
                 await _context.SaveChangesAsync();
-                return (true, auction.AuctionEndDate.ToString()); // successfully assigned auctioneer to auction
+                return (
+                    true,
+                    auction.AuctionEndDate.ToString(),
+                    auction.AuctionStartDate.ToString()
+                ); // successfully assigned auctioneer to auction
             }
             catch (Exception)
             {
-                return (false, null); // failed to assign auctioneer to auction
+                return (false, null, null); // failed to assign auctioneer to auction
             }
         }
 
@@ -60,6 +64,39 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
                 return true; // auctioneer is assigned to another auction
             }
             return false; // auctioneer is not assigned to another auction
+        }
+
+        public async Task GenerateNumbericalOrderAsync(Guid auctionId)
+        {
+            // Lấy tất cả hồ sơ trong phiên đấu
+            var documents = await _context
+                .AuctionDocuments.Include(ad => ad.AuctionAsset)
+                .Where(ad => ad.AuctionAsset.AuctionId == auctionId)
+                .Where(ad => ad.StatusTicket == 2) // Chỉ lấy những hồ sơ đã ký phiếu đăng ký hồ sơ
+                .Where(ad => ad.StatusDeposit == 1) // Chỉ lấy những hồ sơ đã cọc
+                .ToListAsync();
+
+            // Nhóm theo UserId để đảm bảo 1 user chỉ được đánh 1 STT trong 1 phiên
+            var groupedByUser = documents.GroupBy(doc => doc.UserId).ToList();
+
+            int stt = 1;
+
+            foreach (var group in groupedByUser)
+            {
+                var userDocs = group.ToList();
+
+                // Nếu tất cả các hồ sơ của user này chưa có STT
+                if (userDocs.All(d => d.NumericalOrder == null || d.NumericalOrder == 0))
+                {
+                    foreach (var doc in userDocs)
+                    {
+                        doc.NumericalOrder = stt;
+                    }
+                    stt++;
+                }
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

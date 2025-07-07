@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Amazon.S3;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
@@ -13,11 +8,7 @@ using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
 using MyApp.Application.Interfaces.IJwtHelper;
-using MyApp.Application.Interfaces.INofiticationsRepository;
-using MyApp.Application.Interfaces.IRefundRepository;
-using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.JobBackgroud.AuctionJob;
-using MyApp.Core.Entities;
 using MyApp.Core.Models;
 
 namespace MyApp.Application
@@ -61,6 +52,7 @@ namespace MyApp.Application
             services.AddScoped<IJwtHelper, JwtHelper>();
 
             services.AddTransient<SetAuctionUpdateableFalse>();
+            services.AddTransient<GenerateNumericalOrder>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
             services.AddSingleton(resolver =>

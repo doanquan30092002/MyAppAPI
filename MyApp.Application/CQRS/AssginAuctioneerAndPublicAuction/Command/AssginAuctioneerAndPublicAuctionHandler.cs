@@ -14,20 +14,22 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
             AssginAuctioneerAndPublicAuctionResponse
         >
     {
-        private readonly IAssginAuctioneerAndPublicAuctionRepository _assginAuctioneerAndPublicAuctionRepository;
+        private readonly IAssginAuctioneerAndPublicAuctionRepository _repository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SetAuctionUpdateableFalse _setAuctionUpdateableFalse;
+        private readonly GenerateNumericalOrder _generateNumericalOrder;
 
         public AssginAuctioneerAndPublicAuctionHandler(
-            IAssginAuctioneerAndPublicAuctionRepository assginAuctioneerAndPublicAuctionRepository,
+            IAssginAuctioneerAndPublicAuctionRepository repository,
             IHttpContextAccessor httpContextAccessor,
-            SetAuctionUpdateableFalse setAuctionUpdateableFalse
+            SetAuctionUpdateableFalse setAuctionUpdateableFalse,
+            GenerateNumericalOrder generateNumericalOrder
         )
         {
-            _assginAuctioneerAndPublicAuctionRepository =
-                assginAuctioneerAndPublicAuctionRepository;
+            _repository = repository;
             _httpContextAccessor = httpContextAccessor;
             _setAuctionUpdateableFalse = setAuctionUpdateableFalse;
+            _generateNumericalOrder = generateNumericalOrder;
         }
 
         public async Task<AssginAuctioneerAndPublicAuctionResponse> Handle(
@@ -40,7 +42,7 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                 ?.Value;
             // check 1 auctioneer cannot be assigned to 2 auctions at the same time
             var checkAuctioneerAssigned =
-                await _assginAuctioneerAndPublicAuctionRepository.CheckAuctioneerAssignedToAnotherAuctionAsync(
+                await _repository.CheckAuctioneerAssignedToAnotherAuctionAsync(
                     request.Auctioneer,
                     request.AuctionId
                 );
@@ -53,20 +55,19 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                 };
             }
             // assign auctioneer to auction and public auction
-            var result =
-                await _assginAuctioneerAndPublicAuctionRepository.AssignAuctioneerToAuctionAndPublicAuctionAsync(
-                    request.AuctionId,
-                    request.Auctioneer,
-                    userId
-                );
+            var result = await _repository.AssignAuctioneerToAuctionAndPublicAuctionAsync(
+                request.AuctionId,
+                request.Auctioneer,
+                userId
+            );
             if (result.Item1)
             {
-                var delay = DateTime.Parse(result.Item2) - DateTime.Now;
-                if (delay > TimeSpan.Zero)
+                var delaySetAuctionUpdateableFalse = DateTime.Parse(result.Item2) - DateTime.Now;
+                if (delaySetAuctionUpdateableFalse > TimeSpan.Zero)
                 {
                     BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
                         job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
-                        delay
+                        delaySetAuctionUpdateableFalse
                     );
                 }
                 else
@@ -74,6 +75,18 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                     await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(
                         request.AuctionId
                     );
+                }
+                var delayGenarateNumbericalOrder = DateTime.Parse(result.Item3) - DateTime.Now;
+                if (delayGenarateNumbericalOrder > TimeSpan.Zero)
+                {
+                    BackgroundJob.Schedule<GenerateNumericalOrder>(
+                        job => job.GenerateNumericalOrderAsync(request.AuctionId),
+                        delayGenarateNumbericalOrder
+                    );
+                }
+                else
+                {
+                    await _generateNumericalOrder.GenerateNumericalOrderAsync(request.AuctionId);
                 }
                 return new AssginAuctioneerAndPublicAuctionResponse
                 {

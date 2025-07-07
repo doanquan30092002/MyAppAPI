@@ -6,10 +6,11 @@
         Task<bool> CheckAuctioneerAssignedToAnotherAuctionAsync(Guid auctioneerId, Guid auctionId);
 
         // assign auctioneer to auction and public auction
-        Task<(bool, string)> AssignAuctioneerToAuctionAndPublicAuctionAsync(
+        Task<(bool, string, string)> AssignAuctioneerToAuctionAndPublicAuctionAsync(
             Guid auctionId,
             Guid auctioneerId,
             string userId
         );
+        Task GenerateNumbericalOrderAsync(Guid auctionId);
     }
 }
