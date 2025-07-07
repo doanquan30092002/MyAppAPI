@@ -61,10 +61,17 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                 );
             }
 
-            if (RegisterEndDate >= AuctionStartDate)
+            if (RegisterEndDate <= RegisterOpenDate)
             {
                 yield return new ValidationResult(
-                    "Ngày kết thúc đăng ký phải trước ngày bắt đầu đấu giá.",
+                    "Ngày kết thúc đăng ký phải sau ngày mở đăng ký.",
+                    new[] { "RegisterOpenDate", "RegisterEndDate" }
+                );
+            }
+            if ((AuctionStartDate - RegisterEndDate).TotalDays < 3)
+            {
+                yield return new ValidationResult(
+                    "Ngày kết thúc đăng ký phải trước ngày bắt đầu đấu giá ít nhất 3 ngày.",
                     new[] { "RegisterEndDate", "AuctionStartDate" }
                 );
             }

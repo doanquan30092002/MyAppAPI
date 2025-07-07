@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
-using MyApp.Application.Interfaces.INofiticationsRepository;
+using MyApp.Application.Interfaces.INotificationsRepository;
 using MyApp.Application.Interfaces.IRefundRepository;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Core.Entities;

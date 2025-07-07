@@ -26,7 +26,7 @@ namespace MyApp.Api.Controllers.GetListAuctionController
                         new ApiResponse<GetAuctionByIdResponse>
                         {
                             Code = 400,
-                            Message = "List auction not found.",
+                            Message = "Không có phiên đấu giá nào được tìm thấy",
                             Data = null,
                         }
                     );
@@ -36,7 +36,7 @@ namespace MyApp.Api.Controllers.GetListAuctionController
                     new ApiResponse<GetListAuctionResponse>
                     {
                         Code = 200,
-                        Message = "Auction retrieved successfully.",
+                        Message = "Lấy danh sách phiên đấu giá thành công",
                         Data = response,
                     }
                 );
@@ -48,7 +48,7 @@ namespace MyApp.Api.Controllers.GetListAuctionController
                     new ApiResponse<GetAuctionByIdResponse>
                     {
                         Code = 500,
-                        Message = $"An error occurred while retrieving the auction: {ex.Message}",
+                        Message = " Lỗi trong quá trình lấy danh sách phiên đấu giá",
                         Data = null,
                     }
                 );

@@ -6,11 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Application.Interfaces.IAuctionRepository;
-using MyApp.Application.Interfaces.INofiticationsRepository;
+using MyApp.Application.Interfaces.INotificationsRepository;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Core.Entities;
 
@@ -23,13 +24,15 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEnumerable<ISendMessage> _sendMessages;
         private readonly INotificationsRepository _notificationRepository;
+        private readonly INotificationSender _notificationSender;
 
         public CancelAuctionHandler(
             IAuctionRepository auctionRepository,
             IHttpContextAccessor httpContextAccessor,
             IUnitOfWork unitOfWork,
             IEnumerable<ISendMessage> sendMessages,
-            INotificationsRepository notificationRepository
+            INotificationsRepository notificationRepository,
+            INotificationSender notificationSender
         )
         {
             _auctionRepository = auctionRepository;
@@ -37,6 +40,7 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
             _unitOfWork = unitOfWork;
             _sendMessages = sendMessages;
             _notificationRepository = notificationRepository;
+            _notificationSender = notificationSender;
         }
 
         public async Task<bool> Handle(
@@ -100,7 +104,9 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
                     await _notificationRepository.SaveNotificationsAsync(notifications);
                 }
 
-                // 7. Gửi email
+                await _unitOfWork.CommitAsync();
+
+                // send email
                 var emailSender = _sendMessages.FirstOrDefault(x =>
                     x.Channel == SendMessageChannel.Email
                 );
@@ -113,8 +119,16 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
                     await emailSender.SendAsync("", subject, content, emailList);
                 }
 
-                // 8. Commit transaction
-                await _unitOfWork.CommitAsync();
+                // send signalR
+                await _notificationSender.SendToUsersAsync(
+                    userIds,
+                    new
+                    {
+                        Title = "Thông báo từ phiên đấu giá",
+                        Content = "Hủy phiên đấu giá " + request.AuctionId,
+                        Time = DateTime.UtcNow,
+                    }
+                );
 
                 return true;
             }

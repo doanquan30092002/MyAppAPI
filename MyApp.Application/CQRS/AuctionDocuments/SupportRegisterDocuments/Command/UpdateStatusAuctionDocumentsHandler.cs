@@ -52,7 +52,6 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
             var updateRequest = new UpdateStatusAuctionDocumentRequest
             {
                 StatusTicket = request.StatusTicket,
-                StatusDeposit = request.StatusDeposit,
             };
 
             var result = await _supportRegisterDocuments.UpdateAuctionDocumentStatusAsync(

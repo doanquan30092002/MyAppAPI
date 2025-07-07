@@ -44,6 +44,11 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                     );
                 }
 
+                if (getListAuctionRequest.Status.HasValue)
+                {
+                    query = query.Where(a => a.Status == getListAuctionRequest.Status.Value);
+                }
+
                 // Filter by RegisterOpenDate and RegisterEndDate
                 if (
                     getListAuctionRequest.RegisterOpenDate.HasValue
@@ -100,6 +105,12 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                 {
                     switch (getListAuctionRequest.SortBy.ToLower())
                     {
+                        case "status":
+                            query = getListAuctionRequest.IsAscending
+                                ? query.OrderBy(a => a.Status)
+                                : query.OrderByDescending(a => a.Status);
+                            break;
+
                         case "auction_name":
                             query = getListAuctionRequest.IsAscending
                                 ? query.OrderBy(a => a.AuctionName)
@@ -148,6 +159,7 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                         AuctionId = a.AuctionId,
                         AuctionName = a.AuctionName,
                         CategoryId = a.CategoryId,
+                        Status = a.Status,
                         RegisterOpenDate = a.RegisterOpenDate,
                         RegisterEndDate = a.RegisterEndDate,
                         AuctionStartDate = a.AuctionStartDate,

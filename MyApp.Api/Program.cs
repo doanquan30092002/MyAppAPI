@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp.Api;
 using MyApp.Application.Common.Response;
+using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.CQRS.PaymentDeposit.RealTimeStatusDeposit;
 using MyApp.Application.Exceptions;
 using MyApp.Infrastructure.Services.Realtime;
@@ -182,4 +183,5 @@ app.UseStaticFiles(
 app.MapControllers();
 app.MapHub<AuctionDepositHub>("/hubs/auctionDeposit");
 app.MapHub<NotificationHub>("/hub/notification");
+app.MapHub<NotificationsHub>("/hub/notifications");
 app.Run();
