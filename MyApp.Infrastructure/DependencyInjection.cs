@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
+using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
@@ -20,6 +21,7 @@ using MyApp.Application.Interfaces.IRefundRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
+using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Sender;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Service;
@@ -38,6 +40,7 @@ using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
+using MyApp.Infrastructure.Repositories.GenarateNumbericalOrder;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetAuctioneers;
 using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
@@ -46,6 +49,7 @@ using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.NotificationsRepository;
 using MyApp.Infrastructure.Repositories.PaymentDepositRepository;
+using MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm;
 using MyApp.Infrastructure.Repositories.RefundRepository;
 using MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
@@ -116,6 +120,14 @@ namespace MyApp.Infrastructure
 
             services.AddScoped<IRefundRepository, RefundRepository>();
             services.AddScoped<IDetailAuctionDocumentRepository, DetailAuctionDocumentRepository>();
+            services.AddScoped<
+                IReceiveAuctionRegistrationFormRepository,
+                ReceiveAuctionRegistrationFormRepository
+            >();
+            services.AddScoped<
+                IGenarateNumbericalOrderRepository,
+                GenarateNumbericalOrderRepository
+            >();
 
             return services;
         }

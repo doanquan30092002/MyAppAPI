@@ -81,5 +81,15 @@
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
         public const string GET_AUCTION_DOCUMENT_SUCCESS = "Lấy thông tin thành công";
         #endregion
+        #region ReceiveAuctionRegistrationForm
+        public const string RECEIVE_AUCTION_REGISTRATION_FORM_SUCCESS =
+            "Nhận hồ sơ đăng ký tham gia đấu giá thành công";
+        public const string RECEIVE_AUCTION_REGISTRATION_FORM_FAIL =
+            "Nhận hồ sơ đăng ký tham gia đấu giá thất bại";
+        #endregion
+        #region GenarateNumbericalOrder
+        public const string GENARATE_NUMBERICAL_ORDER_SUCCESS = "Tạo số thứ tự thành công";
+        public const string GENARATE_NUMBERICAL_ORDER_FAIL = "Tạo số thứ tự thất bại";
+        #endregion
     }
 }
