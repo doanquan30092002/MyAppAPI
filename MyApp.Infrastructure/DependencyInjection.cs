@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
+using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
@@ -39,6 +40,7 @@ using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
+using MyApp.Infrastructure.Repositories.GenarateNumbericalOrder;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetAuctioneers;
 using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
@@ -121,6 +123,10 @@ namespace MyApp.Infrastructure
             services.AddScoped<
                 IReceiveAuctionRegistrationFormRepository,
                 ReceiveAuctionRegistrationFormRepository
+            >();
+            services.AddScoped<
+                IGenarateNumbericalOrderRepository,
+                GenarateNumbericalOrderRepository
             >();
 
             return services;

@@ -87,5 +87,9 @@
         public const string RECEIVE_AUCTION_REGISTRATION_FORM_FAIL =
             "Nhận hồ sơ đăng ký tham gia đấu giá thất bại";
         #endregion
+        #region GenarateNumbericalOrder
+        public const string GENARATE_NUMBERICAL_ORDER_SUCCESS = "Tạo số thứ tự thành công";
+        public const string GENARATE_NUMBERICAL_ORDER_FAIL = "Tạo số thứ tự thất bại";
+        #endregion
     }
 }
