@@ -76,18 +76,18 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                         request.AuctionId
                     );
                 }
-                var delayGenarateNumbericalOrder = DateTime.Parse(result.Item3) - DateTime.Now;
-                if (delayGenarateNumbericalOrder > TimeSpan.Zero)
-                {
-                    BackgroundJob.Schedule<GenerateNumericalOrder>(
-                        job => job.GenerateNumericalOrderAsync(request.AuctionId),
-                        delayGenarateNumbericalOrder
-                    );
-                }
-                else
-                {
-                    await _generateNumericalOrder.GenerateNumericalOrderAsync(request.AuctionId);
-                }
+                //var delayGenarateNumbericalOrder = DateTime.Parse(result.Item3) - DateTime.Now;
+                //if (delayGenarateNumbericalOrder > TimeSpan.Zero)
+                //{
+                //    BackgroundJob.Schedule<GenerateNumericalOrder>(
+                //        job => job.GenerateNumericalOrderAsync(request.AuctionId),
+                //        delayGenarateNumbericalOrder
+                //    );
+                //}
+                //else
+                //{
+                //    await _generateNumericalOrder.GenerateNumericalOrderAsync(request.AuctionId);
+                //}
                 return new AssginAuctioneerAndPublicAuctionResponse
                 {
                     Code = 200,
