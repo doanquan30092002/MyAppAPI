@@ -20,6 +20,7 @@ using MyApp.Application.Interfaces.IRefundRepository;
 using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
+using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Sender;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Service;
@@ -46,6 +47,7 @@ using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.NotificationsRepository;
 using MyApp.Infrastructure.Repositories.PaymentDepositRepository;
+using MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm;
 using MyApp.Infrastructure.Repositories.RefundRepository;
 using MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository;
 using MyApp.Infrastructure.Repositories.SearchUserAttendance;
@@ -116,6 +118,10 @@ namespace MyApp.Infrastructure
 
             services.AddScoped<IRefundRepository, RefundRepository>();
             services.AddScoped<IDetailAuctionDocumentRepository, DetailAuctionDocumentRepository>();
+            services.AddScoped<
+                IReceiveAuctionRegistrationFormRepository,
+                ReceiveAuctionRegistrationFormRepository
+            >();
 
             return services;
         }
