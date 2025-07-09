@@ -16,6 +16,9 @@ namespace MyApp.Application.CQRS.Auction.GetListAution.Querries
 
         public string? TagName { get; set; }
 
+        public int? StatusTicket { get; set; }
+        public int? StatusDeposit { get; set; }
+
         public string? SortBy { get; set; }
 
         public bool IsAscending { get; set; } = true;

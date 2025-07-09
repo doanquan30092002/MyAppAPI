@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Auction.GetListAuction.Querries;
 using MyApp.Application.CQRS.Auction.GetListAution.Querries;
@@ -33,7 +34,7 @@ namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
                         new ApiResponse<GetListAuctionDocumentsResponse>
                         {
                             Code = 404,
-                            Message = "Không tìm thấy danh sách hồ sơ đăng ký.",
+                            Message = Message.NOT_FOUND_LIST_AUCTION_DOCUMENT,
                             Data = null,
                         }
                     );
@@ -43,7 +44,7 @@ namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
                     new ApiResponse<GetListAuctionDocumentsResponse>
                     {
                         Code = 200,
-                        Message = "Lấy danh sách hồ sơ thành công.",
+                        Message = Message.GET_AUCTION_DOCUMENT_SUCCESS,
                         Data = response,
                     }
                 );
@@ -55,7 +56,7 @@ namespace MyApp.Api.Controllers.GetListAuctionDocumentsController
                     new ApiResponse<GetListAuctionDocumentsResponse>
                     {
                         Code = 500,
-                        Message = "Xảy ra lỗi trong quá trình lấy danh sách hồ sơ.",
+                        Message = Message.GET_LIST_AUCTION_DOCUMENT_FAIL,
                         Data = null,
                     }
                 );

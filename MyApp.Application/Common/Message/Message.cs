@@ -91,5 +91,12 @@
         public const string GENARATE_NUMBERICAL_ORDER_SUCCESS = "Tạo số thứ tự thành công";
         public const string GENARATE_NUMBERICAL_ORDER_FAIL = "Tạo số thứ tự thất bại";
         #endregion
+        #region GetListAuctionsDocument
+        public const string GET_LIST_AUCTION_DOCUMENT_FAIL =
+            "Đã xảy ra lỗi khi truy xuất danh sách hồ sơ đấu giá.";
+        public const string NOT_FOUND_LIST_AUCTION_DOCUMENT =
+            "Không tìm thấy danh sách hồ sơ đăng ký.";
+        public const string GET_LIST_AUCTION_SUCESS = "Lấy danh sách hồ sơ thành công.";
+        #endregion
     }
 }
