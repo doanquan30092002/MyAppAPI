@@ -81,5 +81,12 @@
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
         public const string GET_AUCTION_DOCUMENT_SUCCESS = "Lấy thông tin thành công";
         #endregion
+
+        #region GetListAuctionsDocument
+        public const string GET_LIST_AUCTION_DOCUMENT_FAIL = "Đã xảy ra lỗi khi truy xuất danh sách hồ sơ đấu giá."
+        public const string NOT_FOUND_LIST_AUCTION_DOCUMENT = "Không tìm thấy danh sách hồ sơ đăng ký.";
+        public const string GET_LIST_AUCTION_SUCESS = "Lấy danh sách hồ sơ thành công.";    
+        #endregion
+
     }
 }

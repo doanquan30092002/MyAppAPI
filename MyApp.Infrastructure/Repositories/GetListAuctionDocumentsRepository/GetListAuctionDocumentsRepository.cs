@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.Auction.GetListAuction.Querries;
 using MyApp.Application.CQRS.Auction.GetListAution.Querries;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
@@ -63,6 +64,22 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                         ad.AuctionAsset != null
                         && ad.AuctionAsset.TagName.ToLower()
                             .Contains(getListAuctionDocumentsRequest.TagName.ToLower())
+                    );
+                }
+
+                // Filter by StatusTicket if provided
+                if (getListAuctionDocumentsRequest.StatusTicket.HasValue)
+                {
+                    query = query.Where(ad =>
+                        ad.StatusTicket == getListAuctionDocumentsRequest.StatusTicket.Value
+                    );
+                }
+
+                // Filter by StatusDeposit if provided
+                if (getListAuctionDocumentsRequest.StatusDeposit.HasValue)
+                {
+                    query = query.Where(ad =>
+                        ad.StatusDeposit == getListAuctionDocumentsRequest.StatusDeposit.Value
                     );
                 }
 
@@ -164,7 +181,7 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
             }
             catch (Exception ex)
             {
-                throw new Exception("Đã xảy ra lỗi khi truy xuất danh sách hồ sơ đấu giá.", ex);
+                throw new Exception(Message.GET_LIST_AUCTION_DOCUMENT_FAIL, ex);
             }
         }
     }
