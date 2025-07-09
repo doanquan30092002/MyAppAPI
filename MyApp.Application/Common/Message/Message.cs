@@ -98,5 +98,10 @@
             "Không tìm thấy danh sách hồ sơ đăng ký.";
         public const string GET_LIST_AUCTION_SUCESS = "Lấy danh sách hồ sơ thành công.";
         #endregion
+
+        #region UpdateDepositStatus
+        public const string UPDATE_DEPOSIT_STATUS_SUCESS = "Cập nhật trạng thái cọc thành công";
+        public const string UPDATE_DEPOSIT_STATUS_FAIL = "Cập nhật trạng thái cọc thất bại";
+        #endregion
     }
 }
