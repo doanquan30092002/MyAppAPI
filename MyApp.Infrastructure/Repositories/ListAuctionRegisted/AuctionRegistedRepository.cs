@@ -57,10 +57,7 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
                     NumberRoundMax = a.NumberRoundMax,
                     Status = a.Status,
                     AuctionAssets = _context
-                        .AuctionAssets.Where(aa =>
-                            aa.AuctionId == a.AuctionId
-                            && registeredAssetIds.Contains(aa.AuctionAssetsId)
-                        )
+                        .AuctionAssets.Where(aa => aa.AuctionId == a.AuctionId)
                         .Select(aa => new AuctionAsset
                         {
                             AuctionAssetsId = aa.AuctionAssetsId,
