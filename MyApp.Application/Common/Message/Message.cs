@@ -103,5 +103,10 @@
         public const string UPDATE_DEPOSIT_STATUS_SUCESS = "Cập nhật trạng thái cọc thành công";
         public const string UPDATE_DEPOSIT_STATUS_FAIL = "Cập nhật trạng thái cọc thất bại";
         #endregion
+        #region GetListAuctionRegisted
+        public const string GET_LIST_AUCTION_REGISTED_SUCCESS =
+            "Lấy danh sách đấu giá đã đăng ký thành công";
+        public const string GET_LIST_AUCTION_REGISTED_NOT_EXSIT = "Không có đấu giá nào đã đăng ký";
+        #endregion
     }
 }
