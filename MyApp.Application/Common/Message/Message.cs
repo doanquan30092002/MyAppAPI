@@ -108,5 +108,10 @@
             "Lấy danh sách đấu giá đã đăng ký thành công";
         public const string GET_LIST_AUCTION_REGISTED_NOT_EXSIT = "Không có đấu giá nào đã đăng ký";
         #endregion
+        #region AuctionDocumentRegisted
+        public const string GET_AUCTION_DOCUMENT_REGISTED_SUCCESS =
+            "Lấy thông tin hồ sơ đăng ký thành công";
+        public const string GET_AUCTION_DOCUMENT_REGISTED_NOT_EXSIT = "Không có hồ sơ đăng ký nào";
+        #endregion
     }
 }
