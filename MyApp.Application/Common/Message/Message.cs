@@ -106,12 +106,19 @@
         #region GetListAuctionRegisted
         public const string GET_LIST_AUCTION_REGISTED_SUCCESS =
             "Lấy danh sách đấu giá đã đăng ký thành công";
-        public const string GET_LIST_AUCTION_REGISTED_NOT_EXSIT = "Không có đấu giá nào đã đăng ký";
+        public const string GET_LIST_AUCTION_REGISTED_NOT_EXIST = "Không có đấu giá nào đã đăng ký";
         #endregion
         #region AuctionDocumentRegisted
         public const string GET_AUCTION_DOCUMENT_REGISTED_SUCCESS =
             "Lấy thông tin hồ sơ đăng ký thành công";
-        public const string GET_AUCTION_DOCUMENT_REGISTED_NOT_EXSIT = "Không có hồ sơ đăng ký nào";
+        public const string GET_AUCTION_DOCUMENT_REGISTED_NOT_EXIST = "Không có hồ sơ đăng ký nào";
+        #endregion
+        #region UserRegisteredAuction
+        public const string GET_USER_REGISTERED_AUCTION_SUCCESS =
+            "Lấy thông tin người dùng đã đăng ký thành công";
+        public const string USER_NOT_REGISTERED_OR_INELIGIBLE_PARTICIPATE =
+            "Người dùng chưa đăng ký hoặc không đủ điều kiện tham gia đấu giá";
+        public const string CITIZEN_NOT_EXIST = "Căn cước công dân không tồn tại trong hệ thống";
         #endregion
     }
 }

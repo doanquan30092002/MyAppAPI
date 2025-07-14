@@ -23,7 +23,7 @@ namespace MyApp.Api.Controllers.ListAuctionRegisted
                     Code = response != null ? 200 : 404,
                     Message = response != null
                         ? Message.GET_LIST_AUCTION_REGISTED_SUCCESS
-                        : Message.GET_LIST_AUCTION_REGISTED_NOT_EXSIT,
+                        : Message.GET_LIST_AUCTION_REGISTED_NOT_EXIST,
                     Data = response != null ? response : null,
                 }
             );

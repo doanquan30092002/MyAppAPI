@@ -32,6 +32,7 @@ using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Application.Interfaces.UpdateAccount.Repository;
 using MyApp.Application.Interfaces.UpdateAccount.Service;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
+using MyApp.Application.Interfaces.UserRegisteredAuction;
 using MyApp.Core.Entities;
 using MyApp.Core.Options;
 using MyApp.Infrastructure.Data;
@@ -63,6 +64,7 @@ using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
 using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
 using MyApp.Infrastructure.Repositories.UpdateDepositStatusRepository;
 using MyApp.Infrastructure.Repositories.UpdateExpiredProfile;
+using MyApp.Infrastructure.Repositories.UserRegisteredAuction;
 using MyApp.Infrastructure.Services.RegisterAuctionDocument.Sender;
 using MyApp.Infrastructure.Services.RegisterAuctionDocument.Service;
 using MyApp.Infrastructure.Services.UpdateAccount;
@@ -140,6 +142,7 @@ namespace MyApp.Infrastructure
                 IAuctionDocumentRegistedRepository,
                 AuctionDocumentRegistedRepository
             >();
+            services.AddScoped<IUserRegisteredAuctionRepository, UserRegisteredAuctionRepository>();
 
             return services;
         }

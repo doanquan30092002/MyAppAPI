@@ -24,7 +24,7 @@ namespace MyApp.Api.Controllers.AuctionDocumentRegisted
                     Code = response != null ? 200 : 404,
                     Message = response != null
                         ? Message.GET_AUCTION_DOCUMENT_REGISTED_SUCCESS
-                        : Message.GET_AUCTION_DOCUMENT_REGISTED_NOT_EXSIT,
+                        : Message.GET_AUCTION_DOCUMENT_REGISTED_NOT_EXIST,
                     Data = response != null ? response : null,
                 }
             );
