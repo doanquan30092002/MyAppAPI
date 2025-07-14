@@ -49,6 +49,7 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
                     AuctionName = a.AuctionName,
                     CategoryName = a.Category.CategoryName,
                     AuctionDescription = a.AuctionDescription,
+                    AuctionRules = a.AuctionRules,
                     AuctionPlanningMap = a.AuctionPlanningMap,
                     RegisterOpenDate = a.RegisterOpenDate,
                     RegisterEndDate = a.RegisterEndDate,

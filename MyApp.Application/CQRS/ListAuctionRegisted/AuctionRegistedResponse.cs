@@ -6,6 +6,7 @@
         public string AuctionName { get; set; }
         public string CategoryName { get; set; }
         public string AuctionDescription { get; set; }
+        public string AuctionRules { get; set; }
         public string? AuctionPlanningMap { get; set; }
         public DateTime RegisterOpenDate { get; set; }
         public DateTime RegisterEndDate { get; set; }
@@ -16,11 +17,6 @@
         //0: bản nháp, 1: công khai, 2:Hoàn thành, 3:Hủy
         public int Status { get; set; }
         public List<AuctionAsset> AuctionAssets { get; set; } = new List<AuctionAsset>();
-
-        public static implicit operator List<object>(AuctionRegistedResponse? v)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class AuctionAsset
