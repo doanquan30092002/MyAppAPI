@@ -68,6 +68,9 @@
         public const string REGISTER_AUCTION_DOCUMENT_FAIL = "Lỗi khi tạo phiếu đăng ký hồ sơ";
         public const string AUCTION_DOCUMENT_EXIST =
             "Bạn đã đăng ký mua hồ sơ tham gia đấu giá cho tài sản này. Vui lòng xem lịch sử mua hồ sơ";
+        public const string CUSTOMER_REGISTED_AUCTION =
+            "Có khách hàng vừa tham gia đấu giá phiên: {0}";
+
         #endregion
         #region AssginAuctioneerAndPublicAuction
         public const string AUCTIONEER_ASSIGNED_ANOTHER_AUCTION =
