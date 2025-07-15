@@ -90,6 +90,8 @@
             "Nhận hồ sơ đăng ký tham gia đấu giá thành công";
         public const string RECEIVE_AUCTION_REGISTRATION_FORM_FAIL =
             "Nhận hồ sơ đăng ký tham gia đấu giá thất bại";
+        public const string RECEIVED_FORM_SUCCESS =
+            "Công ty đã nhận được hồ sơ đăng ký tham gia đấu gia phiên: {}";
         #endregion
         #region GenarateNumbericalOrder
         public const string GENARATE_NUMBERICAL_ORDER_SUCCESS = "Tạo số thứ tự thành công";
