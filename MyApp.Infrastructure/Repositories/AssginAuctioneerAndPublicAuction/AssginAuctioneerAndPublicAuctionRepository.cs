@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
+using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
@@ -32,11 +33,7 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
                 auction.UpdatedBy = Guid.Parse(userId);
                 _context.Auctions.Update(auction);
                 await _context.SaveChangesAsync();
-                return (
-                    true,
-                    auction.AuctionEndDate.ToString(),
-                    auction.AuctionStartDate.ToString()
-                ); // successfully assigned auctioneer to auction
+                return (true, auction.AuctionEndDate.ToString(), auction.AuctionName.ToString()); // successfully assigned auctioneer to auction
             }
             catch (Exception)
             {
@@ -66,37 +63,44 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
             return false; // auctioneer is not assigned to another auction
         }
 
-        public async Task GenerateNumbericalOrderAsync(Guid auctionId)
+        public async Task<List<Guid>> GetAllUserIdRoleCustomer()
         {
-            // Lấy tất cả hồ sơ trong phiên đấu
-            var documents = await _context
-                .AuctionDocuments.Include(ad => ad.AuctionAsset)
-                .Where(ad => ad.AuctionAsset.AuctionId == auctionId)
-                .Where(ad => ad.StatusTicket == 2) // Chỉ lấy những hồ sơ đã ký phiếu đăng ký hồ sơ
-                .Where(ad => ad.StatusDeposit == 1) // Chỉ lấy những hồ sơ đã cọc
+            const int customerRoleId = 2;
+            return await _context
+                .Accounts.Where(a => a.RoleId == customerRoleId && a.IsActive)
+                .Select(a => a.UserId)
+                .Distinct()
                 .ToListAsync();
+        }
 
-            // Nhóm theo UserId để đảm bảo 1 user chỉ được đánh 1 STT trong 1 phiên
-            var groupedByUser = documents.GroupBy(doc => doc.UserId).ToList();
+        public async Task<bool> SaveNotificationAsync(List<Guid> userIds, string message)
+        {
+            if (userIds == null || !userIds.Any() || string.IsNullOrWhiteSpace(message))
+                return false;
 
-            int stt = 1;
-
-            foreach (var group in groupedByUser)
-            {
-                var userDocs = group.ToList();
-
-                // Nếu tất cả các hồ sơ của user này chưa có STT
-                if (userDocs.All(d => d.NumericalOrder == null || d.NumericalOrder == 0))
+            var notifications = userIds
+                .Select(userId => new Notification
                 {
-                    foreach (var doc in userDocs)
-                    {
-                        doc.NumericalOrder = stt;
-                    }
-                    stt++;
-                }
+                    NotificationId = Guid.NewGuid(),
+                    UserId = userId,
+                    Message = message,
+                    NotificationType = 0, // default type, adjust as needed
+                    SentAt = DateTime.UtcNow,
+                    IsRead = false,
+                    UpdatedAt = DateTime.UtcNow,
+                    UrlAction = "/notifications",
+                })
+                .ToList();
+            try
+            {
+                await _context.Notifications.AddRangeAsync(notifications);
+                await _context.SaveChangesAsync();
+                return true; // successfully saved notifications
             }
-
-            await _context.SaveChangesAsync();
+            catch (Exception)
+            {
+                return false; // failed to save notifications
+            }
         }
     }
 }

@@ -76,6 +76,7 @@
             "Phiên đấu giá đã được công khai";
         public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
         public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
+        public const string NEW_AUCTION_TO_CUSTOMER = "Có phiên đấu giá mới: {0}";
         #endregion
         #region DetailAuctionDocument
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
