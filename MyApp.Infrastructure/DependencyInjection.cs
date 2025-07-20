@@ -9,6 +9,7 @@ using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
+using MyApp.Application.Interfaces.ICreateAuctionRoundRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
 using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
@@ -39,6 +40,7 @@ using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionDocumentRegisted;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
+using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
@@ -135,6 +137,7 @@ namespace MyApp.Infrastructure
                 AuctionDocumentRegistedRepository
             >();
             services.AddScoped<IUserRegisteredAuctionRepository, UserRegisteredAuctionRepository>();
+            services.AddScoped<ICreateAuctionRoundRepository, CreateAuctionRoundRepository>();
 
             return services;
         }
