@@ -130,5 +130,9 @@
         public const string CREATE_AUCTION_ROUND_SUCCESS = "Tạo vòng đấu giá thành công";
         public const string CREATE_AUCTION_ROUND_FAIL = "Tạo vòng đấu giá thất bại";
         #endregion
+        #region CreateAuctionRound
+        public const string NOT_FOUND_ROUND_BY_AUCTION_ID =
+            "Không tồn tại vòng trả giá với id được nhập";
+        #endregion
     }
 }

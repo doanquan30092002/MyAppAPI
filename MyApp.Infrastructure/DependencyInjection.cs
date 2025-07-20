@@ -13,6 +13,7 @@ using MyApp.Application.Interfaces.ICreateAuctionRoundRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
 using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
+using MyApp.Application.Interfaces.IGetListAuctionRoundRepository;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
@@ -49,6 +50,7 @@ using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetAuctioneers;
 using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
+using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -138,6 +140,7 @@ namespace MyApp.Infrastructure
             >();
             services.AddScoped<IUserRegisteredAuctionRepository, UserRegisteredAuctionRepository>();
             services.AddScoped<ICreateAuctionRoundRepository, CreateAuctionRoundRepository>();
+            services.AddScoped<IGetListAuctionRoundRepository, GetListAuctionRoundRepository>();
 
             return services;
         }
