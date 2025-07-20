@@ -19,5 +19,7 @@
         public DateTime AuctionStartDate { get; set; }
         public DateTime AuctionEndDate { get; set; }
         public string CreatedByUserName { get; set; }
+        public string UpdateByUserName { get; set; }
+        public string AuctioneerBy { get; set; }
     }
 }
