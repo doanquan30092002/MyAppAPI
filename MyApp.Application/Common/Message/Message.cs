@@ -126,5 +126,9 @@
             "Người dùng chưa đăng ký hoặc không đủ điều kiện tham gia đấu giá";
         public const string CITIZEN_NOT_EXIST = "Căn cước công dân không tồn tại trong hệ thống";
         #endregion
+        #region CreateAuctionRound
+        public const string CREATE_AUCTION_ROUND_SUCCESS = "Tạo vòng đấu giá thành công";
+        public const string CREATE_AUCTION_ROUND_FAIL = "Tạo vòng đấu giá thất bại";
+        #endregion
     }
 }
