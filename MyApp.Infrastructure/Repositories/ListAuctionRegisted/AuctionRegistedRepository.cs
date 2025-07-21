@@ -48,7 +48,9 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
             var auctions = _context.Auctions.AsQueryable();
             if (string.IsNullOrEmpty(request.Search.AuctionName) == false)
             {
-                auctions = auctions.Where(a => a.AuctionName.Contains(request.Search.AuctionName));
+                auctions = auctions.Where(a =>
+                    a.AuctionName.ToLower().Contains(request.Search.AuctionName.ToLower())
+                );
             }
             if (request.Search.AuctionStartDate.HasValue)
             {
