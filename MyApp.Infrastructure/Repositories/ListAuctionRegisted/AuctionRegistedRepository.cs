@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
 using MyApp.Infrastructure.Data;
@@ -14,7 +15,10 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
             _context = context;
         }
 
-        public async Task<List<AuctionRegistedResponse>?> ListAuctionRegisted(string? userId)
+        public async Task<AuctionRegistedResponse> ListAuctionRegisted(
+            string? userId,
+            AuctionRegistedRequest request
+        )
         {
             if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
                 return null;
@@ -41,9 +45,27 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
                 return null;
 
             // Get info of all auctions the user has registered
-            var auctions = await _context
-                .Auctions.Where(a => registeredAuctionIds.Contains(a.AuctionId))
-                .Select(a => new AuctionRegistedResponse
+            var auctions = _context.Auctions.AsQueryable();
+            if (string.IsNullOrEmpty(request.Search.AuctionName) == false)
+            {
+                auctions = auctions.Where(a => a.AuctionName.Contains(request.Search.AuctionName));
+            }
+            if (request.Search.AuctionStartDate.HasValue)
+            {
+                auctions = auctions.Where(a =>
+                    a.AuctionStartDate >= request.Search.AuctionStartDate.Value
+                );
+            }
+            if (request.Search.AuctionEndDate.HasValue)
+            {
+                auctions = auctions.Where(a =>
+                    a.AuctionEndDate <= request.Search.AuctionEndDate.Value
+                );
+            }
+
+            var auctionResponses = auctions
+                .Where(a => registeredAuctionIds.Contains(a.AuctionId))
+                .Select(a => new AuctionResponse
                 {
                     AuctionId = a.AuctionId,
                     AuctionName = a.AuctionName,
@@ -58,7 +80,10 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
                     NumberRoundMax = a.NumberRoundMax,
                     Status = a.Status,
                     AuctionAssets = _context
-                        .AuctionAssets.Where(aa => aa.AuctionId == a.AuctionId)
+                        .AuctionAssets.Where(aa =>
+                            aa.AuctionId == a.AuctionId
+                            && registeredAssetIds.Contains(aa.AuctionAssetsId)
+                        )
                         .Select(aa => new AuctionAsset
                         {
                             AuctionAssetsId = aa.AuctionAssetsId,
@@ -72,9 +97,17 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
                         })
                         .ToList(),
                 })
-                .ToListAsync();
+                .ToList();
+            var skipResult = (request.PageNumber - 1) * request.PageSize;
+            var result = auctionResponses.Skip(skipResult).Take(request.PageSize).ToList();
 
-            return auctions;
+            return new AuctionRegistedResponse
+            {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                TotalAuctionRegisted = result.Count,
+                AuctionResponse = result,
+            };
         }
     }
 }
