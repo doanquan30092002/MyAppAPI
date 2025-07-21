@@ -3,6 +3,7 @@ using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.JobBackgroud.AuctionJob;
 
@@ -17,19 +18,19 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
         private readonly IAssginAuctioneerAndPublicAuctionRepository _repository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SetAuctionUpdateableFalse _setAuctionUpdateableFalse;
-        private readonly GenerateNumericalOrder _generateNumericalOrder;
+        private readonly INotificationSender _notificationSender;
 
         public AssginAuctioneerAndPublicAuctionHandler(
             IAssginAuctioneerAndPublicAuctionRepository repository,
             IHttpContextAccessor httpContextAccessor,
             SetAuctionUpdateableFalse setAuctionUpdateableFalse,
-            GenerateNumericalOrder generateNumericalOrder
+            INotificationSender notificationSender
         )
         {
             _repository = repository;
             _httpContextAccessor = httpContextAccessor;
             _setAuctionUpdateableFalse = setAuctionUpdateableFalse;
-            _generateNumericalOrder = generateNumericalOrder;
+            _notificationSender = notificationSender;
         }
 
         public async Task<AssginAuctioneerAndPublicAuctionResponse> Handle(
@@ -62,6 +63,25 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
             );
             if (result.Item1)
             {
+                // get userId role customer
+                List<Guid> userIds = await _repository.GetAllUserIdRoleCustomer();
+                // send notification to customer
+                var message = string.Format(Message.NEW_AUCTION_TO_CUSTOMER, result.Item3);
+                await _notificationSender.SendToUsersAsync(userIds, new { Message = message });
+                // save notification to database
+                var checkSaveNotificationAsync = await _repository.SaveNotificationAsync(
+                    userIds,
+                    message
+                );
+                if (!checkSaveNotificationAsync)
+                {
+                    return new AssginAuctioneerAndPublicAuctionResponse
+                    {
+                        Code = 500,
+                        Message = Message.SYSTEM_ERROR,
+                    };
+                }
+                // Set Auction Updateable False
                 var delaySetAuctionUpdateableFalse = DateTime.Parse(result.Item2) - DateTime.Now;
                 if (delaySetAuctionUpdateableFalse > TimeSpan.Zero)
                 {
@@ -76,18 +96,7 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                         request.AuctionId
                     );
                 }
-                //var delayGenarateNumbericalOrder = DateTime.Parse(result.Item3) - DateTime.Now;
-                //if (delayGenarateNumbericalOrder > TimeSpan.Zero)
-                //{
-                //    BackgroundJob.Schedule<GenerateNumericalOrder>(
-                //        job => job.GenerateNumericalOrderAsync(request.AuctionId),
-                //        delayGenarateNumbericalOrder
-                //    );
-                //}
-                //else
-                //{
-                //    await _generateNumericalOrder.GenerateNumericalOrderAsync(request.AuctionId);
-                //}
+
                 return new AssginAuctioneerAndPublicAuctionResponse
                 {
                     Code = 200,

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Common.InformationBank;
 using MyApp.Application.Common.Message;
@@ -68,6 +69,33 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             };
         }
 
+        public async Task<string> GetAuctionNameByAuctionDocumentsIdAsync(Guid? auctionDocumentsId)
+        {
+            if (auctionDocumentsId == null)
+            {
+                return string.Empty;
+            }
+
+            var auctionName = await _context
+                .AuctionDocuments.Where(ad => ad.AuctionDocumentsId == auctionDocumentsId)
+                .Include(ad => ad.AuctionAsset)
+                .ThenInclude(aa => aa.Auction)
+                .Select(ad => ad.AuctionAsset.Auction.AuctionName)
+                .FirstOrDefaultAsync();
+
+            return auctionName ?? string.Empty;
+        }
+
+        public async Task<List<Guid>> GetUserIdByRoleAsync()
+        {
+            const int staffRoleId = 3;
+            return await _context
+                .Accounts.Where(a => a.RoleId == staffRoleId && a.IsActive)
+                .Select(a => a.UserId)
+                .Distinct()
+                .ToListAsync();
+        }
+
         public async Task<Guid> InsertAuctionDocumentAsync(
             string auctionAssetsId,
             string? userId,
@@ -103,6 +131,35 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             catch (Exception)
             {
                 return Guid.Empty; // Handle the exception as needed
+            }
+        }
+
+        public async Task SaveNotificationAsync(List<Guid> userIds, string message)
+        {
+            if (userIds == null || !userIds.Any() || string.IsNullOrWhiteSpace(message))
+                return;
+
+            var notifications = userIds
+                .Select(userId => new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    UserId = userId,
+                    Message = message,
+                    NotificationType = 0, // default type, adjust as needed
+                    SentAt = DateTime.UtcNow,
+                    IsRead = false,
+                    UpdatedAt = DateTime.UtcNow,
+                    UrlAction = "/notifications",
+                })
+                .ToList();
+            try
+            {
+                await _context.Notifications.AddRangeAsync(notifications);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return; // failed to save notifications
             }
         }
 

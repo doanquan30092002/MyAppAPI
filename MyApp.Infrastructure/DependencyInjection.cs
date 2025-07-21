@@ -2,15 +2,18 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
+using MyApp.Application.Interfaces.AuctionDocumentRegisted;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
 using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
+using MyApp.Application.Interfaces.ICreateAuctionRoundRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
 using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
+using MyApp.Application.Interfaces.IGetListAuctionRoundRepository;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
@@ -25,20 +28,20 @@ using MyApp.Application.Interfaces.IUpdateDepositStatus;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
-using MyApp.Application.Interfaces.RegisterAuctionDocument.Sender;
-using MyApp.Application.Interfaces.RegisterAuctionDocument.Service;
 using MyApp.Application.Interfaces.SearchUserAttendance;
 using MyApp.Application.Interfaces.UpdateAccount.Repository;
 using MyApp.Application.Interfaces.UpdateAccount.Service;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
-using MyApp.Core.Entities;
+using MyApp.Application.Interfaces.UserRegisteredAuction;
 using MyApp.Core.Options;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.ImplementUnitOfWork;
 using MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction;
 using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
+using MyApp.Infrastructure.Repositories.AuctionDocumentRegisted;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
+using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
@@ -47,6 +50,7 @@ using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetAuctioneers;
 using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
+using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -61,8 +65,7 @@ using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
 using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
 using MyApp.Infrastructure.Repositories.UpdateDepositStatusRepository;
 using MyApp.Infrastructure.Repositories.UpdateExpiredProfile;
-using MyApp.Infrastructure.Services.RegisterAuctionDocument.Sender;
-using MyApp.Infrastructure.Services.RegisterAuctionDocument.Service;
+using MyApp.Infrastructure.Repositories.UserRegisteredAuction;
 using MyApp.Infrastructure.Services.UpdateAccount;
 
 namespace MyApp.Infrastructure
@@ -109,9 +112,6 @@ namespace MyApp.Infrastructure
                 IRegisterAuctionDocumentRepository,
                 RegisterAuctionDocumentRepository
             >();
-            services.AddScoped<INotificationRepository, NotificationRepository>();
-            services.AddScoped<INotificationSender, NotificationSender>();
-            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IOTPService_1, EmailOTPService_1>();
             services.AddScoped<
                 IAssginAuctioneerAndPublicAuctionRepository,
@@ -134,6 +134,13 @@ namespace MyApp.Infrastructure
                 GenarateNumbericalOrderRepository
             >();
             services.AddScoped<IAuctionRegistedRepository, AuctionRegistedRepository>();
+            services.AddScoped<
+                IAuctionDocumentRegistedRepository,
+                AuctionDocumentRegistedRepository
+            >();
+            services.AddScoped<IUserRegisteredAuctionRepository, UserRegisteredAuctionRepository>();
+            services.AddScoped<ICreateAuctionRoundRepository, CreateAuctionRoundRepository>();
+            services.AddScoped<IGetListAuctionRoundRepository, GetListAuctionRoundRepository>();
 
             return services;
         }
