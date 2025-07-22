@@ -16,7 +16,8 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
         }
 
         public async Task<GetListAuctionResponse> GetListAuctionsAsync(
-            GetListAuctionRequest getListAuctionRequest
+            GetListAuctionRequest getListAuctionRequest,
+            string? userId = null
         )
         {
             try
@@ -65,53 +66,32 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                         a.auction.Status == getListAuctionRequest.Status.Value
                     );
                 }
-
-                // Filter by RegisterOpenDate and RegisterEndDate
-                if (
-                    getListAuctionRequest.RegisterOpenDate.HasValue
-                    && getListAuctionRequest.RegisterEndDate.HasValue
-                )
+                // Filter by ConditionAuction
+                if (getListAuctionRequest.ConditionAuction == 1)
                 {
                     query = query.Where(a =>
-                        a.auction.RegisterOpenDate >= getListAuctionRequest.RegisterOpenDate.Value
-                        && a.auction.RegisterEndDate <= getListAuctionRequest.RegisterEndDate.Value
+                        a.auction.RegisterOpenDate <= DateTime.Now
+                        && a.auction.RegisterEndDate >= DateTime.Now
                     );
                 }
-                else if (getListAuctionRequest.RegisterOpenDate.HasValue)
+                else if (getListAuctionRequest.ConditionAuction == 2)
                 {
                     query = query.Where(a =>
-                        a.auction.RegisterOpenDate >= getListAuctionRequest.RegisterOpenDate.Value
+                        a.auction.RegisterEndDate < DateTime.Now
+                        && a.auction.AuctionStartDate > DateTime.Now
                     );
                 }
-                else if (getListAuctionRequest.RegisterEndDate.HasValue)
+                else if (getListAuctionRequest.ConditionAuction == 3)
                 {
                     query = query.Where(a =>
-                        a.auction.RegisterEndDate <= getListAuctionRequest.RegisterEndDate.Value
+                        a.auction.AuctionStartDate <= DateTime.Now
+                        && a.auction.AuctionEndDate >= DateTime.Now
                     );
                 }
-
-                // Filter by AuctionStartDate and AuctionEndDate
-                if (
-                    getListAuctionRequest.AuctionStartDate.HasValue
-                    && getListAuctionRequest.AuctionEndDate.HasValue
-                )
+                // Filter by userId if provided
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    query = query.Where(a =>
-                        a.auction.AuctionStartDate >= getListAuctionRequest.AuctionStartDate.Value
-                        && a.auction.AuctionEndDate <= getListAuctionRequest.AuctionEndDate.Value
-                    );
-                }
-                else if (getListAuctionRequest.AuctionStartDate.HasValue)
-                {
-                    query = query.Where(a =>
-                        a.auction.AuctionStartDate >= getListAuctionRequest.AuctionStartDate.Value
-                    );
-                }
-                else if (getListAuctionRequest.AuctionEndDate.HasValue)
-                {
-                    query = query.Where(a =>
-                        a.auction.AuctionEndDate <= getListAuctionRequest.AuctionEndDate.Value
-                    );
+                    query = query.Where(a => a.auction.Auctioneer == Guid.Parse(userId));
                 }
 
                 // Calculate total count before pagination
