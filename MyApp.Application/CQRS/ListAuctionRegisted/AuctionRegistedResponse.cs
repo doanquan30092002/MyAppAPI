@@ -2,6 +2,14 @@
 {
     public class AuctionRegistedResponse
     {
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int TotalAuctionRegisted { get; set; }
+        public List<AuctionResponse>? AuctionResponse { get; set; }
+    }
+
+    public class AuctionResponse
+    {
         public Guid AuctionId { get; set; }
         public string AuctionName { get; set; }
         public string CategoryName { get; set; }

@@ -68,6 +68,9 @@
         public const string REGISTER_AUCTION_DOCUMENT_FAIL = "Lỗi khi tạo phiếu đăng ký hồ sơ";
         public const string AUCTION_DOCUMENT_EXIST =
             "Bạn đã đăng ký mua hồ sơ tham gia đấu giá cho tài sản này. Vui lòng xem lịch sử mua hồ sơ";
+        public const string CUSTOMER_REGISTED_AUCTION =
+            "Có khách hàng vừa tham gia đấu giá phiên: {0}";
+
         #endregion
         #region AssginAuctioneerAndPublicAuction
         public const string AUCTIONEER_ASSIGNED_ANOTHER_AUCTION =
@@ -76,6 +79,7 @@
             "Phiên đấu giá đã được công khai";
         public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
         public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
+        public const string NEW_AUCTION_TO_CUSTOMER = "Có phiên đấu giá mới: {0}";
         #endregion
         #region DetailAuctionDocument
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
@@ -86,6 +90,8 @@
             "Nhận hồ sơ đăng ký tham gia đấu giá thành công";
         public const string RECEIVE_AUCTION_REGISTRATION_FORM_FAIL =
             "Nhận hồ sơ đăng ký tham gia đấu giá thất bại";
+        public const string RECEIVED_FORM_SUCCESS =
+            "Công ty đã nhận được hồ sơ đăng ký tham gia đấu gia phiên: {}";
         #endregion
         #region GenarateNumbericalOrder
         public const string GENARATE_NUMBERICAL_ORDER_SUCCESS = "Tạo số thứ tự thành công";
@@ -119,6 +125,14 @@
         public const string USER_NOT_REGISTERED_OR_INELIGIBLE_PARTICIPATE =
             "Người dùng chưa đăng ký hoặc không đủ điều kiện tham gia đấu giá";
         public const string CITIZEN_NOT_EXIST = "Căn cước công dân không tồn tại trong hệ thống";
+        #endregion
+        #region CreateAuctionRound
+        public const string CREATE_AUCTION_ROUND_SUCCESS = "Tạo vòng đấu giá thành công";
+        public const string CREATE_AUCTION_ROUND_FAIL = "Tạo vòng đấu giá thất bại";
+        #endregion
+        #region CreateAuctionRound
+        public const string NOT_FOUND_ROUND_BY_AUCTION_ID =
+            "Không tồn tại vòng trả giá với id được nhập";
         #endregion
     }
 }

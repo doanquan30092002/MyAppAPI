@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MyApp.Application.CQRS.ReceiveAuctionRegistrationForm;
+﻿using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
+using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm
@@ -20,6 +15,61 @@ namespace MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm
             _context = context;
         }
 
+        public async Task<string> GetAuctionNameByAuctionDocumentsIdAsync(Guid auctionDocumentsId)
+        {
+            if (auctionDocumentsId == null)
+            {
+                return string.Empty;
+            }
+
+            var auctionName = await _context
+                .AuctionDocuments.Where(ad => ad.AuctionDocumentsId == auctionDocumentsId)
+                .Include(ad => ad.AuctionAsset)
+                .ThenInclude(aa => aa.Auction)
+                .Select(ad => ad.AuctionAsset.Auction.AuctionName)
+                .FirstOrDefaultAsync();
+
+            return auctionName ?? string.Empty;
+        }
+
+        public async Task<List<Guid>> GetUserIdByAuctionDocumentId(Guid auctionDocumentsId)
+        {
+            var userId = await _context
+                .AuctionDocuments.Where(ad => ad.AuctionDocumentsId == auctionDocumentsId)
+                .Select(ad => ad.UserId)
+                .ToListAsync();
+            return userId;
+        }
+
+        public async Task SaveNotificationAsync(List<Guid> userIds, string message)
+        {
+            if (userIds == null || !userIds.Any() || string.IsNullOrWhiteSpace(message))
+                return;
+
+            var notifications = userIds
+                .Select(userId => new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    UserId = userId,
+                    Message = message,
+                    NotificationType = 0, // default type, adjust as needed
+                    SentAt = DateTime.UtcNow,
+                    IsRead = false,
+                    UpdatedAt = DateTime.UtcNow,
+                    UrlAction = "/notifications",
+                })
+                .ToList();
+            try
+            {
+                await _context.Notifications.AddRangeAsync(notifications);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return; // failed to save notifications
+            }
+        }
+
         public async Task<bool> UpdateStatusTicketSigned(Guid auctionDocumentsId)
         {
             var auctionDocuments = await _context.AuctionDocuments.FirstOrDefaultAsync(ad =>
@@ -27,7 +77,7 @@ namespace MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm
             );
             if (auctionDocuments == null)
             {
-                return await Task.FromResult(false);
+                return false;
             }
             auctionDocuments.StatusTicket = 2;
             auctionDocuments.UpdateAtTicket = DateTime.Now;
@@ -35,11 +85,11 @@ namespace MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm
             {
                 _context.AuctionDocuments.Update(auctionDocuments);
                 await _context.SaveChangesAsync();
-                return await Task.FromResult(true);
+                return true;
             }
             catch (Exception)
             {
-                return await Task.FromResult(false);
+                return false;
             }
         }
     }
