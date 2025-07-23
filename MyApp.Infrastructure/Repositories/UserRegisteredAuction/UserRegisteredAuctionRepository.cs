@@ -65,6 +65,7 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
                     Id = user.Id,
                     Name = user.Name,
                     CitizenIdentification = user.CitizenIdentification,
+                    RecentLocation = user.RecentLocation,
                     AuctionAssets = auctionAssets,
                 },
             };
