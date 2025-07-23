@@ -134,5 +134,9 @@
         public const string NOT_FOUND_ROUND_BY_AUCTION_ID =
             "Không tồn tại vòng trả giá với id được nhập";
         #endregion
+        #region SaveListPrices
+        public const string SAVE_LIST_PRICES_SUCCESS = "Lưu danh sách giá thành công";
+        public const string SAVE_LIST_PRICES_FAIL = "Lưu danh sách giá thất bại";
+        #endregion
     }
 }
