@@ -13,8 +13,6 @@ namespace MyApp.Application.CQRS.CreateAutionRound.Command
     {
         public Guid AuctionId { get; set; }
 
-        public decimal? HighestBid { get; set; }
-
         public Guid CreatedBy { get; set; }
     }
 }

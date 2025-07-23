@@ -13,7 +13,6 @@ namespace MyApp.Core.Entities
         public Auction Auction { get; set; }
 
         public int RoundNumber { get; set; }
-        public decimal? HighestBid { get; set; }
 
         public int Status { get; set; }
 
