@@ -8,16 +8,22 @@ using MyApp.Application.CQRS.AuctionDocuments.FindHighestPriceAndFlag.Queries;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.IFindHighestPriceAndFlag;
 using MyApp.Infrastructure.Data;
+using MyApp.Infrastructure.Repositories.AuctionRepository;
 
 namespace MyApp.Infrastructure.Repositories.FindHighestPriceAndFlagRepository
 {
     public class FindHighestPriceAndFlagRepository : IFindHighestPriceAndFlag
     {
         private readonly AppDbContext _context;
+        private readonly IAuctionRepository _auctionRepository;
 
-        public FindHighestPriceAndFlagRepository(AppDbContext context)
+        public FindHighestPriceAndFlagRepository(
+            AppDbContext context,
+            IAuctionRepository auctionRepository
+        )
         {
             _context = context;
+            _auctionRepository = auctionRepository;
         }
 
         public async Task<FindHighestPriceAndFlagResponse> FindHighestPriceAndFlag(
@@ -27,7 +33,14 @@ namespace MyApp.Infrastructure.Repositories.FindHighestPriceAndFlagRepository
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new KeyNotFoundException("Không tìm thấy người dùng.");
+
+            var auction = await _auctionRepository.FindAuctionByIdAsync(auctionId);
+
+            if (auction == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy phiên đấu giá: " + auctionId);
+            }
 
             var citizenId = user.CitizenIdentification;
 
