@@ -11,6 +11,7 @@ using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.ICreateAuctionRoundRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
+using MyApp.Application.Interfaces.IFindHighestPriceAndFlag;
 using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
 using MyApp.Application.Interfaces.IGetListAuctionRoundRepository;
@@ -45,6 +46,7 @@ using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
+using MyApp.Infrastructure.Repositories.FindHighestPriceAndFlagRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
 using MyApp.Infrastructure.Repositories.GenarateNumbericalOrder;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
@@ -144,6 +146,8 @@ namespace MyApp.Infrastructure
             services.AddScoped<ICreateAuctionRoundRepository, CreateAuctionRoundRepository>();
             services.AddScoped<IGetListAuctionRoundRepository, GetListAuctionRoundRepository>();
             services.AddScoped<ISaveListPricesRepository, SaveListPricesRepository>();
+
+            services.AddScoped<IFindHighestPriceAndFlag, FindHighestPriceAndFlagRepository>();
 
             return services;
         }
