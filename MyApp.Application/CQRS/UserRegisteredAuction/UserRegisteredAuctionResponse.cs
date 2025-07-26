@@ -11,6 +11,7 @@ namespace MyApp.Application.CQRS.UserRegisteredAuction
         public Guid Id { get; set; }
         public string CitizenIdentification { get; set; }
         public string Name { get; set; }
+        public string RecentLocation { get; set; }
         public List<AuctionAsset> AuctionAssets { get; set; } = new List<AuctionAsset>();
     }
 

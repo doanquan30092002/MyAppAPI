@@ -292,9 +292,6 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("HighestBid")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("RoundNumber")
                         .HasColumnType("int");
 
@@ -329,6 +326,9 @@ namespace MyApp.Infrastructure.Migrations
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("FlagWinner")
+                        .HasColumnType("bit");
 
                     b.Property<string>("RecentLocation")
                         .IsRequired()
@@ -378,28 +378,10 @@ namespace MyApp.Infrastructure.Migrations
                     b.ToTable("Blacklists");
                 });
 
-            modelBuilder.Entity("MyApp.Core.Entities.BlogType", b =>
-                {
-                    b.Property<Guid>("BlogTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BlogsName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("BlogTypeId");
-
-                    b.ToTable("BlogTypes");
-                });
-
             modelBuilder.Entity("MyApp.Core.Entities.Blogs", b =>
                 {
                     b.Property<Guid>("BlogId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BlogTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
@@ -412,8 +394,8 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
@@ -423,15 +405,13 @@ namespace MyApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UpdatedBy")
+                    b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("BlogId");
-
-                    b.HasIndex("BlogTypeId");
 
                     b.HasIndex("CreatedBy");
 
@@ -707,19 +687,11 @@ namespace MyApp.Infrastructure.Migrations
 
             modelBuilder.Entity("MyApp.Core.Entities.Blogs", b =>
                 {
-                    b.HasOne("MyApp.Core.Entities.BlogType", "BlogType")
-                        .WithMany()
-                        .HasForeignKey("BlogTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("MyApp.Core.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("BlogType");
 
                     b.Navigation("CreatedByUser");
                 });

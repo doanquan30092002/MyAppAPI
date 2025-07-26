@@ -36,7 +36,6 @@ namespace MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository
                 AuctionRoundId = new Guid(),
                 AuctionId = createAuctionRoundRequest.AuctionId,
                 RoundNumber = roundNumber,
-                HighestBid = createAuctionRoundRequest.HighestBid,
                 Status = 1,
                 CreatedAt = DateTime.Now,
                 CreatedBy = createAuctionRoundRequest.CreatedBy,
