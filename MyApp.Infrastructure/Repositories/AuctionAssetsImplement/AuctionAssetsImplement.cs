@@ -34,8 +34,13 @@ namespace MyApp.Infrastructure.Repositories.AuctionAssetsImplement
         }
 
         public async Task<
-            List<AuctionAssetsWithHighestBidResponse>
-        > GetAuctionAssetsWithHighestBidByAuctionIdAsync(Guid auctionId)
+            PagedResult<AuctionAssetsWithHighestBidResponse>
+        > GetAuctionAssetsWithHighestBidByAuctionIdAsync(
+            Guid auctionId,
+            string? tagName,
+            int pageNumber,
+            int pageSize
+        )
         {
             var auctionExists = await _context.Auctions.AnyAsync(a => a.AuctionId == auctionId);
             if (!auctionExists)
@@ -43,15 +48,12 @@ namespace MyApp.Infrastructure.Repositories.AuctionAssetsImplement
                 throw new KeyNotFoundException("Phiên đấu giá không tồn tại.");
             }
 
-            // Lấy userId từ HttpContext (Claim)
             var user = _httpContextAccessor.HttpContext?.User;
             var userIdStr = user
                 ?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
                 ?.Value;
-
             Guid.TryParse(userIdStr, out Guid userId);
 
-            // Truy vấn DB để lấy role từ bảng Account
             var account = await _context
                 .Accounts.Where(a => a.UserId == userId)
                 .Select(a => new { a.RoleId })
@@ -59,12 +61,20 @@ namespace MyApp.Infrastructure.Repositories.AuctionAssetsImplement
 
             var userRoleId = account?.RoleId ?? 0;
 
-            // Bước 1: Lấy toàn bộ tài sản thuộc phiên đấu giá
-            var auctionAssets = await _context
-                .AuctionAssets.Where(a => a.AuctionId == auctionId)
+            var query = _context.AuctionAssets.Where(a => a.AuctionId == auctionId);
+            if (!string.IsNullOrEmpty(tagName))
+            {
+                query = query.Where(a => a.TagName.Contains(tagName));
+            }
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var auctionAssets = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            // Bước 2: Lấy các bản ghi có FlagWinner = true trong toàn bộ các vòng của phiên
             var winningBids = await _context
                 .AuctionRoundPrices.Where(p =>
                     p.FlagWinner == true
@@ -74,29 +84,24 @@ namespace MyApp.Infrastructure.Repositories.AuctionAssetsImplement
                 )
                 .ToListAsync();
 
-            // Tạo từ điển ánh xạ TagName -> HighestBidInfo
             var winnerBidMap = winningBids
                 .GroupBy(p => p.TagName)
-                .Select(g => g.First()) // mỗi tài sản có 1 người thắng
+                .Select(g => g.First())
                 .ToDictionary(
                     b => b.TagName,
                     b =>
                     {
                         var info = new HighestBidInfo { Price = b.AuctionPrice };
-
-                        // Nếu role là 3 hoặc 6 thì gán thêm Name và CitizenIdentification
                         if (userRoleId == 3 || userRoleId == 6)
                         {
                             info.Name = b.UserName;
                             info.CitizenIdentification = b.CitizenIdentification;
                         }
-
                         return info;
                     }
                 );
 
-            // Bước 3: Gộp dữ liệu tài sản và thông tin người thắng
-            var result = auctionAssets
+            var items = auctionAssets
                 .Select(asset => new AuctionAssetsWithHighestBidResponse
                 {
                     AuctionAssetsId = asset.AuctionAssetsId,
@@ -111,14 +116,18 @@ namespace MyApp.Infrastructure.Repositories.AuctionAssetsImplement
                     UpdatedAt = asset.UpdatedAt,
                     UpdatedBy = asset.UpdatedBy,
                     AuctionId = asset.AuctionId,
-
-                    HighestBid = winnerBidMap.ContainsKey(asset.TagName)
-                        ? winnerBidMap[asset.TagName]
-                        : null,
+                    HighestBid = winnerBidMap.TryGetValue(asset.TagName, out var bid) ? bid : null,
                 })
                 .ToList();
 
-            return result;
+            return new PagedResult<AuctionAssetsWithHighestBidResponse>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Items = items,
+            };
         }
     }
 }

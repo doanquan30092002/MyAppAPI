@@ -12,7 +12,12 @@ namespace MyApp.Application.Interfaces.IActionAssetsRepository
         Task DeleteByAuctionIdAsync(Guid auctionId);
 
         Task<
-            List<AuctionAssetsWithHighestBidResponse>
-        > GetAuctionAssetsWithHighestBidByAuctionIdAsync(Guid auctionId);
+            PagedResult<AuctionAssetsWithHighestBidResponse>
+        > GetAuctionAssetsWithHighestBidByAuctionIdAsync(
+            Guid auctionId,
+            string? tagName,
+            int pageNumber,
+            int pageSize
+        );
     }
 }

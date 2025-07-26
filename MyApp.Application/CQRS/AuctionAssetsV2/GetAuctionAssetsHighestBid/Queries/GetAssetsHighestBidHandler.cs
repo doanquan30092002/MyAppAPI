@@ -11,7 +11,10 @@ using MyApp.Core.DTOs.AuctionAssetsDTO;
 namespace MyApp.Application.CQRS.AuctionAssetsV2.GetAuctionAssetsHighestBid.Queries
 {
     public class GetAssetsHighestBidHandler
-        : IRequestHandler<GetAssetsHighestBidRequest, List<AuctionAssetsWithHighestBidResponse>>
+        : IRequestHandler<
+            GetAssetsHighestBidRequest,
+            PagedResult<AuctionAssetsWithHighestBidResponse>
+        >
     {
         private readonly IAuctionAssetsRepository _auctionAssetsRepository;
 
@@ -20,17 +23,17 @@ namespace MyApp.Application.CQRS.AuctionAssetsV2.GetAuctionAssetsHighestBid.Quer
             _auctionAssetsRepository = auctionAssetsRepository;
         }
 
-        public async Task<List<AuctionAssetsWithHighestBidResponse>> Handle(
+        public async Task<PagedResult<AuctionAssetsWithHighestBidResponse>> Handle(
             GetAssetsHighestBidRequest request,
             CancellationToken cancellationToken
         )
         {
-            var result =
-                await _auctionAssetsRepository.GetAuctionAssetsWithHighestBidByAuctionIdAsync(
-                    request.AuctionId
-                );
-
-            return result;
+            return await _auctionAssetsRepository.GetAuctionAssetsWithHighestBidByAuctionIdAsync(
+                request.AuctionId,
+                request.TagName,
+                request.PageNumber,
+                request.PageSize
+            );
         }
     }
 }
