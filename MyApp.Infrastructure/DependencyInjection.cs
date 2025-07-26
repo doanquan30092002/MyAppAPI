@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.Interfaces.AuctionDocumentRegisted;
+using MyApp.Application.Interfaces.Blog;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
 using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
@@ -42,6 +43,7 @@ using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionDocumentRegisted;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
+using MyApp.Infrastructure.Repositories.Blog;
 using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
@@ -144,6 +146,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<ICreateAuctionRoundRepository, CreateAuctionRoundRepository>();
             services.AddScoped<IGetListAuctionRoundRepository, GetListAuctionRoundRepository>();
             services.AddScoped<ISaveListPricesRepository, SaveListPricesRepository>();
+            services.AddScoped<IBlogRepository, BlogRepository>();
 
             return services;
         }

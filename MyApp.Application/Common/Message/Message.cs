@@ -138,5 +138,26 @@
         public const string SAVE_LIST_PRICES_SUCCESS = "Lưu danh sách giá thành công";
         public const string SAVE_LIST_PRICES_FAIL = "Lưu danh sách giá thất bại";
         #endregion
+        #region Blog
+        // Create blog
+        public const string CREATE_BLOG_SUCCESS = "Tạo blog thành công";
+        public const string CREATE_BLOG_FAIL = "Tạo blog thất bại";
+
+        // Get blog detail
+        public const string GET_BLOG_SUCCESS = "Lấy blog thành công";
+        public const string GET_BLOG_NOT_FOUND = "Lấy blog thất bại";
+
+        // Update blog
+        public const string UPDATE_BLOG_SUCCESS = "Cập nhật blog thành công";
+        public const string UPDATE_BLOG_FAIL = "Cập nhật blog thất bại";
+
+        // Change status blog
+        public const string UPDATE_STATUS_BLOG_SUCCESS = "Cập nhật blog thành công";
+        public const string UPDATE_STATUS_BLOG_FAIL = "Cập nhật blog thất bại";
+
+        //  Get list blogs
+        public const string GET_BLOGS_SUCCESS = "Lấy danh sách blog thành công";
+        public const string GET_BLOGS_NOT_FOUND = "Không tìm thấy blog nào";
+        #endregion
     }
 }
