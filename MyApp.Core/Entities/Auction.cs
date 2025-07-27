@@ -45,6 +45,8 @@ namespace MyApp.Core.Entities
         public string? CancelReasonFile { get; set; }
 
         public string? CancelReason { get; set; }
+
+        public string? RejectReason { get; set; }
         public Guid? Auctioneer { get; set; }
 
         [ForeignKey("Auctioneer")]
