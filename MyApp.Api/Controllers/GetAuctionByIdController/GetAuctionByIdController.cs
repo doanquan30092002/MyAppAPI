@@ -27,7 +27,7 @@ namespace MyApp.Api.Controllers.GetAuctionByIdController
                         new ApiResponse<GetAuctionByIdResponse>
                         {
                             Code = 400,
-                            Message = "Auction not found.",
+                            Message = Message.NOT_FOUND_AUCTION,
                             Data = null,
                         }
                     );
