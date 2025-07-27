@@ -17,6 +17,7 @@ using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
 using MyApp.Application.Interfaces.IGetListAuctionRoundRepository;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
+using MyApp.Application.Interfaces.IGetListEnteredPricesRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
@@ -56,6 +57,7 @@ using MyApp.Infrastructure.Repositories.GetAuctioneers;
 using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
+using MyApp.Infrastructure.Repositories.GetListEnteredPricesRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -151,6 +153,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<IBlogRepository, BlogRepository>();
 
             services.AddScoped<IFindHighestPriceAndFlag, FindHighestPriceAndFlagRepository>();
+            services.AddScoped<IGetListEnteredPricesRepository, GetListEnteredPricesRepository>();
 
             return services;
         }
