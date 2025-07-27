@@ -166,5 +166,8 @@
         #region GetAuction
         public const string NOT_FOUND_AUCTION = "Không tìm thấy phiên đấu giá";
         #endregion
+        #region UpdateWinnerFlag
+        public const string NOT_FOUND_ROUND_PRICES_ID_TO_UPDATE = "Không tìm thấy id cần update";
+        #endregion
     }
 }
