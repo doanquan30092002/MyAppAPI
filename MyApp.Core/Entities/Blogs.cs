@@ -23,7 +23,9 @@ namespace MyApp.Core.Entities
         //1: Pending
         //2: Publish
         //3: Disable
-        //4: get 2 and 3
+        //4: get 1, 2 and 3
         public int Status { get; set; }
+
+        public string? Note { get; set; }
     }
 }

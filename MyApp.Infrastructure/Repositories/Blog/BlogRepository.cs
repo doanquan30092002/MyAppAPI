@@ -16,7 +16,12 @@ namespace MyApp.Infrastructure.Repositories.Blog
             this.context = context;
         }
 
-        public async Task<bool> ChangeStatusBlogAsync(Guid blogId, int status, string? userIdStr)
+        public async Task<bool> ChangeStatusBlogAsync(
+            Guid blogId,
+            int status,
+            string? note,
+            string? userIdStr
+        )
         {
             var blogExist = await context.Blogs.FirstOrDefaultAsync(b => b.BlogId == blogId);
             if (blogExist == null)
@@ -24,6 +29,7 @@ namespace MyApp.Infrastructure.Repositories.Blog
                 return false;
             }
             blogExist.Status = status;
+            blogExist.Note = note ?? blogExist.Note;
             blogExist.UpdatedAt = DateTime.Now;
             blogExist.UpdatedBy = string.IsNullOrEmpty(userIdStr)
                 ? Guid.Empty
@@ -84,6 +90,7 @@ namespace MyApp.Infrastructure.Repositories.Blog
                     UpdatedAt = b.UpdatedAt ?? default,
                     UpdatedBy = b.UpdatedBy ?? Guid.Empty,
                     Status = b.Status,
+                    Note = b.Note,
                 })
                 .FirstOrDefaultAsync();
             return query;
@@ -110,7 +117,7 @@ namespace MyApp.Infrastructure.Repositories.Blog
                 }
                 else
                 {
-                    query = query.Where(b => b.Status == 2 || b.Status == 3);
+                    query = query.Where(b => b.Status == 1 || b.Status == 2 || b.Status == 3);
                 }
             }
             if (userId.HasValue)
@@ -132,6 +139,7 @@ namespace MyApp.Infrastructure.Repositories.Blog
                     UpdatedAt = b.UpdatedAt ?? default,
                     UpdatedBy = b.UpdatedBy ?? Guid.Empty,
                     Status = b.Status,
+                    Note = b.Note,
                 })
                 .ToListAsync();
         }

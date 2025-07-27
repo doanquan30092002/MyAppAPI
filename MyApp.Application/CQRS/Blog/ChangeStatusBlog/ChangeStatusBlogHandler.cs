@@ -32,6 +32,7 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog
             bool isChangeSuccess = await _blogRepository.ChangeStatusBlogAsync(
                 request.BlogId,
                 request.Status,
+                request.Note,
                 userIdStr
             );
             if (!isChangeSuccess)

@@ -21,5 +21,6 @@ namespace MyApp.Application.CQRS.Blog.GetListBlog
         public DateTime UpdatedAt { get; set; }
         public Guid UpdatedBy { get; set; }
         public int Status { get; set; }
+        public string? Note { get; set; }
     }
 }

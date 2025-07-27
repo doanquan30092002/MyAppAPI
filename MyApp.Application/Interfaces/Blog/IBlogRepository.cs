@@ -6,7 +6,7 @@ namespace MyApp.Application.Interfaces.Blog
 {
     public interface IBlogRepository
     {
-        Task<bool> ChangeStatusBlogAsync(Guid blogId, int status, string? userIdStr);
+        Task<bool> ChangeStatusBlogAsync(Guid blogId, int status, string? note, string? userIdStr);
         Task<bool> CreateBlogAsync(
             string title,
             string content,

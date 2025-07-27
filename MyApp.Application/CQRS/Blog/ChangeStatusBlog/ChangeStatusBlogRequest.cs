@@ -6,5 +6,6 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog
     {
         public Guid BlogId { get; set; }
         public int Status { get; set; }
+        public string? Note { get; set; }
     }
 }
