@@ -29,6 +29,7 @@ using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Application.Interfaces.IUpdateDepositStatus;
+using MyApp.Application.Interfaces.IUpdateWinnerFlagRepository;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
@@ -73,6 +74,7 @@ using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
 using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
 using MyApp.Infrastructure.Repositories.UpdateDepositStatusRepository;
 using MyApp.Infrastructure.Repositories.UpdateExpiredProfile;
+using MyApp.Infrastructure.Repositories.UpdateWinnerFlagRepository;
 using MyApp.Infrastructure.Repositories.UserRegisteredAuction;
 using MyApp.Infrastructure.Services.UpdateAccount;
 
@@ -154,6 +156,7 @@ namespace MyApp.Infrastructure
 
             services.AddScoped<IFindHighestPriceAndFlag, FindHighestPriceAndFlagRepository>();
             services.AddScoped<IGetListEnteredPricesRepository, GetListEnteredPricesRepository>();
+            services.AddScoped<IUpdateWinnerFlagRepository, UpdateWinnerFlagRepository>();
 
             return services;
         }
