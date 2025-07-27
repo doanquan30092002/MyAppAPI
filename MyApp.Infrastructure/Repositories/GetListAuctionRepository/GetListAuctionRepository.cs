@@ -67,27 +67,35 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                     );
                 }
                 // Filter by ConditionAuction
-                if (getListAuctionRequest.ConditionAuction == 1)
+                if (getListAuctionRequest.ConditionAuction.HasValue)
                 {
-                    query = query.Where(a =>
-                        a.auction.RegisterOpenDate <= DateTime.Now
-                        && a.auction.RegisterEndDate >= DateTime.Now
-                    );
+                    if (getListAuctionRequest.ConditionAuction == 1)
+                    {
+                        query = query.Where(a =>
+                            a.auction.RegisterOpenDate <= DateTime.Now
+                            && a.auction.RegisterEndDate >= DateTime.Now
+                        );
+                    }
+                    else if (getListAuctionRequest.ConditionAuction == 2)
+                    {
+                        query = query.Where(a =>
+                            a.auction.RegisterEndDate < DateTime.Now
+                            && a.auction.AuctionStartDate > DateTime.Now
+                        );
+                    }
+                    else if (getListAuctionRequest.ConditionAuction == 3)
+                    {
+                        query = query.Where(a =>
+                            a.auction.AuctionStartDate <= DateTime.Now
+                            && a.auction.AuctionEndDate >= DateTime.Now
+                        );
+                    }
+                    else if (getListAuctionRequest.ConditionAuction == 4)
+                    {
+                        query = query.Where(a => a.auction.AuctionEndDate < DateTime.Now);
+                    }
                 }
-                else if (getListAuctionRequest.ConditionAuction == 2)
-                {
-                    query = query.Where(a =>
-                        a.auction.RegisterEndDate < DateTime.Now
-                        && a.auction.AuctionStartDate > DateTime.Now
-                    );
-                }
-                else if (getListAuctionRequest.ConditionAuction == 3)
-                {
-                    query = query.Where(a =>
-                        a.auction.AuctionStartDate <= DateTime.Now
-                        && a.auction.AuctionEndDate >= DateTime.Now
-                    );
-                }
+
                 // Filter by userId if provided
                 if (!string.IsNullOrEmpty(userId))
                 {

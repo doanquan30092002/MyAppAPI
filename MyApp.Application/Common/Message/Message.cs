@@ -159,5 +159,15 @@
         public const string GET_BLOGS_SUCCESS = "Lấy danh sách blog thành công";
         public const string GET_BLOGS_NOT_FOUND = "Không tìm thấy blog nào";
         #endregion
+        #region GetListEnteredPrices
+        public const string NOT_FOUND_LIST_ENTERED_PRICES =
+            "Không tìm thấy danh sách giá được nhập";
+        #endregion
+        #region GetAuction
+        public const string NOT_FOUND_AUCTION = "Không tìm thấy phiên đấu giá";
+        #endregion
+        #region UpdateWinnerFlag
+        public const string NOT_FOUND_ROUND_PRICES_ID_TO_UPDATE = "Không tìm thấy id cần update";
+        #endregion
     }
 }

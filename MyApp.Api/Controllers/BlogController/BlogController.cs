@@ -27,6 +27,7 @@ namespace MyApp.Api.Controllers.BlogController
 
         [HttpGet]
         [Route("Get-List-Blog")]
+        [AllowAnonymous]
         public async Task<ActionResult> GetListBlog([FromQuery] GetListBlogRequest request)
         {
             var response = await _mediator.Send(request);
@@ -53,6 +54,7 @@ namespace MyApp.Api.Controllers.BlogController
 
         [HttpGet]
         [Route("Get-Blog-Detail")]
+        [AllowAnonymous]
         public async Task<ActionResult> GetBlogDetail([FromQuery] GetBlogDetailRequest request)
         {
             var response = await _mediator.Send(request);

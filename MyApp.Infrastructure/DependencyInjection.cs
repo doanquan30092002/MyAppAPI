@@ -17,6 +17,7 @@ using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
 using MyApp.Application.Interfaces.IGetListAuctionRoundRepository;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
+using MyApp.Application.Interfaces.IGetListEnteredPricesRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
@@ -28,6 +29,7 @@ using MyApp.Application.Interfaces.ISignUpRepository;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Application.Interfaces.IUpdateDepositStatus;
+using MyApp.Application.Interfaces.IUpdateWinnerFlagRepository;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
@@ -56,6 +58,7 @@ using MyApp.Infrastructure.Repositories.GetAuctioneers;
 using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
+using MyApp.Infrastructure.Repositories.GetListEnteredPricesRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -71,6 +74,7 @@ using MyApp.Infrastructure.Repositories.SupportRegisterDocuments;
 using MyApp.Infrastructure.Repositories.UpdateAccountRepository;
 using MyApp.Infrastructure.Repositories.UpdateDepositStatusRepository;
 using MyApp.Infrastructure.Repositories.UpdateExpiredProfile;
+using MyApp.Infrastructure.Repositories.UpdateWinnerFlagRepository;
 using MyApp.Infrastructure.Repositories.UserRegisteredAuction;
 using MyApp.Infrastructure.Services.UpdateAccount;
 
@@ -151,6 +155,8 @@ namespace MyApp.Infrastructure
             services.AddScoped<IBlogRepository, BlogRepository>();
 
             services.AddScoped<IFindHighestPriceAndFlag, FindHighestPriceAndFlagRepository>();
+            services.AddScoped<IGetListEnteredPricesRepository, GetListEnteredPricesRepository>();
+            services.AddScoped<IUpdateWinnerFlagRepository, UpdateWinnerFlagRepository>();
 
             return services;
         }
