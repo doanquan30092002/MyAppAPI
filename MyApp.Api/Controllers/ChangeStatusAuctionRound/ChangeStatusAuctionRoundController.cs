@@ -22,7 +22,7 @@ namespace MyApp.Api.Controllers.ChangeStatusAuctionRound
             return Ok(
                 new ApiResponse<bool>
                 {
-                    Code = response ? 200 : 400,
+                    Code = response ? 200 : 500,
                     Message = response
                         ? Message.CHANGE_STATUS_AUCTION_ROUND_SUCCESS
                         : Message.CHANGE_STATUS_AUCTION_ROUND_FAIL,
