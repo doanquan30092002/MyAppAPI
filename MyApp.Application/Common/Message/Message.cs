@@ -171,5 +171,11 @@
         #region UpdateWinnerFlag
         public const string NOT_FOUND_ROUND_PRICES_ID_TO_UPDATE = "Không tìm thấy id cần update";
         #endregion
+        #region ChangeStatusAuctionRound
+        public const string CHANGE_STATUS_AUCTION_ROUND_SUCCESS =
+            "Thay đổi trạng thái vòng đấu giá thành công";
+        public const string CHANGE_STATUS_AUCTION_ROUND_FAIL =
+            "Thay đổi trạng thái vòng đấu giá thất bại";
+        #endregion
     }
 }

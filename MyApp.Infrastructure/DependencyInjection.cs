@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.Interfaces.AuctionDocumentRegisted;
 using MyApp.Application.Interfaces.Blog;
+using MyApp.Application.Interfaces.ChangeStatusAuctionRound;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
 using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
@@ -47,6 +48,7 @@ using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionDocumentRegisted;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.Blog;
+using MyApp.Infrastructure.Repositories.ChangeStatusAuctionRound;
 using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
@@ -157,6 +159,10 @@ namespace MyApp.Infrastructure
             services.AddScoped<IFindHighestPriceAndFlag, FindHighestPriceAndFlagRepository>();
             services.AddScoped<IGetListEnteredPricesRepository, GetListEnteredPricesRepository>();
             services.AddScoped<IUpdateWinnerFlagRepository, UpdateWinnerFlagRepository>();
+            services.AddScoped<
+                IChangeStatusAuctionRoundRepository,
+                ChangeStatusAuctionRoundRepository
+            >();
 
             return services;
         }
