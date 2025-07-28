@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund;
 using MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer;
+using MyApp.Application.CQRS.AuctionDocuments.FindHighestPriceAndFlag.Queries;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -143,36 +144,23 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
         [Authorize(Roles = "Staff")]
         public async Task<IActionResult> ExportRefundDocumentsExcel([FromQuery] Guid auctionId)
         {
-            try
-            {
-                var command = new ExportExcelTransferCommand { AuctionId = auctionId };
-                var fileBytes = await _mediator.Send(command);
-                var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
-                var base64 = Convert.ToBase64String(fileBytes);
+            var command = new ExportExcelTransferCommand { AuctionId = auctionId };
+            var fileBytes = await _mediator.Send(command);
+            var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
+            var base64 = Convert.ToBase64String(fileBytes);
 
-                var response = new ApiResponse<object>
-                {
-                    Code = 200,
-                    Message = "Xuất file Excel thành công",
-                    Data = new
-                    {
-                        FileName = fileName,
-                        ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        Base64 = base64,
-                    },
-                };
-                return Ok(response);
-            }
-            catch (Exception ex)
+            var response = new ApiResponse<object>
             {
-                var errorResponse = new ApiResponse<object>
+                Code = 200,
+                Message = "Xuất file Excel thành công",
+                Data = new
                 {
-                    Code = 400,
-                    Message = "Lỗi xuất file Excel hoàn tiền",
-                    Data = null,
-                };
-                return StatusCode(500, errorResponse);
-            }
+                    FileName = fileName,
+                    ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    Base64 = base64,
+                },
+            };
+            return Ok(response);
 
             //var command = new ExportExcelTransferCommand { AuctionId = auctionId };
             //var fileBytes = await _mediator.Send(command);
@@ -215,6 +203,24 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
                     }
                 );
             }
+        }
+
+        [HttpGet("find-highest-price-and-flag/{auctionId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> FindHighestPriceAndFlag(Guid auctionId)
+        {
+            var query = new FindHighestPriceAndFlagRequest { AuctionId = auctionId };
+
+            var result = await _mediator.Send(query);
+
+            return Ok(
+                new ApiResponse<FindHighestPriceAndFlagResponse>
+                {
+                    Code = 200,
+                    Message = "Lấy giá người dùng đã trả ở vòng cao nhất và flag thành công",
+                    Data = result,
+                }
+            );
         }
     }
 }

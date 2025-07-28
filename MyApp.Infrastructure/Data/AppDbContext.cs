@@ -19,7 +19,6 @@ namespace MyApp.Infrastructure.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Blacklist> Blacklists { get; set; }
         public DbSet<Information> Informations { get; set; }
-        public DbSet<BlogType> BlogTypes { get; set; }
         public DbSet<AuctionRound> AuctionRounds { get; set; }
         public DbSet<AuctionRoundPrices> AuctionRoundPrices { get; set; }
 

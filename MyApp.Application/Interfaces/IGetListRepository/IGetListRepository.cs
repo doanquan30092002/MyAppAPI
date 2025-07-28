@@ -6,7 +6,8 @@ namespace MyApp.Application.Interfaces.IGetListRepository
     public interface IGetListRepository
     {
         public Task<GetListAuctionResponse> GetListAuctionsAsync(
-            GetListAuctionRequest getListAuctionRequest
+            GetListAuctionRequest getListAuctionRequest,
+            string? userId = null
         );
     }
 }

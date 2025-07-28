@@ -126,5 +126,48 @@
             "Người dùng chưa đăng ký hoặc không đủ điều kiện tham gia đấu giá";
         public const string CITIZEN_NOT_EXIST = "Căn cước công dân không tồn tại trong hệ thống";
         #endregion
+        #region CreateAuctionRound
+        public const string CREATE_AUCTION_ROUND_SUCCESS = "Tạo vòng đấu giá thành công";
+        public const string CREATE_AUCTION_ROUND_FAIL = "Tạo vòng đấu giá thất bại";
+        #endregion
+        #region CreateAuctionRound
+        public const string NOT_FOUND_ROUND_BY_AUCTION_ID =
+            "Không tồn tại vòng trả giá với id được nhập";
+        #endregion
+        #region SaveListPrices
+        public const string SAVE_LIST_PRICES_SUCCESS = "Lưu danh sách giá thành công";
+        public const string SAVE_LIST_PRICES_FAIL = "Lưu danh sách giá thất bại";
+        #endregion
+        #region Blog
+        // Create blog
+        public const string CREATE_BLOG_SUCCESS = "Tạo blog thành công";
+        public const string CREATE_BLOG_FAIL = "Tạo blog thất bại";
+
+        // Get blog detail
+        public const string GET_BLOG_SUCCESS = "Lấy blog thành công";
+        public const string GET_BLOG_NOT_FOUND = "Lấy blog thất bại";
+
+        // Update blog
+        public const string UPDATE_BLOG_SUCCESS = "Cập nhật blog thành công";
+        public const string UPDATE_BLOG_FAIL = "Cập nhật blog thất bại";
+
+        // Change status blog
+        public const string UPDATE_STATUS_BLOG_SUCCESS = "Cập nhật blog thành công";
+        public const string UPDATE_STATUS_BLOG_FAIL = "Cập nhật blog thất bại";
+
+        //  Get list blogs
+        public const string GET_BLOGS_SUCCESS = "Lấy danh sách blog thành công";
+        public const string GET_BLOGS_NOT_FOUND = "Không tìm thấy blog nào";
+        #endregion
+        #region GetListEnteredPrices
+        public const string NOT_FOUND_LIST_ENTERED_PRICES =
+            "Không tìm thấy danh sách giá được nhập";
+        #endregion
+        #region GetAuction
+        public const string NOT_FOUND_AUCTION = "Không tìm thấy phiên đấu giá";
+        #endregion
+        #region UpdateWinnerFlag
+        public const string NOT_FOUND_ROUND_PRICES_ID_TO_UPDATE = "Không tìm thấy id cần update";
+        #endregion
     }
 }
