@@ -295,6 +295,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             auction.UpdatedAt = DateTime.Now;
             auction.RejectReason = null;
             auction.UpdatedBy = userId.Value;
+            auction.Updateable = false;
 
             _context.Auctions.Update(auction);
             await _context.SaveChangesAsync();
@@ -338,6 +339,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             auction.RejectReason = rejectReason;
             auction.UpdatedAt = DateTime.Now;
             auction.UpdatedBy = userId.Value;
+            auction.Updateable = true;
 
             _context.Auctions.Update(auction);
             await _context.SaveChangesAsync();
