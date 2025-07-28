@@ -21,6 +21,7 @@ using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListEnteredPricesRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
+using MyApp.Application.Interfaces.IListUserWinnerRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.INotificationsRepository;
 using MyApp.Application.Interfaces.IPaymentDeposit;
@@ -61,6 +62,7 @@ using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.GetListEnteredPricesRepository;
+using MyApp.Infrastructure.Repositories.GetListUserWinnerRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -163,6 +165,7 @@ namespace MyApp.Infrastructure
                 IChangeStatusAuctionRoundRepository,
                 ChangeStatusAuctionRoundRepository
             >();
+            services.AddScoped<IListUserWinnerRepository, GetListUserWinnerRepository>();
 
             return services;
         }
