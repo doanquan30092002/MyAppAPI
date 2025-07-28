@@ -41,6 +41,18 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
             string userId = _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
+            // check status Auction is waiting
+            var checkStatusAuction = await _repository.CheckStatusAuctionIsWaitingAsync(
+                request.AuctionId
+            );
+            if (!checkStatusAuction)
+            {
+                return new AssginAuctioneerAndPublicAuctionResponse
+                {
+                    Code = 400,
+                    Message = Message.AUCTION_NOT_WAITING,
+                };
+            }
             // check 1 auctioneer cannot be assigned to 2 auctions at the same time
             var checkAuctioneerAssigned =
                 await _repository.CheckAuctioneerAssignedToAnotherAuctionAsync(
@@ -55,6 +67,7 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                     Message = Message.AUCTIONEER_ASSIGNED_ANOTHER_AUCTION,
                 };
             }
+
             // assign auctioneer to auction and public auction
             var result = await _repository.AssignAuctioneerToAuctionAndPublicAuctionAsync(
                 request.AuctionId,

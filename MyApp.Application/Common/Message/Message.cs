@@ -80,6 +80,8 @@
         public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
         public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
         public const string NEW_AUCTION_TO_CUSTOMER = "Có phiên đấu giá mới: {0}";
+        public const string AUCTION_NOT_WAITING =
+            "Phiên đấu giá không ở trạng thái chờ duyệt. Vui lòng kiểm tra lại";
         #endregion
         #region DetailAuctionDocument
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
