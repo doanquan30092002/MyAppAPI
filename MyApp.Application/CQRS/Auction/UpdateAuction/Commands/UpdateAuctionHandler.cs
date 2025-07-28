@@ -107,23 +107,23 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                 throw;
             }
 
-            if (updateResult.StatusChangedToTrue)
-            {
-                var delay = updateResult.AuctionEndDate - DateTime.Now;
-                if (delay > TimeSpan.Zero)
-                {
-                    BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
-                        job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
-                        delay
-                    );
-                }
-                else
-                {
-                    await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(
-                        request.AuctionId
-                    );
-                }
-            }
+            //if (updateResult.StatusChangedToTrue)
+            //{
+            //    var delay = updateResult.AuctionEndDate - DateTime.Now;
+            //    if (delay > TimeSpan.Zero)
+            //    {
+            //        BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
+            //            job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
+            //            delay
+            //        );
+            //    }
+            //    else
+            //    {
+            //        await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(
+            //            request.AuctionId
+            //        );
+            //    }
+            //}
 
             return request.AuctionId;
         }
