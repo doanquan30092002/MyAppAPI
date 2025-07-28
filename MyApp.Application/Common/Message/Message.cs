@@ -177,5 +177,9 @@
         public const string CHANGE_STATUS_AUCTION_ROUND_FAIL =
             "Thay đổi trạng thái vòng đấu giá thất bại";
         #endregion
+        #region GetListUserWinner
+        public const string NOT_FOUND_LIST_USER_WINNER =
+            "Không tìm thấy danh sách người thắng cuộc";
+        #endregion
     }
 }
