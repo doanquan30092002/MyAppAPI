@@ -82,21 +82,16 @@ namespace MyApp.Api.Controllers.AuctionController
         }
 
         [Authorize(Roles = "Manager")]
-        [HttpPut("reject-auction/{auctionId}")]
-        public async Task<IActionResult> RejectAuction(
-            Guid auctionId,
-            [FromBody] string rejectReason
-        )
+        [HttpPut("reject-auction")]
+        public async Task<IActionResult> RejectAuction([FromBody] RejectAuction rejectAuction)
         {
-            var command = new RejectAuction { AuctionId = auctionId, RejectReason = rejectReason };
-
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(rejectAuction);
 
             var response = new ApiResponse<Object>
             {
                 Code = 200,
                 Message = "Từ chối phiên đấu giá thành công",
-                Data = new { AuctionId = auctionId, Status = result },
+                Data = new { AuctionId = rejectAuction.AuctionId, Status = result },
             };
 
             return Ok(response);
