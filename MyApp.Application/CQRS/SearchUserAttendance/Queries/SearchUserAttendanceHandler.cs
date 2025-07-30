@@ -4,7 +4,7 @@ using MyApp.Application.Interfaces.SearchUserAttendance;
 namespace MyApp.Application.CQRS.SearchUserAttendance.Queries
 {
     public class SearchUserAttendanceHandler
-        : IRequestHandler<SearchUserAttendanceRequest, SearchUserAttendanceResponse>
+        : IRequestHandler<SearchUserAttendanceRequest, SearchUserAttendanceResponseDTO>
     {
         private readonly ISearchUserAttendanceRepository _attendanceRepository;
 
@@ -13,7 +13,7 @@ namespace MyApp.Application.CQRS.SearchUserAttendance.Queries
             _attendanceRepository = attendanceRepository;
         }
 
-        public Task<SearchUserAttendanceResponse> Handle(
+        public Task<SearchUserAttendanceResponseDTO> Handle(
             SearchUserAttendanceRequest request,
             CancellationToken cancellationToken
         )
