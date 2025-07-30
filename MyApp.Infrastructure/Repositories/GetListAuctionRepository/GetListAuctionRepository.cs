@@ -67,35 +67,45 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                     );
                 }
                 // Filter by ConditionAuction
-                if (getListAuctionRequest.ConditionAuction.HasValue)
+                if (getListAuctionRequest.ConditionAuction != null)
                 {
-                    if (getListAuctionRequest.ConditionAuction == 1)
+                    foreach (var condition in getListAuctionRequest.ConditionAuction)
                     {
-                        query = query.Where(a =>
-                            a.auction.RegisterOpenDate <= DateTime.Now
-                            && a.auction.RegisterEndDate >= DateTime.Now
-                        );
-                    }
-                    else if (getListAuctionRequest.ConditionAuction == 2)
-                    {
-                        query = query.Where(a =>
-                            a.auction.RegisterEndDate < DateTime.Now
-                            && a.auction.AuctionStartDate > DateTime.Now
-                        );
-                    }
-                    else if (getListAuctionRequest.ConditionAuction == 3)
-                    {
-                        query = query.Where(a =>
-                            a.auction.AuctionStartDate <= DateTime.Now
-                            && a.auction.AuctionEndDate >= DateTime.Now
-                        );
-                    }
-                    else if (getListAuctionRequest.ConditionAuction == 4)
-                    {
-                        query = query.Where(a => a.auction.AuctionEndDate < DateTime.Now);
+                        switch (condition)
+                        {
+                            case 1: // Đang thu hồ sơ
+                                query = query.Where(a =>
+                                    a.auction.RegisterOpenDate <= DateTime.Now
+                                    && a.auction.RegisterEndDate >= DateTime.Now
+                                );
+                                break;
+                            case 2: // Chuẩn bị tổ chức
+                                query = query.Where(a =>
+                                    a.auction.RegisterEndDate < DateTime.Now
+                                    && a.auction.AuctionStartDate > DateTime.Now
+                                );
+                                break;
+                            case 3: // Hôm nay tổ chức
+                                query = query.Where(a =>
+                                    a.auction.AuctionStartDate <= DateTime.Now
+                                    && a.auction.AuctionEndDate >= DateTime.Now
+                                );
+                                break;
+                            case 4: // Đã kết thúc
+                                query = query.Where(a => a.auction.AuctionEndDate < DateTime.Now);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
-
+                // Filter by CreatedBy if provided
+                if (getListAuctionRequest.CreatedBy.HasValue)
+                {
+                    query = query.Where(a =>
+                        a.auction.CreatedBy == getListAuctionRequest.CreatedBy
+                    );
+                }
                 // Filter by userId if provided
                 if (!string.IsNullOrEmpty(userId))
                 {

@@ -144,36 +144,23 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
         [Authorize(Roles = "Staff")]
         public async Task<IActionResult> ExportRefundDocumentsExcel([FromQuery] Guid auctionId)
         {
-            try
-            {
-                var command = new ExportExcelTransferCommand { AuctionId = auctionId };
-                var fileBytes = await _mediator.Send(command);
-                var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
-                var base64 = Convert.ToBase64String(fileBytes);
+            var command = new ExportExcelTransferCommand { AuctionId = auctionId };
+            var fileBytes = await _mediator.Send(command);
+            var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
+            var base64 = Convert.ToBase64String(fileBytes);
 
-                var response = new ApiResponse<object>
-                {
-                    Code = 200,
-                    Message = "Xuất file Excel thành công",
-                    Data = new
-                    {
-                        FileName = fileName,
-                        ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        Base64 = base64,
-                    },
-                };
-                return Ok(response);
-            }
-            catch (Exception ex)
+            var response = new ApiResponse<object>
             {
-                var errorResponse = new ApiResponse<object>
+                Code = 200,
+                Message = "Xuất file Excel thành công",
+                Data = new
                 {
-                    Code = 400,
-                    Message = "Lỗi xuất file Excel hoàn tiền",
-                    Data = null,
-                };
-                return StatusCode(500, errorResponse);
-            }
+                    FileName = fileName,
+                    ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    Base64 = base64,
+                },
+            };
+            return Ok(response);
 
             //var command = new ExportExcelTransferCommand { AuctionId = auctionId };
             //var fileBytes = await _mediator.Send(command);

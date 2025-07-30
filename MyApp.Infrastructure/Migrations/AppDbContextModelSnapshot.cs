@@ -131,6 +131,9 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("RegisterOpenDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("RejectReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 

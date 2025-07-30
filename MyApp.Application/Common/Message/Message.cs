@@ -80,6 +80,8 @@
         public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
         public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
         public const string NEW_AUCTION_TO_CUSTOMER = "Có phiên đấu giá mới: {0}";
+        public const string AUCTION_NOT_WAITING =
+            "Phiên đấu giá không ở trạng thái chờ duyệt. Vui lòng kiểm tra lại";
         #endregion
         #region DetailAuctionDocument
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
@@ -172,6 +174,16 @@
         #endregion
         #region UpdateWinnerFlag
         public const string NOT_FOUND_ROUND_PRICES_ID_TO_UPDATE = "Không tìm thấy id cần update";
+        #endregion
+        #region ChangeStatusAuctionRound
+        public const string CHANGE_STATUS_AUCTION_ROUND_SUCCESS =
+            "Thay đổi trạng thái vòng đấu giá thành công";
+        public const string CHANGE_STATUS_AUCTION_ROUND_FAIL =
+            "Thay đổi trạng thái vòng đấu giá thất bại";
+        #endregion
+        #region GetListUserWinner
+        public const string NOT_FOUND_LIST_USER_WINNER =
+            "Không tìm thấy danh sách người thắng cuộc";
         #endregion
     }
 }

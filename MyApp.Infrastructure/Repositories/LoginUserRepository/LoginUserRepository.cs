@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using MyApp.Application.CQRS.LoginUser.Queries;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Core.DTOs.LoginUserDTO;
 using MyApp.Infrastructure.Data;
