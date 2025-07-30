@@ -75,6 +75,25 @@ namespace MyApp.Infrastructure.Repositories.Blog
             }
         }
 
+        public async Task<bool> DeleteBlogAsync(Guid blogId)
+        {
+            var blog = await context.Blogs.FirstOrDefaultAsync(b => b.BlogId == blogId);
+            if (blog == null)
+            {
+                return false;
+            }
+            try
+            {
+                context.Blogs.Remove(blog);
+                await context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public async Task<GetBlogDetailResponse?> GetBlogDetailAsync(Guid blogId)
         {
             var query = await context

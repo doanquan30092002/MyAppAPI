@@ -5,6 +5,7 @@ using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Blog.ChangeStatusBlog;
 using MyApp.Application.CQRS.Blog.CreateBlog;
+using MyApp.Application.CQRS.Blog.DeleteBlog;
 using MyApp.Application.CQRS.Blog.GetBlogDetail;
 using MyApp.Application.CQRS.Blog.GetListBlog;
 using MyApp.Application.CQRS.Blog.UpdateBlog;
@@ -97,6 +98,33 @@ namespace MyApp.Api.Controllers.BlogController
             var response = await _mediator.Send(request);
 
             return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("Delete-Blog")]
+        [Authorize(Roles = "Staff")]
+        public async Task<ActionResult> DeleteBlog([FromQuery] DeleteBlogRequest request)
+        {
+            var response = await _mediator.Send(request);
+            if (!response)
+            {
+                return Ok(
+                    new ApiResponse<bool>
+                    {
+                        Code = 500,
+                        Message = Message.DELETE_BLOG_FAIL,
+                        Data = response,
+                    }
+                );
+            }
+            return Ok(
+                new ApiResponse<bool>
+                {
+                    Code = 200,
+                    Message = Message.DELETE_BLOG_SUCCESS,
+                    Data = response,
+                }
+            );
         }
     }
 }

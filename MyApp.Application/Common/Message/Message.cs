@@ -158,6 +158,10 @@
         //  Get list blogs
         public const string GET_BLOGS_SUCCESS = "Lấy danh sách blog thành công";
         public const string GET_BLOGS_NOT_FOUND = "Không tìm thấy blog nào";
+
+        // Delete blog
+        public const string DELETE_BLOG_SUCCESS = "Xoá blog thành công";
+        public const string DELETE_BLOG_FAIL = "Xoá blog thất bại";
         #endregion
         #region GetListEnteredPrices
         public const string NOT_FOUND_LIST_ENTERED_PRICES =
