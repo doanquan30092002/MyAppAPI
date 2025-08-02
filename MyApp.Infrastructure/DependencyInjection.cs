@@ -10,6 +10,7 @@ using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
+using MyApp.Application.Interfaces.IAuctionDocuments;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.ICreateAuctionRoundRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
@@ -47,6 +48,7 @@ using MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction;
 using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionDocumentRegisted;
+using MyApp.Infrastructure.Repositories.AuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.Blog;
 using MyApp.Infrastructure.Repositories.ChangeStatusAuctionRound;
@@ -166,6 +168,8 @@ namespace MyApp.Infrastructure
                 ChangeStatusAuctionRoundRepository
             >();
             services.AddScoped<IListUserWinnerRepository, GetListUserWinnerRepository>();
+
+            services.AddScoped<IAuctionDocuments, AuctionDocumentsRepository>();
 
             return services;
         }

@@ -88,5 +88,60 @@ namespace MyApp.Infrastructure.Repositories.FindHighestPriceAndFlagRepository
 
             return new FindHighestPriceAndFlagResponse { Data = result };
         }
+
+        public async Task<FindHighestPriceAndFlagResponse> GetAllHighestPriceAndFlagByAuctionId(
+            Guid auctionId
+        )
+        {
+            var auction = await _auctionRepository.FindAuctionByIdAsync(auctionId);
+            if (auction == null)
+                throw new KeyNotFoundException("Không tìm thấy phiên đấu giá: " + auctionId);
+
+            var auctionDocuments = await _context
+                .AuctionDocuments.Include(ad => ad.User)
+                .Include(ad => ad.AuctionAsset)
+                .Where(ad => ad.AuctionAsset.AuctionId == auctionId)
+                .ToListAsync();
+
+            var result = new Dictionary<Guid, List<PriceFlagDto>>();
+
+            foreach (var doc in auctionDocuments)
+            {
+                var tagName = doc.AuctionAsset.TagName;
+                var citizenId = doc.User.CitizenIdentification;
+
+                var latestRound = await (
+                    from price in _context.AuctionRoundPrices
+                    join round in _context.AuctionRounds
+                        on price.AuctionRoundId equals round.AuctionRoundId
+                    where
+                        round.AuctionId == auctionId
+                        && price.TagName == tagName
+                        && price.CitizenIdentification == citizenId
+                    orderby round.RoundNumber descending
+                    select new { round.RoundNumber, round.AuctionRoundId }
+                ).FirstOrDefaultAsync();
+
+                if (latestRound == null)
+                    continue;
+
+                var highestPrice = await _context
+                    .AuctionRoundPrices.Where(p =>
+                        p.AuctionRoundId == latestRound.AuctionRoundId
+                        && p.TagName == tagName
+                        && p.CitizenIdentification == citizenId
+                    )
+                    .OrderByDescending(p => p.AuctionPrice)
+                    .Select(p => new PriceFlagDto { Price = p.AuctionPrice, Flag = p.FlagWinner })
+                    .FirstOrDefaultAsync();
+
+                if (highestPrice != null)
+                {
+                    result[doc.AuctionDocumentsId] = new List<PriceFlagDto> { highestPrice };
+                }
+            }
+
+            return new FindHighestPriceAndFlagResponse { Data = result };
+        }
     }
 }

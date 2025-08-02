@@ -71,5 +71,12 @@ namespace MyApp.Application.Interfaces.IAuctionRepository
         Task<bool> RejectAuctionAsync(Guid auctionId, string rejectReason);
 
         Task<bool> UpdateStatusAsync(Guid auctionId, int status);
+
+        /// <summary>
+        /// Đánh dấu phiên đấu giá là thành công.
+        /// </summary>
+        /// <param name="auctionId">ID phiên đấu giá.</param>
+        /// <returns>True nếu cập nhật thành công, false nếu thất bại.</returns>
+        Task<bool> MarkAuctionAsSuccessfulAsync(Guid auctionId);
     }
 }

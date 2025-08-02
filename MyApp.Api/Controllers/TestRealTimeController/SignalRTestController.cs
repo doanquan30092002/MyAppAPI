@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Services.ExportWord.ExportAuctionBook;
 using MyApp.Application.Common.Services.NotificationHub;
 
 namespace MyApp.Api.Controllers.TestRealTimeController
@@ -9,10 +10,15 @@ namespace MyApp.Api.Controllers.TestRealTimeController
     public class SignalRTestController : ControllerBase
     {
         private readonly INotificationSender _notificationSender;
+        private readonly IAuctionBookExporter _bookExporter;
 
-        public SignalRTestController(INotificationSender notificationSender)
+        public SignalRTestController(
+            INotificationSender notificationSender,
+            IAuctionBookExporter bookExporter
+        )
         {
             _notificationSender = notificationSender;
+            _bookExporter = bookExporter;
         }
 
         // POST: api/signalrtest/send

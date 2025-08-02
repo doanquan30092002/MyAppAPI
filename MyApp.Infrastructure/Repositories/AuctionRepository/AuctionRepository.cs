@@ -363,5 +363,30 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
 
             return true;
         }
+
+        public async Task<bool> MarkAuctionAsSuccessfulAsync(Guid auctionId)
+        {
+            var auction = await _context.Auctions.FindAsync(auctionId);
+            if (auction == null)
+            {
+                throw new KeyNotFoundException($"Phiên đấu giá {auctionId} Không tồn tại.");
+            }
+
+            if (auction.Status != 1)
+            {
+                throw new InvalidOperationException(
+                    $"Chỉ có thế chuyển trạng thái từ công khai sang thành công."
+                );
+            }
+
+            auction.Status = 2;
+            auction.UpdatedAt = DateTime.Now;
+            auction.Updateable = false;
+
+            _context.Auctions.Update(auction);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }
