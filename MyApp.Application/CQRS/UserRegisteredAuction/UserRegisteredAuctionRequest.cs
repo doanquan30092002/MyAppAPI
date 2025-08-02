@@ -11,5 +11,6 @@ namespace MyApp.Application.CQRS.UserRegisteredAuction
         )]
         public string CitizenIdentification { get; set; }
         public Guid AuctionId { get; set; }
+        public Guid? AuctionRoundId { get; set; }
     }
 }
