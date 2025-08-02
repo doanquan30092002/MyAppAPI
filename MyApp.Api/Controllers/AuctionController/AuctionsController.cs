@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
 using MyApp.Application.CQRS.Auction.CancelAuction.Commands;
+using MyApp.Application.CQRS.Auction.MarkAuctionAsSuccessful.Command;
 using MyApp.Application.CQRS.Auction.RejectAuction;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Application.CQRS.Auction.WaitingPublic.Commands;
@@ -92,6 +93,25 @@ namespace MyApp.Api.Controllers.AuctionController
                 Code = 200,
                 Message = "Từ chối phiên đấu giá thành công",
                 Data = new { AuctionId = rejectAuction.AuctionId, Status = result },
+            };
+
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Auctioneer")]
+        [HttpPut("mark-successful")]
+        public async Task<IActionResult> MarkAuctionAsSuccessful(
+            [FromBody] MarkAuctionAsSuccessfulCommand command
+        )
+        {
+            var result = await _mediator.Send(command);
+
+            var response = new ApiResponse<object>
+            {
+                Code = 200,
+                Message = "Đánh dấu phiên đấu giá thành công",
+
+                Data = new { AuctionId = command.AuctionId, Status = result },
             };
 
             return Ok(response);

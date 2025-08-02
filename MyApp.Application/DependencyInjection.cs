@@ -7,6 +7,7 @@ using Amazon.S3;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MyApp.Application.Common.Services.ExportWord.ExportAuctionBook;
 using MyApp.Application.Common.Services.ExportWord.ExportAuctionDocuments;
 using MyApp.Application.Common.Services.JwtHelper;
 using MyApp.Application.Common.Services.NotificationHub;
@@ -79,6 +80,8 @@ namespace MyApp.Application
             services.AddScoped<IExportAuctionDocuments, ExportAuctionDocuments>();
 
             services.AddScoped<INotificationSender, NotificationSender>();
+
+            services.AddScoped<IAuctionBookExporter, AuctionBookExporter>();
 
             return services;
         }
