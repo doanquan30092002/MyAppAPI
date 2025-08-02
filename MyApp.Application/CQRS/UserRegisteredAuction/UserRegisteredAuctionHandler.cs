@@ -61,10 +61,11 @@ namespace MyApp.Application.CQRS.UserRegisteredAuction
             else
             {
                 // lấy danh sách tagname của người đấu giá đã đăng ký mà phải tiếp tục đấu giá ở vòng tiếp theo
-                List<string> nextRoundTagNames = await _repository.GetNextRoundTagNamesForUserAsync(
-                    request.AuctionRoundId,
-                    request.CitizenIdentification
-                );
+                List<(string TagName, decimal AuctionPrice)> nextRoundTagNames =
+                    await _repository.GetNextRoundTagNamesForUserAsync(
+                        request.AuctionRoundId,
+                        request.CitizenIdentification
+                    );
                 if (!nextRoundTagNames.Any())
                 {
                     return new UserRegisteredAuctionResponseDTO
@@ -74,8 +75,18 @@ namespace MyApp.Application.CQRS.UserRegisteredAuction
                         Data = null,
                     };
                 }
+                var auctionPriceMap = nextRoundTagNames.ToDictionary(
+                    x => x.TagName,
+                    x => x.AuctionPrice
+                );
+
                 auctionAssets = auctionAssets
-                    .Where(a => nextRoundTagNames.Contains(a.TagName))
+                    .Where(a => auctionPriceMap.ContainsKey(a.TagName))
+                    .Select(a =>
+                    {
+                        a.StartingPrice = auctionPriceMap[a.TagName]; // gán giá trị mới
+                        return a;
+                    })
                     .ToList();
                 return new UserRegisteredAuctionResponseDTO
                 {

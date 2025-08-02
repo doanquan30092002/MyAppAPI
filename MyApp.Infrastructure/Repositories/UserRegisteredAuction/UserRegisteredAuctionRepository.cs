@@ -16,10 +16,9 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
             _context = context;
         }
 
-        public async Task<List<string>> GetNextRoundTagNamesForUserAsync(
-            Guid? auctionRoundId,
-            string citizenIdentification
-        )
+        public async Task<
+            List<(string TagName, decimal AuctionPrice)>
+        > GetNextRoundTagNamesForUserAsync(Guid? auctionRoundId, string citizenIdentification)
         {
             var result = await _context
                 .AuctionRoundPrices.Where(p =>
@@ -35,10 +34,10 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
                         .GroupBy(sub => new { sub.AuctionRoundId, sub.TagName })
                         .Any(g => g.Count() > 1)
                 )
-                .Select(p => p.TagName)
+                .Select(p => new { p.TagName, p.AuctionPrice })
                 .Distinct()
                 .ToListAsync();
-            return result;
+            return result.Select(r => (r.TagName, r.AuctionPrice)).ToList();
         }
 
         public async Task<User?> GetUserByCitizenIdAsync(string citizenId)
@@ -64,6 +63,7 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
                 {
                     AuctionAssetsId = ad.AuctionAsset.AuctionAssetsId,
                     TagName = ad.AuctionAsset.TagName,
+                    StartingPrice = ad.AuctionAsset.StartingPrice,
                 })
                 .ToListAsync();
         }

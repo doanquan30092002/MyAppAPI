@@ -5,7 +5,7 @@ namespace MyApp.Application.Interfaces.UserRegisteredAuction
 {
     public interface IUserRegisteredAuctionRepository
     {
-        Task<List<string>> GetNextRoundTagNamesForUserAsync(
+        Task<List<(string TagName, decimal AuctionPrice)>> GetNextRoundTagNamesForUserAsync(
             Guid? auctionRoundId,
             string citizenIdentification
         );
