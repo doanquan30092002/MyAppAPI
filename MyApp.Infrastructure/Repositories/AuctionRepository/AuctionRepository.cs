@@ -121,10 +121,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             return await _context.Auctions.FirstOrDefaultAsync(a => a.AuctionId == auctionId);
         }
 
-        public async Task<UpdateAuctionResult> UpdateAuctionAsync(
-            UpdateAuctionCommand command,
-            Guid userId
-        )
+        public async Task<bool> UpdateAuctionAsync(UpdateAuctionCommand command, Guid userId)
         {
             var auction = await _context.Auctions.FirstOrDefaultAsync(a =>
                 a.AuctionId == command.AuctionId
@@ -196,12 +193,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
 
             _context.Auctions.Update(auction);
 
-            return new UpdateAuctionResult
-            {
-                AuctionId = auction.AuctionId,
-                StatusChangedToTrue = (oldStatus == 0 && newStatus == 1),
-                AuctionEndDate = auction.AuctionEndDate,
-            };
+            return true;
         }
 
         public async Task UpdateAuctionUpdateableAsync(Guid auctionId, bool updateable)

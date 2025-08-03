@@ -87,7 +87,16 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             UpdateAuctionResult updateResult;
             try
             {
-                updateResult = await _auctionRepository.UpdateAuctionAsync(request, userId.Value);
+                bool updateSuccess = await _auctionRepository.UpdateAuctionAsync(
+                    request,
+                    userId.Value
+                );
+
+                if (!updateSuccess)
+                {
+                    await _unitOfWork.RollbackAsync();
+                    throw new InvalidOperationException("Cập nhật phiên đấu giá thất bại.");
+                }
 
                 if (request.AuctionAssetFile != null && request.AuctionAssetFile.Length > 0)
                 {

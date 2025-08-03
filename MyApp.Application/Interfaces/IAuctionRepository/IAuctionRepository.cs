@@ -20,7 +20,7 @@ namespace MyApp.Application.Interfaces.IAuctionRepository
         /// <param name="command">Lệnh cập nhật phiên đấu giá.</param>
         /// <param name="userId">Id người thực hiện cập nhật.</param>
         /// <returns>Kết quả cập nhật đấu giá.</returns>
-        Task<UpdateAuctionResult> UpdateAuctionAsync(UpdateAuctionCommand command, Guid userId);
+        Task<bool> UpdateAuctionAsync(UpdateAuctionCommand command, Guid userId);
 
         /// <summary>
         /// Tìm phiên đấu giá theo Id.
