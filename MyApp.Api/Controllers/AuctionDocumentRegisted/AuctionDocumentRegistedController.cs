@@ -26,7 +26,7 @@ namespace MyApp.Api.Controllers.AuctionDocumentRegisted
                     new ApiResponse<List<AuctionDocumentRegistedResponse>>
                     {
                         Code = 404,
-                        Message = Message.GET_AUCTION_DOCUMENT_REGISTED_NOT_EXSIT,
+                        Message = Message.GET_AUCTION_DOCUMENT_REGISTED_NOT_EXIST,
                         Data = null,
                     }
                 );

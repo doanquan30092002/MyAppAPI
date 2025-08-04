@@ -6,6 +6,7 @@ using MyApp.Application.Interfaces.AuctionDocumentRegisted;
 using MyApp.Application.Interfaces.Blog;
 using MyApp.Application.Interfaces.ChangeStatusAuctionRound;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
+using MyApp.Application.Interfaces.EmployeeManager;
 using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
@@ -54,6 +55,7 @@ using MyApp.Infrastructure.Repositories.Blog;
 using MyApp.Infrastructure.Repositories.ChangeStatusAuctionRound;
 using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
+using MyApp.Infrastructure.Repositories.EmployeeManager;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.FindHighestPriceAndFlagRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
@@ -170,6 +172,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<IListUserWinnerRepository, GetListUserWinnerRepository>();
 
             services.AddScoped<IAuctionDocuments, AuctionDocumentsRepository>();
+            services.AddScoped<IEmployeeManagerRepository, EmployeeManagerRepository>();
 
             return services;
         }

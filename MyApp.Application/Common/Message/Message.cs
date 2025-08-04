@@ -185,5 +185,19 @@
         public const string NOT_FOUND_LIST_USER_WINNER =
             "Không tìm thấy danh sách người thắng cuộc";
         #endregion
+        #region EmployeeManager
+        public const string GET_LIST_EMPLOYEE_ACCOUNT_SUCCESS =
+            "Lấy danh sách tài khoản nhân viên thành công";
+        public const string GET_LIST_EMPLOYEE_ACCOUNT_NOT_FOUND =
+            "Không tìm thấy danh sách tài khoản nhân viên";
+        public const string CHANGE_STATUS_EMPLOYEE_ACCOUNT_SUCCESS =
+            "Thay đổi trạng thái tài khoản nhân viên thành công";
+        public const string CHANGE_STATUS_EMPLOYEE_ACCOUNT_FAIL =
+            "Thay đổi trạng thái tài khoản nhân viên thất bại";
+        public const string CHANGE_PERMISSTION_EMPLOYEE_ACCOUNT_FAIL =
+            "Thay đổi quyền hạn tài khoản nhân viên thất bại";
+        public const string CHANGE_PERMISSTION_EMPLOYEE_ACCOUNT_SUCCESS =
+            "Thay đổi quyền hạn tài khoản nhân viên thành công";
+        #endregion
     }
 }
