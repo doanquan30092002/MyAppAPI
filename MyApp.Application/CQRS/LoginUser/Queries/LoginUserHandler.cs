@@ -35,31 +35,24 @@ namespace MyApp.Application.CQRS.LoginUser.Queries
                 if (account.IsActive)
                 {
                     var user = await loginUserRepository.GetUserByEmail(account.Email);
-                    // check valid date
-                    if (user.ValidDate > DateTime.UtcNow.Date)
-                    {
-                        var role = await loginUserRepository.GetRoleNameByEmail(account.Email);
 
-                        var result = new LoginUserResponseDTO
-                        {
-                            Token = tokenRepository.CreateJWTToken(user, role),
-                            Message = Message.LOGIN_SUCCESS,
-                            Id = user.Id,
-                            Email = account.Email,
-                            Name = user.Name,
-                            RoleName = role,
-                        };
+                    var role = await loginUserRepository.GetRoleNameByEmail(account.Email);
 
-                        return result;
-                    }
-                    else
+                    var result = new LoginUserResponseDTO
                     {
-                        return new LoginUserResponseDTO
-                        {
-                            Token = null,
-                            Message = Message.EXPIRED_CITIZEN_IDENTIFICATION,
-                        };
-                    }
+                        Token = tokenRepository.CreateJWTToken(user, role),
+                        // check valid date
+                        Message =
+                            user.ValidDate > DateTime.UtcNow.Date
+                                ? Message.LOGIN_SUCCESS
+                                : Message.EXPIRED_CITIZEN_IDENTIFICATION,
+                        Id = user.Id,
+                        Email = account.Email,
+                        Name = user.Name,
+                        RoleName = role,
+                    };
+
+                    return result;
                 }
                 else
                 {
