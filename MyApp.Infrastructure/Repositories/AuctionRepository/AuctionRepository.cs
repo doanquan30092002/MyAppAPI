@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
@@ -19,11 +20,17 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
     {
         private readonly AppDbContext _context;
         private readonly IUploadFile _uploadFileService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuctionRepository(AppDbContext context, IUploadFile uploadFileService)
+        public AuctionRepository(
+            AppDbContext context,
+            IUploadFile uploadFileService,
+            IHttpContextAccessor httpContextAccessor
+        )
         {
             _context = context;
             _uploadFileService = uploadFileService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Guid> AddAuctionAsync(AddAuctionCommand command, Guid userId)
@@ -242,6 +249,144 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 .ToListAsync();
 
             return emails;
+        }
+
+        public async Task<bool> WaitingPublicAsync(Guid auctionId)
+        {
+            Guid? userId = null;
+            var userIdStr = _httpContextAccessor
+                .HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
+                ?.Value;
+
+            if (Guid.TryParse(userIdStr, out var parsedGuid))
+            {
+                userId = parsedGuid;
+            }
+
+            if (userId == null)
+                throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
+
+            var auction = await _context.Auctions.FirstOrDefaultAsync(a =>
+                a.AuctionId == auctionId
+            );
+
+            if (auction == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy phiên đấu giá.");
+            }
+
+            // Chỉ cho phép chuyển từ Draft (0) hoặc Rejected (6) sang Waiting Public (4)
+            if (auction.Status != 0 && auction.Status != 6)
+            {
+                throw new ValidationException(
+                    "Chỉ những phiên đấu giá ở trạng thái bản nháp hoặc bị từ chối mới có thể chuyển sang chờ công bố."
+                );
+            }
+
+            // Kiểm tra thời điểm hiện tại phải trước ngày bắt đầu đấu giá
+            if (DateTime.Now >= auction.AuctionStartDate)
+            {
+                throw new ValidationException(
+                    "Không thể chuyển sang trạng thái chờ công bố vì đã quá thời gian bắt đầu đấu giá."
+                );
+            }
+
+            auction.Status = 4; // Trạng thái chờ công bố
+            auction.UpdatedAt = DateTime.Now;
+            auction.RejectReason = null;
+            auction.UpdatedBy = userId.Value;
+            auction.Updateable = false;
+
+            _context.Auctions.Update(auction);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> RejectAuctionAsync(Guid auctionId, string rejectReason)
+        {
+            Guid? userId = null;
+            var userIdStr = _httpContextAccessor
+                .HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
+                ?.Value;
+
+            if (Guid.TryParse(userIdStr, out var parsedGuid))
+            {
+                userId = parsedGuid;
+            }
+
+            if (userId == null)
+                throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
+
+            var auction = await _context.Auctions.FirstOrDefaultAsync(a =>
+                a.AuctionId == auctionId
+            );
+
+            if (auction == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy phiên đấu giá.");
+            }
+
+            // Kiểm tra trạng thái phải là chờ công bố (4)
+            if (auction.Status != 4)
+            {
+                throw new ValidationException(
+                    "Chỉ những phiên đấu giá ở trạng thái chờ công bố mới được từ chối."
+                );
+            }
+
+            auction.Status = 6; // Trạng thái bị từ chối
+            auction.RejectReason = rejectReason;
+            auction.UpdatedAt = DateTime.Now;
+            auction.UpdatedBy = userId.Value;
+            auction.Updateable = true;
+
+            _context.Auctions.Update(auction);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UpdateStatusAsync(Guid auctionId, int status)
+        {
+            var auction = await _context.Auctions.FindAsync(auctionId);
+            if (auction == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy phiên đấu giá " + auctionId);
+            }
+
+            auction.Status = status;
+            auction.UpdatedAt = DateTime.UtcNow;
+
+            _context.Auctions.Update(auction);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> MarkAuctionAsSuccessfulAsync(Guid auctionId)
+        {
+            var auction = await _context.Auctions.FindAsync(auctionId);
+            if (auction == null)
+            {
+                throw new KeyNotFoundException($"Phiên đấu giá {auctionId} Không tồn tại.");
+            }
+
+            if (auction.Status != 1)
+            {
+                throw new InvalidOperationException(
+                    $"Chỉ có thế chuyển trạng thái từ công khai sang thành công."
+                );
+            }
+
+            auction.Status = 2;
+            auction.UpdatedAt = DateTime.Now;
+            auction.Updateable = false;
+
+            _context.Auctions.Update(auction);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

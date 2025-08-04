@@ -68,6 +68,9 @@
         public const string REGISTER_AUCTION_DOCUMENT_FAIL = "Lỗi khi tạo phiếu đăng ký hồ sơ";
         public const string AUCTION_DOCUMENT_EXIST =
             "Bạn đã đăng ký mua hồ sơ tham gia đấu giá cho tài sản này. Vui lòng xem lịch sử mua hồ sơ";
+        public const string CUSTOMER_REGISTED_AUCTION =
+            "Có khách hàng vừa tham gia đấu giá phiên: {0}";
+
         #endregion
         #region AssginAuctioneerAndPublicAuction
         public const string AUCTIONEER_ASSIGNED_ANOTHER_AUCTION =
@@ -76,6 +79,9 @@
             "Phiên đấu giá đã được công khai";
         public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
         public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
+        public const string NEW_AUCTION_TO_CUSTOMER = "Có phiên đấu giá mới: {0}";
+        public const string AUCTION_NOT_WAITING =
+            "Phiên đấu giá không ở trạng thái chờ duyệt. Vui lòng kiểm tra lại";
         #endregion
         #region DetailAuctionDocument
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
@@ -86,6 +92,8 @@
             "Nhận hồ sơ đăng ký tham gia đấu giá thành công";
         public const string RECEIVE_AUCTION_REGISTRATION_FORM_FAIL =
             "Nhận hồ sơ đăng ký tham gia đấu giá thất bại";
+        public const string RECEIVED_FORM_SUCCESS =
+            "Công ty đã nhận được hồ sơ đăng ký tham gia đấu gia phiên: {}";
         #endregion
         #region GenarateNumbericalOrder
         public const string GENARATE_NUMBERICAL_ORDER_SUCCESS = "Tạo số thứ tự thành công";
@@ -106,12 +114,76 @@
         #region GetListAuctionRegisted
         public const string GET_LIST_AUCTION_REGISTED_SUCCESS =
             "Lấy danh sách đấu giá đã đăng ký thành công";
-        public const string GET_LIST_AUCTION_REGISTED_NOT_EXSIT = "Không có đấu giá nào đã đăng ký";
+        public const string GET_LIST_AUCTION_REGISTED_NOT_EXIST = "Không có đấu giá nào đã đăng ký";
         #endregion
         #region AuctionDocumentRegisted
         public const string GET_AUCTION_DOCUMENT_REGISTED_SUCCESS =
             "Lấy thông tin hồ sơ đăng ký thành công";
-        public const string GET_AUCTION_DOCUMENT_REGISTED_NOT_EXSIT = "Không có hồ sơ đăng ký nào";
+        public const string GET_AUCTION_DOCUMENT_REGISTED_NOT_EXIST = "Không có hồ sơ đăng ký nào";
+        #endregion
+        #region UserRegisteredAuction
+        public const string GET_USER_REGISTERED_AUCTION_SUCCESS =
+            "Lấy thông tin người dùng đã đăng ký thành công";
+        public const string USER_NOT_REGISTERED_OR_INELIGIBLE_PARTICIPATE =
+            "Người dùng chưa đăng ký hoặc không đủ điều kiện tham gia đấu giá";
+        public const string CITIZEN_NOT_EXIST = "Căn cước công dân không tồn tại trong hệ thống";
+        #endregion
+        #region CreateAuctionRound
+        public const string CREATE_AUCTION_ROUND_SUCCESS = "Tạo vòng đấu giá thành công";
+        public const string CREATE_AUCTION_ROUND_FAIL = "Tạo vòng đấu giá thất bại";
+        #endregion
+        #region CreateAuctionRound
+        public const string NOT_FOUND_ROUND_BY_AUCTION_ID =
+            "Không tồn tại vòng trả giá với id được nhập";
+        #endregion
+        #region SaveListPrices
+        public const string SAVE_LIST_PRICES_SUCCESS = "Lưu danh sách giá thành công";
+        public const string SAVE_LIST_PRICES_FAIL = "Lưu danh sách giá thất bại";
+        #endregion
+        #region Blog
+        // Create blog
+        public const string CREATE_BLOG_SUCCESS = "Tạo blog thành công";
+        public const string CREATE_BLOG_FAIL = "Tạo blog thất bại";
+
+        // Get blog detail
+        public const string GET_BLOG_SUCCESS = "Lấy blog thành công";
+        public const string GET_BLOG_NOT_FOUND = "Lấy blog thất bại";
+
+        // Update blog
+        public const string UPDATE_BLOG_SUCCESS = "Cập nhật blog thành công";
+        public const string UPDATE_BLOG_FAIL = "Cập nhật blog thất bại";
+
+        // Change status blog
+        public const string UPDATE_STATUS_BLOG_SUCCESS = "Cập nhật blog thành công";
+        public const string UPDATE_STATUS_BLOG_FAIL = "Cập nhật blog thất bại";
+
+        //  Get list blogs
+        public const string GET_BLOGS_SUCCESS = "Lấy danh sách blog thành công";
+        public const string GET_BLOGS_NOT_FOUND = "Không tìm thấy blog nào";
+
+        // Delete blog
+        public const string DELETE_BLOG_SUCCESS = "Xoá blog thành công";
+        public const string DELETE_BLOG_FAIL = "Xoá blog thất bại";
+        #endregion
+        #region GetListEnteredPrices
+        public const string NOT_FOUND_LIST_ENTERED_PRICES =
+            "Không tìm thấy danh sách giá được nhập";
+        #endregion
+        #region GetAuction
+        public const string NOT_FOUND_AUCTION = "Không tìm thấy phiên đấu giá";
+        #endregion
+        #region UpdateWinnerFlag
+        public const string NOT_FOUND_ROUND_PRICES_ID_TO_UPDATE = "Không tìm thấy id cần update";
+        #endregion
+        #region ChangeStatusAuctionRound
+        public const string CHANGE_STATUS_AUCTION_ROUND_SUCCESS =
+            "Thay đổi trạng thái vòng đấu giá thành công";
+        public const string CHANGE_STATUS_AUCTION_ROUND_FAIL =
+            "Thay đổi trạng thái vòng đấu giá thất bại";
+        #endregion
+        #region GetListUserWinner
+        public const string NOT_FOUND_LIST_USER_WINNER =
+            "Không tìm thấy danh sách người thắng cuộc";
         #endregion
     }
 }

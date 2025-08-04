@@ -11,6 +11,8 @@
             Guid auctioneerId,
             string userId
         );
-        Task GenerateNumbericalOrderAsync(Guid auctionId);
+        Task<List<Guid>> GetAllUserIdRoleCustomer();
+        Task<bool> SaveNotificationAsync(List<Guid> userIds, string message);
+        Task<bool> CheckStatusAuctionIsWaitingAsync(Guid auctionId);
     }
 }

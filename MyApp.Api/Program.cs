@@ -112,7 +112,9 @@ builder.Services.AddCors(options =>
                 .WithOrigins(
                     "http://localhost:5173",
                     "https://digitalauction-fe.pages.dev",
-                    "http://localhost:3000"
+                    "http://localhost:3000",
+                    "http://auctiondigital.mooo.com",
+                    "http://161.248.147.123:4000"
                 )
                 .AllowCredentials()
                 .AllowAnyHeader()

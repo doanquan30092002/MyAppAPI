@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MyApp.Core.Entities;
 
 namespace MyApp.Core.Entities
 {
@@ -21,5 +22,8 @@ namespace MyApp.Core.Entities
         public decimal AuctionPrice { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public Guid CreatedBy { get; set; }
+
+        public bool FlagWinner { get; set; } = false;
     }
 }
+// tren FE truyen auctionId , TagName ,  UserId

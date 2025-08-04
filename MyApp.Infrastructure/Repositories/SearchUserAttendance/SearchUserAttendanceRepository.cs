@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.SearchUserAttendance.Queries;
 using MyApp.Application.Interfaces.SearchUserAttendance;
-using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
@@ -21,7 +15,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
             this.context = context;
         }
 
-        public async Task<SearchUserAttendanceResponse> SearchUserAttendanceAsync(
+        public async Task<SearchUserAttendanceResponseDTO> SearchUserAttendanceAsync(
             Guid auctionId,
             string citizenIdentification
         )
@@ -41,7 +35,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
                     .FirstOrDefaultAsync();
                 if (numericalOrder != null)
                 {
-                    return new SearchUserAttendanceResponse
+                    return new SearchUserAttendanceResponseDTO
                     {
                         Message = Message.FOUND_NUMERICAL_ORDER,
                         AuctionName = auctionSearch.AuctionName,
@@ -50,7 +44,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
                 }
                 else
                 {
-                    return new SearchUserAttendanceResponse
+                    return new SearchUserAttendanceResponseDTO
                     {
                         Message = Message.NOT_FOUND_NUMERICAL_ORDER,
                         AuctionName = auctionSearch.AuctionName,
@@ -58,7 +52,7 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
                     };
                 }
             }
-            return new SearchUserAttendanceResponse
+            return new SearchUserAttendanceResponseDTO
             {
                 Message = Message.AUCTION_NOT_EXIST,
                 AuctionName = null,

@@ -37,7 +37,7 @@ namespace MyApp.Api.Controllers.LoginUserController
                 );
             }
             return Ok(
-                new
+                new ApiResponse<LoginUserResponse>
                 {
                     Code = string.IsNullOrEmpty(response.Token) ? 400 : 200,
                     Message = response.Message,

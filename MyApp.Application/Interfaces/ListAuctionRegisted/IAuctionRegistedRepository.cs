@@ -4,6 +4,9 @@ namespace MyApp.Application.Interfaces.ListAuctionRegisted
 {
     public interface IAuctionRegistedRepository
     {
-        Task<List<AuctionRegistedResponse>?> ListAuctionRegisted(string? userId);
+        Task<AuctionRegistedResponse> ListAuctionRegisted(
+            string? userId,
+            AuctionRegistedRequest request
+        );
     }
 }

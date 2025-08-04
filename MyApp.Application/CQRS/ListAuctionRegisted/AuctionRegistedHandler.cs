@@ -6,7 +6,7 @@ using MyApp.Application.Interfaces.ListAuctionRegisted;
 namespace MyApp.Application.CQRS.ListAuctionRegisted
 {
     public class AuctionRegistedHandler
-        : IRequestHandler<AuctionRegistedRequest, List<AuctionRegistedResponse>?>
+        : IRequestHandler<AuctionRegistedRequest, AuctionRegistedResponse>
     {
         private readonly IAuctionRegistedRepository _repository;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -20,7 +20,7 @@ namespace MyApp.Application.CQRS.ListAuctionRegisted
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<List<AuctionRegistedResponse?>> Handle(
+        public async Task<AuctionRegistedResponse> Handle(
             AuctionRegistedRequest request,
             CancellationToken cancellationToken
         )
@@ -29,7 +29,10 @@ namespace MyApp.Application.CQRS.ListAuctionRegisted
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
 
-            List<AuctionRegistedResponse>? response = await _repository.ListAuctionRegisted(userId);
+            AuctionRegistedResponse response = await _repository.ListAuctionRegisted(
+                userId,
+                request
+            );
             return response;
         }
     }

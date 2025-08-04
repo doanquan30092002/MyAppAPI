@@ -31,7 +31,7 @@ namespace MyApp.Core.Entities
 
         public int NumberRoundMax { get; set; }
 
-        //0: bản nháp, 1: công khai, 2:Hoàn thành, 3:Hủy
+        //0: bản nháp, 1: công khai, 2:Hoàn thành, 3:Hủy, 4 : Chờ duyệt
         public int Status { get; set; }
 
         public string? WinnerData { get; set; }
@@ -45,6 +45,8 @@ namespace MyApp.Core.Entities
         public string? CancelReasonFile { get; set; }
 
         public string? CancelReason { get; set; }
+
+        public string? RejectReason { get; set; }
         public Guid? Auctioneer { get; set; }
 
         [ForeignKey("Auctioneer")]

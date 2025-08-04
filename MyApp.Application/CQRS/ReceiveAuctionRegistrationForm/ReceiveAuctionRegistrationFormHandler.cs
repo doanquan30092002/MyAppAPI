@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
+using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
 
 namespace MyApp.Application.CQRS.ReceiveAuctionRegistrationForm
@@ -12,12 +9,15 @@ namespace MyApp.Application.CQRS.ReceiveAuctionRegistrationForm
         : IRequestHandler<ReceiveAuctionRegistrationFormRequest, bool>
     {
         IReceiveAuctionRegistrationFormRepository _repository;
+        private readonly INotificationSender _notificationSender;
 
         public ReceiveAuctionRegistrationFormHandler(
-            IReceiveAuctionRegistrationFormRepository repository
+            IReceiveAuctionRegistrationFormRepository repository,
+            INotificationSender notificationSender
         )
         {
             _repository = repository;
+            _notificationSender = notificationSender;
         }
 
         public async Task<bool> Handle(
@@ -26,6 +26,22 @@ namespace MyApp.Application.CQRS.ReceiveAuctionRegistrationForm
         )
         {
             var response = await _repository.UpdateStatusTicketSigned(request.AuctionDocumentsId);
+            if (response)
+            {
+                // get userId of the auction document
+                List<Guid> userId = await _repository.GetUserIdByAuctionDocumentId(
+                    request.AuctionDocumentsId
+                );
+                // get auction name by auctionDocumentsId
+                string auctionName = await _repository.GetAuctionNameByAuctionDocumentsIdAsync(
+                    request.AuctionDocumentsId
+                );
+                // save notification to the database
+                var message = Message.RECEIVED_FORM_SUCCESS;
+                await _notificationSender.SendToUsersAsync(userId, message);
+                // send notification to the user
+                await _repository.SaveNotificationAsync(userId, message);
+            }
             return response;
         }
     }

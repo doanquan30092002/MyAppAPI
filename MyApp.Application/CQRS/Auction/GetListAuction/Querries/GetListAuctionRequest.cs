@@ -18,13 +18,6 @@ namespace MyApp.Application.CQRS.Auction.GetListAution.Querries
 
         public int? Status { get; set; }
 
-        public DateTime? RegisterOpenDate { get; set; }
-        public DateTime? RegisterEndDate { get; set; }
-
-        public DateTime? AuctionStartDate { get; set; }
-
-        public DateTime? AuctionEndDate { get; set; }
-
         public string? SortBy { get; set; }
 
         public bool IsAscending { get; set; } = true;
@@ -32,5 +25,12 @@ namespace MyApp.Application.CQRS.Auction.GetListAution.Querries
         public int? PageNumber { get; set; }
 
         public int? PageSize { get; set; }
+
+        // 1: Danh sách phiên đấu giá đang thu hồ sơ
+        // 2: Danh sách phiên đấu giá chuẩn bị tổ chức
+        // 3: Danh sách phiên đấu giá hôm nay tổ chức
+        // 4: Danh sách phiên đấu giá đã kết thúc
+        public List<int>? ConditionAuction { get; set; }
+        public Guid? CreatedBy { get; set; }
     }
 }

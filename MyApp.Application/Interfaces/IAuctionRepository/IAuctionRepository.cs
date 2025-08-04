@@ -53,5 +53,30 @@ namespace MyApp.Application.Interfaces.IAuctionRepository
         Task<List<AuctionDocuments>> GetPaidOrDepositedDocumentsByAuctionIdAsync(Guid auctionId);
 
         Task<List<string>> GetEmailsByUserIdsAsync(List<Guid> userIds);
+
+        /// <summary>
+        /// Cập nhật trạng thái phiên đấu giá sang chờ công bố.
+        /// </summary>
+        /// <param name="auctionId">Id phiên đấu giá.</param>
+        /// <returns>Task hoàn thành.</returns>
+        Task<bool> WaitingPublicAsync(Guid auctionId);
+
+        /// <summary>
+        /// Từ chối phiên đấu giá ở trạng thái chờ công bố.
+        /// </summary>
+        /// <param name="auctionId">ID phiên đấu giá.</param>
+        /// <param name="rejectReason">Lý do từ chối.</param>
+        /// <param name="userId">ID người thực hiện từ chối.</param>
+        /// <returns>True nếu thành công, ngược lại ném lỗi.</returns>
+        Task<bool> RejectAuctionAsync(Guid auctionId, string rejectReason);
+
+        Task<bool> UpdateStatusAsync(Guid auctionId, int status);
+
+        /// <summary>
+        /// Đánh dấu phiên đấu giá là thành công.
+        /// </summary>
+        /// <param name="auctionId">ID phiên đấu giá.</param>
+        /// <returns>True nếu cập nhật thành công, false nếu thất bại.</returns>
+        Task<bool> MarkAuctionAsSuccessfulAsync(Guid auctionId);
     }
 }

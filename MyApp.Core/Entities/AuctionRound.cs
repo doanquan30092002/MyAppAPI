@@ -13,8 +13,9 @@ namespace MyApp.Core.Entities
         public Auction Auction { get; set; }
 
         public int RoundNumber { get; set; }
-        public decimal? HighestBid { get; set; }
 
+        // 1 : đang diễn ra
+        // 2 : kết thúc
         public int Status { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;

@@ -16,22 +16,37 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
         }
 
         public async Task<GetListAuctionResponse> GetListAuctionsAsync(
-            GetListAuctionRequest getListAuctionRequest
+            GetListAuctionRequest getListAuctionRequest,
+            string? userId = null
         )
         {
             try
             {
-                // Initialize query with includes
-                var query = context
-                    .Auctions.Include(a => a.CreatedByUser)
-                    .Include(a => a.Category)
-                    .AsQueryable();
+                // Initialize query with joins
+                var query =
+                    from auction in context.Auctions
+                    join category in context.AuctionCategories
+                        on auction.CategoryId equals category.CategoryId
+                    join createdUser in context.Users on auction.CreatedBy equals createdUser.Id
+                    join updatedUser in context.Users on auction.UpdatedBy equals updatedUser.Id
+                    join auctioneerUser in context.Users
+                        on auction.Auctioneer equals auctioneerUser.Id
+                        into auctioneerJoin
+                    from auctioneer in auctioneerJoin.DefaultIfEmpty() // Left join for Auctioneer
+                    select new
+                    {
+                        auction,
+                        category,
+                        createdUser,
+                        updatedUser,
+                        auctioneer,
+                    };
 
                 // Filter by AuctionName if provided (case-insensitive)
                 if (!string.IsNullOrEmpty(getListAuctionRequest.AuctionName))
                 {
                     query = query.Where(a =>
-                        a.AuctionName.ToLower()
+                        a.auction.AuctionName.ToLower()
                             .Contains(getListAuctionRequest.AuctionName.ToLower())
                     );
                 }
@@ -40,61 +55,61 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                 if (getListAuctionRequest.CategoryId.HasValue)
                 {
                     query = query.Where(a =>
-                        a.CategoryId == getListAuctionRequest.CategoryId.Value
+                        a.auction.CategoryId == getListAuctionRequest.CategoryId.Value
                     );
                 }
 
+                // Filter by Status if provided
                 if (getListAuctionRequest.Status.HasValue)
                 {
-                    query = query.Where(a => a.Status == getListAuctionRequest.Status.Value);
-                }
-
-                // Filter by RegisterOpenDate and RegisterEndDate
-                if (
-                    getListAuctionRequest.RegisterOpenDate.HasValue
-                    && getListAuctionRequest.RegisterEndDate.HasValue
-                )
-                {
                     query = query.Where(a =>
-                        a.RegisterOpenDate >= getListAuctionRequest.RegisterOpenDate.Value
-                        && a.RegisterEndDate <= getListAuctionRequest.RegisterEndDate.Value
+                        a.auction.Status == getListAuctionRequest.Status.Value
                     );
                 }
-                else if (getListAuctionRequest.RegisterOpenDate.HasValue)
+                // Filter by ConditionAuction
+                if (getListAuctionRequest.ConditionAuction != null)
+                {
+                    foreach (var condition in getListAuctionRequest.ConditionAuction)
+                    {
+                        switch (condition)
+                        {
+                            case 1: // Đang thu hồ sơ
+                                query = query.Where(a =>
+                                    a.auction.RegisterOpenDate <= DateTime.Now
+                                    && a.auction.RegisterEndDate >= DateTime.Now
+                                );
+                                break;
+                            case 2: // Chuẩn bị tổ chức
+                                query = query.Where(a =>
+                                    a.auction.RegisterEndDate < DateTime.Now
+                                    && a.auction.AuctionStartDate > DateTime.Now
+                                );
+                                break;
+                            case 3: // Hôm nay tổ chức
+                                query = query.Where(a =>
+                                    a.auction.AuctionStartDate <= DateTime.Now
+                                    && a.auction.AuctionEndDate >= DateTime.Now
+                                );
+                                break;
+                            case 4: // Đã kết thúc
+                                query = query.Where(a => a.auction.AuctionEndDate < DateTime.Now);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                // Filter by CreatedBy if provided
+                if (getListAuctionRequest.CreatedBy.HasValue)
                 {
                     query = query.Where(a =>
-                        a.RegisterOpenDate >= getListAuctionRequest.RegisterOpenDate.Value
+                        a.auction.CreatedBy == getListAuctionRequest.CreatedBy
                     );
                 }
-                else if (getListAuctionRequest.RegisterEndDate.HasValue)
+                // Filter by userId if provided
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    query = query.Where(a =>
-                        a.RegisterEndDate <= getListAuctionRequest.RegisterEndDate.Value
-                    );
-                }
-
-                // Filter by AuctionStartDate and AuctionEndDate
-                if (
-                    getListAuctionRequest.AuctionStartDate.HasValue
-                    && getListAuctionRequest.AuctionEndDate.HasValue
-                )
-                {
-                    query = query.Where(a =>
-                        a.AuctionStartDate >= getListAuctionRequest.AuctionStartDate.Value
-                        && a.AuctionEndDate <= getListAuctionRequest.AuctionEndDate.Value
-                    );
-                }
-                else if (getListAuctionRequest.AuctionStartDate.HasValue)
-                {
-                    query = query.Where(a =>
-                        a.AuctionStartDate >= getListAuctionRequest.AuctionStartDate.Value
-                    );
-                }
-                else if (getListAuctionRequest.AuctionEndDate.HasValue)
-                {
-                    query = query.Where(a =>
-                        a.AuctionEndDate <= getListAuctionRequest.AuctionEndDate.Value
-                    );
+                    query = query.Where(a => a.auction.Auctioneer == Guid.Parse(userId));
                 }
 
                 // Calculate total count before pagination
@@ -107,43 +122,68 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                     {
                         case "status":
                             query = getListAuctionRequest.IsAscending
-                                ? query.OrderBy(a => a.Status)
-                                : query.OrderByDescending(a => a.Status);
+                                ? query.OrderBy(a => a.auction.Status)
+                                : query.OrderByDescending(a => a.auction.Status);
                             break;
 
                         case "auction_name":
                             query = getListAuctionRequest.IsAscending
-                                ? query.OrderBy(a => a.AuctionName)
-                                : query.OrderByDescending(a => a.AuctionName);
+                                ? query.OrderBy(a => a.auction.AuctionName)
+                                : query.OrderByDescending(a => a.auction.AuctionName);
                             break;
                         case "register_open_date":
                             query = getListAuctionRequest.IsAscending
-                                ? query.OrderBy(a => a.RegisterOpenDate)
-                                : query.OrderByDescending(a => a.RegisterOpenDate);
+                                ? query.OrderBy(a => a.auction.RegisterOpenDate)
+                                : query.OrderByDescending(a => a.auction.RegisterOpenDate);
                             break;
                         case "register_end_date":
                             query = getListAuctionRequest.IsAscending
-                                ? query.OrderBy(a => a.RegisterEndDate)
-                                : query.OrderByDescending(a => a.RegisterEndDate);
+                                ? query.OrderBy(a => a.auction.RegisterEndDate)
+                                : query.OrderByDescending(a => a.auction.RegisterEndDate);
                             break;
                         case "auction_start_date":
                             query = getListAuctionRequest.IsAscending
-                                ? query.OrderBy(a => a.AuctionStartDate)
-                                : query.OrderByDescending(a => a.AuctionStartDate);
+                                ? query.OrderBy(a => a.auction.AuctionStartDate)
+                                : query.OrderByDescending(a => a.auction.AuctionStartDate);
                             break;
                         case "auction_end_date":
                             query = getListAuctionRequest.IsAscending
-                                ? query.OrderBy(a => a.AuctionEndDate)
-                                : query.OrderByDescending(a => a.AuctionEndDate);
+                                ? query.OrderBy(a => a.auction.AuctionEndDate)
+                                : query.OrderByDescending(a => a.auction.AuctionEndDate);
+                            break;
+                        case "created_by_username":
+                            query = getListAuctionRequest.IsAscending
+                                ? query.OrderBy(a => a.createdUser.Name)
+                                : query.OrderByDescending(a => a.createdUser.Name);
+                            break;
+                        case "update_by_username":
+                            query = getListAuctionRequest.IsAscending
+                                ? query
+                                    .OrderBy(a => a.updatedUser != null ? a.updatedUser.Name : null)
+                                    .ThenBy(a => a.auction.AuctionId)
+                                : query
+                                    .OrderByDescending(a =>
+                                        a.updatedUser != null ? a.updatedUser.Name : null
+                                    )
+                                    .ThenByDescending(a => a.auction.AuctionId);
+                            break;
+                        case "auctioneer_by":
+                            query = getListAuctionRequest.IsAscending
+                                ? query.OrderBy(a =>
+                                    a.auctioneer != null ? a.auctioneer.Name : null
+                                )
+                                : query.OrderByDescending(a =>
+                                    a.auctioneer != null ? a.auctioneer.Name : null
+                                );
                             break;
                         default:
-                            query = query.OrderBy(a => a.CreatedAt); // Default sort by CreatedAt
+                            query = query.OrderBy(a => a.auction.CreatedAt); // Default sort by CreatedAt
                             break;
                     }
                 }
                 else
                 {
-                    query = query.OrderBy(a => a.CreatedAt); // Default sort by CreatedAt
+                    query = query.OrderBy(a => a.auction.CreatedAt); // Default sort by CreatedAt
                 }
 
                 // Apply pagination
@@ -156,15 +196,17 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                 var auctions = await query
                     .Select(a => new ListAuctionDTO
                     {
-                        AuctionId = a.AuctionId,
-                        AuctionName = a.AuctionName,
-                        CategoryId = a.CategoryId,
-                        Status = a.Status,
-                        RegisterOpenDate = a.RegisterOpenDate,
-                        RegisterEndDate = a.RegisterEndDate,
-                        AuctionStartDate = a.AuctionStartDate,
-                        AuctionEndDate = a.AuctionEndDate,
-                        CreatedByUserName = a.CreatedByUser.Name,
+                        AuctionId = a.auction.AuctionId,
+                        AuctionName = a.auction.AuctionName,
+                        CategoryId = a.auction.CategoryId,
+                        Status = a.auction.Status,
+                        RegisterOpenDate = a.auction.RegisterOpenDate,
+                        RegisterEndDate = a.auction.RegisterEndDate,
+                        AuctionStartDate = a.auction.AuctionStartDate,
+                        AuctionEndDate = a.auction.AuctionEndDate,
+                        CreatedByUserName = a.createdUser.Name,
+                        UpdateByUserName = a.updatedUser.Name,
+                        AuctioneerBy = a.auctioneer != null ? a.auctioneer.Name : null,
                     })
                     .ToListAsync();
 
