@@ -18,5 +18,14 @@ namespace MyApp.Application.Interfaces.IFindHighestPriceAndFlag
         /// Trả về thông tin giá cao nhất và trạng thái flag (FindHighestPriceAndFlagResponse)
         /// </returns>
         Task<FindHighestPriceAndFlagResponse> FindHighestPriceAndFlag(Guid auctionId, Guid userId);
+
+        /// <summary>
+        /// Lấy toàn bộ giá và trạng thái flag của tất cả người dùng trong một phiên đấu giá.
+        /// </summary>
+        /// <param name="auctionId">Guid của phiên đấu giá</param>
+        /// <returns>
+        /// Trả về toàn bộ thông tin giá cao nhất và flag theo từng người dùng và asset.
+        /// </returns>
+        Task<FindHighestPriceAndFlagResponse> GetAllHighestPriceAndFlagByAuctionId(Guid auctionId);
     }
 }

@@ -4,11 +4,14 @@ using Microsoft.Extensions.Options;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.Interfaces.AuctionDocumentRegisted;
 using MyApp.Application.Interfaces.Blog;
+using MyApp.Application.Interfaces.ChangeStatusAuctionRound;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
+using MyApp.Application.Interfaces.EmployeeManager;
 using MyApp.Application.Interfaces.GenarateNumbericalOrder;
 using MyApp.Application.Interfaces.GetAuctioneers;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
+using MyApp.Application.Interfaces.IAuctionDocuments;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.ICreateAuctionRoundRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
@@ -20,6 +23,7 @@ using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListEnteredPricesRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
+using MyApp.Application.Interfaces.IListUserWinnerRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
 using MyApp.Application.Interfaces.INotificationsRepository;
 using MyApp.Application.Interfaces.IPaymentDeposit;
@@ -45,10 +49,13 @@ using MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction;
 using MyApp.Infrastructure.Repositories.AuctionAssetsImplement;
 using MyApp.Infrastructure.Repositories.AuctionCategoriesRepository;
 using MyApp.Infrastructure.Repositories.AuctionDocumentRegisted;
+using MyApp.Infrastructure.Repositories.AuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.Blog;
+using MyApp.Infrastructure.Repositories.ChangeStatusAuctionRound;
 using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
+using MyApp.Infrastructure.Repositories.EmployeeManager;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
 using MyApp.Infrastructure.Repositories.FindHighestPriceAndFlagRepository;
 using MyApp.Infrastructure.Repositories.ForgetPassRepository;
@@ -59,6 +66,7 @@ using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.GetListEnteredPricesRepository;
+using MyApp.Infrastructure.Repositories.GetListUserWinnerRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -157,6 +165,14 @@ namespace MyApp.Infrastructure
             services.AddScoped<IFindHighestPriceAndFlag, FindHighestPriceAndFlagRepository>();
             services.AddScoped<IGetListEnteredPricesRepository, GetListEnteredPricesRepository>();
             services.AddScoped<IUpdateWinnerFlagRepository, UpdateWinnerFlagRepository>();
+            services.AddScoped<
+                IChangeStatusAuctionRoundRepository,
+                ChangeStatusAuctionRoundRepository
+            >();
+            services.AddScoped<IListUserWinnerRepository, GetListUserWinnerRepository>();
+
+            services.AddScoped<IAuctionDocuments, AuctionDocumentsRepository>();
+            services.AddScoped<IEmployeeManagerRepository, EmployeeManagerRepository>();
 
             return services;
         }

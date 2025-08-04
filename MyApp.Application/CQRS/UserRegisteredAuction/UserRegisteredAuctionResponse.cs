@@ -19,6 +19,7 @@ namespace MyApp.Application.CQRS.UserRegisteredAuction
     {
         public Guid AuctionAssetsId { get; set; }
         public string TagName { get; set; }
+        public decimal StartingPrice { get; set; }
     }
 
     public class UserRegisteredAuctionResponseDTO

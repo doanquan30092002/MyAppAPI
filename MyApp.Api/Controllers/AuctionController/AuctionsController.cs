@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
 using MyApp.Application.CQRS.Auction.CancelAuction.Commands;
+using MyApp.Application.CQRS.Auction.MarkAuctionAsSuccessful.Command;
 using MyApp.Application.CQRS.Auction.RejectAuction;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Application.CQRS.Auction.WaitingPublic.Commands;
@@ -82,21 +83,35 @@ namespace MyApp.Api.Controllers.AuctionController
         }
 
         [Authorize(Roles = "Manager")]
-        [HttpPut("reject-auction/{auctionId}")]
-        public async Task<IActionResult> RejectAuction(
-            Guid auctionId,
-            [FromBody] string rejectReason
-        )
+        [HttpPut("reject-auction")]
+        public async Task<IActionResult> RejectAuction([FromBody] RejectAuction rejectAuction)
         {
-            var command = new RejectAuction { AuctionId = auctionId, RejectReason = rejectReason };
-
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(rejectAuction);
 
             var response = new ApiResponse<Object>
             {
                 Code = 200,
                 Message = "Từ chối phiên đấu giá thành công",
-                Data = new { AuctionId = auctionId, Status = result },
+                Data = new { AuctionId = rejectAuction.AuctionId, Status = result },
+            };
+
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Auctioneer")]
+        [HttpPut("mark-successful")]
+        public async Task<IActionResult> MarkAuctionAsSuccessful(
+            [FromBody] MarkAuctionAsSuccessfulCommand command
+        )
+        {
+            var result = await _mediator.Send(command);
+
+            var response = new ApiResponse<object>
+            {
+                Code = 200,
+                Message = "Đánh dấu phiên đấu giá thành công",
+
+                Data = new { AuctionId = command.AuctionId, Status = result },
             };
 
             return Ok(response);

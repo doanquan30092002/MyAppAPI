@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.AuctionDocumentRegisted;
 
 namespace MyApp.Api.Controllers.AuctionDocumentRegisted
@@ -18,14 +19,25 @@ namespace MyApp.Api.Controllers.AuctionDocumentRegisted
         )
         {
             var response = await _mediator.Send(request);
+
+            if (response == null || response.Count == 0)
+            {
+                return NotFound(
+                    new ApiResponse<List<AuctionDocumentRegistedResponse>>
+                    {
+                        Code = 404,
+                        Message = Message.GET_AUCTION_DOCUMENT_REGISTED_NOT_EXIST,
+                        Data = null,
+                    }
+                );
+            }
+
             return Ok(
-                new
+                new ApiResponse<List<AuctionDocumentRegistedResponse>>
                 {
-                    Code = response != null ? 200 : 404,
-                    Message = response != null
-                        ? Message.GET_AUCTION_DOCUMENT_REGISTED_SUCCESS
-                        : Message.GET_AUCTION_DOCUMENT_REGISTED_NOT_EXIST,
-                    Data = response != null ? response : null,
+                    Code = 200,
+                    Message = Message.GET_AUCTION_DOCUMENT_REGISTED_SUCCESS,
+                    Data = response,
                 }
             );
         }

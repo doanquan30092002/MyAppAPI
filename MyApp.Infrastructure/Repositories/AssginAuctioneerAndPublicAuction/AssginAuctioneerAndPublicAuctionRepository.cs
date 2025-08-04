@@ -63,6 +63,18 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
             return false; // auctioneer is not assigned to another auction
         }
 
+        public async Task<bool> CheckStatusAuctionIsWaitingAsync(Guid auctionId)
+        {
+            var auction = await _context.Auctions.FirstOrDefaultAsync(x =>
+                x.AuctionId == auctionId
+            );
+            if (auction.Status == 4)
+            {
+                return true; // auction is waiting
+            }
+            return false; // auction is not waiting
+        }
+
         public async Task<List<Guid>> GetAllUserIdRoleCustomer()
         {
             const int customerRoleId = 2;

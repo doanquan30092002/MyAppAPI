@@ -2,6 +2,7 @@
 using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.UserRegisteredAuction;
 using MyApp.Application.Interfaces.UserRegisteredAuction;
+using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
@@ -15,28 +16,46 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
             _context = context;
         }
 
-        public async Task<UserRegisteredAuctionResponseDTO> UserRegisteredAuction(
-            UserRegisteredAuctionRequest request
+        public async Task<
+            List<(string TagName, decimal AuctionPrice)>
+        > GetNextRoundTagNamesForUserAsync(Guid? auctionRoundId, string citizenIdentification)
+        {
+            var result = await _context
+                .AuctionRoundPrices.Where(p =>
+                    p.AuctionRoundId == auctionRoundId
+                    && p.CitizenIdentification == citizenIdentification
+                    && p.FlagWinner == true
+                    && _context
+                        .AuctionRoundPrices.Where(sub =>
+                            sub.AuctionRoundId == p.AuctionRoundId
+                            && sub.TagName == p.TagName
+                            && sub.FlagWinner == true
+                        )
+                        .GroupBy(sub => new { sub.AuctionRoundId, sub.TagName })
+                        .Any(g => g.Count() > 1)
+                )
+                .Select(p => new { p.TagName, p.AuctionPrice })
+                .Distinct()
+                .ToListAsync();
+            return result.Select(r => (r.TagName, r.AuctionPrice)).ToList();
+        }
+
+        public async Task<User?> GetUserByCitizenIdAsync(string citizenId)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u =>
+                u.CitizenIdentification == citizenId
+            );
+        }
+
+        public async Task<List<AuctionAsset>> GetValidAuctionAssetsAsync(
+            Guid userId,
+            Guid auctionId
         )
         {
-            // 1. Find the user by CitizenIdentification
-            var user = await _context.Users.FirstOrDefaultAsync(u =>
-                u.CitizenIdentification == request.CitizenIdentification
-            );
-
-            if (user == null)
-                return new UserRegisteredAuctionResponseDTO
-                {
-                    Code = 404,
-                    Message = Message.CITIZEN_NOT_EXIST,
-                    Data = null,
-                };
-
-            // 2. Find all AuctionDocuments for this user and auction
-            var auctionAssets = await _context
+            return await _context
                 .AuctionDocuments.Where(ad =>
-                    ad.UserId == user.Id
-                    && ad.AuctionAsset.AuctionId == request.AuctionId
+                    ad.UserId == userId
+                    && ad.AuctionAsset.AuctionId == auctionId
                     && ad.StatusTicket == 2
                     && ad.StatusDeposit == 1
                 )
@@ -44,31 +63,9 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
                 {
                     AuctionAssetsId = ad.AuctionAsset.AuctionAssetsId,
                     TagName = ad.AuctionAsset.TagName,
+                    StartingPrice = ad.AuctionAsset.StartingPrice,
                 })
                 .ToListAsync();
-
-            if (!auctionAssets.Any())
-                return new UserRegisteredAuctionResponseDTO
-                {
-                    Code = 404,
-                    Message = Message.USER_NOT_REGISTERED_OR_INELIGIBLE_PARTICIPATE,
-                    Data = null,
-                };
-
-            // 3. Build and return the response
-            return new UserRegisteredAuctionResponseDTO
-            {
-                Code = 200,
-                Message = Message.GET_USER_REGISTERED_AUCTION_SUCCESS,
-                Data = new UserRegisteredAuctionResponse
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    CitizenIdentification = user.CitizenIdentification,
-                    RecentLocation = user.RecentLocation,
-                    AuctionAssets = auctionAssets,
-                },
-            };
         }
     }
 }

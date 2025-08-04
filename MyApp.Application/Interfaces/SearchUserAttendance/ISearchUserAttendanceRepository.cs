@@ -9,7 +9,7 @@ namespace MyApp.Application.Interfaces.SearchUserAttendance
 {
     public interface ISearchUserAttendanceRepository
     {
-        Task<SearchUserAttendanceResponse> SearchUserAttendanceAsync(
+        Task<SearchUserAttendanceResponseDTO> SearchUserAttendanceAsync(
             Guid auctionId,
             string citizenIdentification
         );

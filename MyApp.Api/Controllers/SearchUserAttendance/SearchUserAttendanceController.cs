@@ -14,7 +14,7 @@ namespace MyApp.Api.Controllers.SearchUserAttendanceController
         [HttpGet]
         [Route("Search-User-Attendance")]
         [AllowAnonymous]
-        public async Task<ActionResult<SearchUserAttendanceResponse>> SearchUserAttendance(
+        public async Task<ActionResult> SearchUserAttendance(
             [FromQuery] Guid auctionId,
             string citizenIdentification
         )

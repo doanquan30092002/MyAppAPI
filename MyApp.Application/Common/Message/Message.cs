@@ -80,6 +80,8 @@
         public const string NOT_FOUND_AUCTIONEER = "Không tìm thấy thông tin người đấu giá";
         public const string GET_AUCTIONEER_SUCCESS = "Lấy thông tin người đấu giá thành công";
         public const string NEW_AUCTION_TO_CUSTOMER = "Có phiên đấu giá mới: {0}";
+        public const string AUCTION_NOT_WAITING =
+            "Phiên đấu giá không ở trạng thái chờ duyệt. Vui lòng kiểm tra lại";
         #endregion
         #region DetailAuctionDocument
         public const string GET_AUCTION_DOCUMENT_FAIL = "Không tồn tại thông tin này";
@@ -158,6 +160,10 @@
         //  Get list blogs
         public const string GET_BLOGS_SUCCESS = "Lấy danh sách blog thành công";
         public const string GET_BLOGS_NOT_FOUND = "Không tìm thấy blog nào";
+
+        // Delete blog
+        public const string DELETE_BLOG_SUCCESS = "Xoá blog thành công";
+        public const string DELETE_BLOG_FAIL = "Xoá blog thất bại";
         #endregion
         #region GetListEnteredPrices
         public const string NOT_FOUND_LIST_ENTERED_PRICES =
@@ -168,6 +174,30 @@
         #endregion
         #region UpdateWinnerFlag
         public const string NOT_FOUND_ROUND_PRICES_ID_TO_UPDATE = "Không tìm thấy id cần update";
+        #endregion
+        #region ChangeStatusAuctionRound
+        public const string CHANGE_STATUS_AUCTION_ROUND_SUCCESS =
+            "Thay đổi trạng thái vòng đấu giá thành công";
+        public const string CHANGE_STATUS_AUCTION_ROUND_FAIL =
+            "Thay đổi trạng thái vòng đấu giá thất bại";
+        #endregion
+        #region GetListUserWinner
+        public const string NOT_FOUND_LIST_USER_WINNER =
+            "Không tìm thấy danh sách người thắng cuộc";
+        #endregion
+        #region EmployeeManager
+        public const string GET_LIST_EMPLOYEE_ACCOUNT_SUCCESS =
+            "Lấy danh sách tài khoản nhân viên thành công";
+        public const string GET_LIST_EMPLOYEE_ACCOUNT_NOT_FOUND =
+            "Không tìm thấy danh sách tài khoản nhân viên";
+        public const string CHANGE_STATUS_EMPLOYEE_ACCOUNT_SUCCESS =
+            "Thay đổi trạng thái tài khoản nhân viên thành công";
+        public const string CHANGE_STATUS_EMPLOYEE_ACCOUNT_FAIL =
+            "Thay đổi trạng thái tài khoản nhân viên thất bại";
+        public const string CHANGE_PERMISSTION_EMPLOYEE_ACCOUNT_FAIL =
+            "Thay đổi quyền hạn tài khoản nhân viên thất bại";
+        public const string CHANGE_PERMISSTION_EMPLOYEE_ACCOUNT_SUCCESS =
+            "Thay đổi quyền hạn tài khoản nhân viên thành công";
         #endregion
     }
 }

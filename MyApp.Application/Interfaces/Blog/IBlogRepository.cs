@@ -13,6 +13,7 @@ namespace MyApp.Application.Interfaces.Blog
             string thumbnailUrl,
             string? userIdStr
         );
+        Task<bool> DeleteBlogAsync(Guid blogId);
         Task<GetBlogDetailResponse> GetBlogDetailAsync(Guid blogId);
         Task<List<BlogsResponse>> GetListBlogAsync(
             int pageNumber,

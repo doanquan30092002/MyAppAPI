@@ -7,7 +7,7 @@ using MediatR;
 
 namespace MyApp.Application.CQRS.SearchUserAttendance.Queries
 {
-    public class SearchUserAttendanceRequest : IRequest<SearchUserAttendanceResponse>
+    public class SearchUserAttendanceRequest : IRequest<SearchUserAttendanceResponseDTO>
     {
         public Guid AuctionId { get; set; }
         public string CitizenIdentification { get; set; }

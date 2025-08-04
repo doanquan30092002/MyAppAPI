@@ -18,14 +18,7 @@ namespace MyApp.Api.Controllers.UserRegisteredAuction
         )
         {
             var response = await _mediator.Send(request);
-            return Ok(
-                new
-                {
-                    Code = response.Code,
-                    Message = response.Message,
-                    Data = response.Data,
-                }
-            );
+            return Ok(response);
         }
     }
 }
