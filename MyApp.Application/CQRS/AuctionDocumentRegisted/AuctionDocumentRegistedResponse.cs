@@ -12,5 +12,8 @@
         public int StatusDeposit { get; set; }
         public int StatusTicket { get; set; }
         public string TagName { get; set; }
+        public string? BankAccount { get; set; }
+        public string? BankAccountNumber { get; set; }
+        public string? BankBranch { get; set; }
     }
 }

@@ -41,6 +41,9 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentRegisted
                     StatusDeposit = auctionDocument.StatusDeposit,
                     StatusTicket = auctionDocument.StatusTicket,
                     TagName = auctionAsset.TagName,
+                    BankAccount = auctionDocument.BankAccount,
+                    BankAccountNumber = auctionDocument.BankAccountNumber,
+                    BankBranch = auctionDocument.BankBranch,
                 }
             ).ToListAsync();
 
