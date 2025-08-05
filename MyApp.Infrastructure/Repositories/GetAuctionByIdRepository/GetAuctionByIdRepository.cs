@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.Auction.GetListAuctionById.Querries;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
 using MyApp.Core.Entities;
@@ -38,6 +39,10 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                         on a.CategoryId equals category.CategoryId
                         into categories
                     from category in categories.DefaultIfEmpty()
+                    join auctioneerUser in context.Users
+                        on a.Auctioneer equals auctioneerUser.Id
+                        into auctioneerUsers
+                    from auctioneerUser in auctioneerUsers.DefaultIfEmpty()
                     where a.AuctionId == auctionId
                     select new GetAuctionByIdResponse
                     {
@@ -59,6 +64,10 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                         Status = a.Status,
                         WinnerData = a.WinnerData,
                         CategoryName = category != null ? category.CategoryName : null,
+                        CancelReasonFile = a.CancelReasonFile,
+                        CancelReason = a.CancelReason,
+                        RejectReason = a.RejectReason,
+                        AuctioneerBy = auctioneerUser != null ? auctioneerUser.Name : null,
                         ListAuctionAssets = (
                             from aa in context.AuctionAssets
                             where aa.AuctionId == a.AuctionId
@@ -84,14 +93,14 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                 // Check if auction exists
                 if (auction == null)
                 {
-                    throw new Exception("Auction not found.");
+                    throw new Exception("Không tìm thấy phiên đấu giá");
                 }
 
                 return auction;
             }
             catch (Exception ex)
             {
-                throw new Exception("An error occurred while retrieving the auction.", ex);
+                throw new Exception(Message.HANDLER_ERROR, ex);
             }
         }
     }
