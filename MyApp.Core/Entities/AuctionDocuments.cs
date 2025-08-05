@@ -47,5 +47,10 @@ namespace MyApp.Core.Entities
         public int? NumericalOrder { get; set; }
 
         public string? Note { get; set; }
+
+        public bool? IsAttended { get; set; }
+        public bool? IsRefundRequested { get; set; }
+        public string? RefundReason { get; set; }
+        public string? RefundProof { get; set; }
     }
 }
