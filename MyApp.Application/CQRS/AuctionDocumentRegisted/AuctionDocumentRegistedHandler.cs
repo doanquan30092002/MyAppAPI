@@ -28,6 +28,8 @@ namespace MyApp.Application.CQRS.AuctionDocumentRegisted
             string userId = _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return null;
             List<AuctionDocumentRegistedResponse>? auctionDocuments =
                 await _repository.GetAuctionDocumentRegistedByAuctionId(userId, request.AuctionId);
             return auctionDocuments;
