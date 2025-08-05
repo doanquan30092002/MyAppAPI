@@ -43,6 +43,8 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
 
         public string? RejectReason { get; set; }
 
+        public string AuctioneerBy { get; set; }
+
         public List<AuctionAssets> ListAuctionAssets { get; set; } = new List<AuctionAssets>();
     }
 }
