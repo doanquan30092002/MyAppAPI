@@ -59,6 +59,9 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                         Status = a.Status,
                         WinnerData = a.WinnerData,
                         CategoryName = category != null ? category.CategoryName : null,
+                        CancelReasonFile = a.CancelReasonFile,
+                        CancelReason = a.CancelReason,
+                        RejectReason = a.RejectReason,
                         ListAuctionAssets = (
                             from aa in context.AuctionAssets
                             where aa.AuctionId == a.AuctionId

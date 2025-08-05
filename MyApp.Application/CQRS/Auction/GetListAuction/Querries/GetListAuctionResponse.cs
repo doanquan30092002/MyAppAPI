@@ -14,6 +14,11 @@
         public int CategoryId { get; set; }
 
         public int Status { get; set; }
+        public string? CancelReasonFile { get; set; }
+
+        public string? CancelReason { get; set; }
+
+        public string? RejectReason { get; set; }
         public DateTime RegisterOpenDate { get; set; }
         public DateTime RegisterEndDate { get; set; }
         public DateTime AuctionStartDate { get; set; }
