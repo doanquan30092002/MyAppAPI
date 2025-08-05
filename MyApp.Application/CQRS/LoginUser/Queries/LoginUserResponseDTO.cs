@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MyApp.Application.CQRS.LoginUser.Queries
+﻿namespace MyApp.Application.CQRS.LoginUser.Queries
 {
     public class LoginUserResponseDTO
     {

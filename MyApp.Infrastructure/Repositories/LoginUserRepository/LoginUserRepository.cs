@@ -8,44 +8,38 @@ namespace MyApp.Infrastructure.Repositories.LoginUserRepository
 {
     public class LoginUserRepository : ILoginUserRepository
     {
-        private readonly AppDbContext context;
-        private readonly IMapper mapper;
+        private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
         public LoginUserRepository(AppDbContext context, IMapper mapper)
         {
-            this.context = context;
-            this.mapper = mapper;
+            _context = context;
+            _mapper = mapper;
         }
 
         public async Task<AccountDTO> GetAccountLogin(string email, string password)
         {
-            var account = await context.Accounts.FirstOrDefaultAsync(x =>
-                x.Email.Equals(email) && x.Password.Equals(password)
+            var account = await _context.Accounts.FirstOrDefaultAsync(x =>
+                x.Email == email && x.Password == password
             );
-            if (account != null)
-            {
-                return mapper.Map<AccountDTO>(account);
-            }
-            return null;
+            return account != null ? _mapper.Map<AccountDTO>(account) : null;
         }
 
         public async Task<string> GetRoleNameByEmail(string email)
         {
-            var roleNames = await context
-                .Accounts.Include(x => x.Role)
-                .Where(x => x.Email == email)
-                .Select(ur => ur.Role.RoleName)
+            return await _context
+                .Accounts.Include(a => a.Role)
+                .Where(a => a.Email == email)
+                .Select(a => a.Role.RoleName)
                 .FirstOrDefaultAsync();
-
-            return roleNames;
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
         {
-            var user = await context
-                .Accounts.Include(x => x.User)
-                .FirstOrDefaultAsync(x => x.Email == email);
-            return user != null ? mapper.Map<UserDTO>(user.User) : null;
+            var account = await _context
+                .Accounts.Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.Email == email);
+            return account?.User != null ? _mapper.Map<UserDTO>(account.User) : null;
         }
     }
 }

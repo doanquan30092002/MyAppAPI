@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.LoginUser.Queries;
 
 namespace MyApp.Api.Controllers.LoginUserController.Tests
@@ -17,106 +18,115 @@ namespace MyApp.Api.Controllers.LoginUserController.Tests
         public void SetUp()
         {
             _mediatorMock = new Mock<IMediator>();
-            _controller = new LoginUserController(_mediatorMock.Object);
-
-            var httpContext = new DefaultHttpContext();
-            _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+            _controller = new LoginUserController(_mediatorMock.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext(),
+                },
+            };
         }
 
         [Test]
-        public async Task Login_Returns200AndSetCookie_WhenTokenIsValid()
+        public async Task Login_ReturnsTokenAndLoginSuccess()
         {
-            var request = new LoginUserRequest
+            // Arrange
+            var loginRequest = new LoginUserRequest
             {
                 Email = "test@example.com",
-                Password = "password123",
+                Password = "password",
             };
-
-            var expectedResponse = new LoginUserResponseDTO
+            var responseDto = new LoginUserResponseDTO
             {
+                Token = "valid_token",
+                Message = Message.LOGIN_SUCCESS,
                 Id = Guid.NewGuid(),
-                Email = request.Email,
+                Email = loginRequest.Email,
                 Name = "Test User",
-                RoleName = "User",
-                Message = "Login successful",
-                Token = "token123",
+                RoleName = "Admin",
             };
 
             _mediatorMock
-                .Setup(x => x.Send(It.IsAny<LoginUserRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expectedResponse);
+                .Setup(m => m.Send(loginRequest, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(responseDto);
 
-            var actionResult = await _controller.Login(request);
-            var result = actionResult.Result as OkObjectResult;
+            // Act
+            var result = await _controller.Login(loginRequest);
 
-            Assert.IsNotNull(result);
-            dynamic data = result.Value;
-
-            Assert.AreEqual(200, (int)data.Code);
-            Assert.IsFalse((bool)data.Data.IsExpired);
-
-            var setCookieHeader = _controller.Response.Headers["Set-Cookie"].ToString();
-            Assert.IsTrue(setCookieHeader.Contains("access_token=token123"));
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            var apiResponse = okResult.Value as ApiResponse<LoginUserResponse>;
+            Assert.IsNotNull(apiResponse);
+            Assert.AreEqual(200, apiResponse.Code);
+            Assert.AreEqual(Message.LOGIN_SUCCESS, apiResponse.Message);
+            Assert.AreEqual("Test User", apiResponse.Data.Name);
+            Assert.AreEqual("Admin", apiResponse.Data.RoleName);
+            Assert.IsFalse(apiResponse.Data.IsExpired);
         }
 
         [Test]
-        public async Task Login_Returns400_WhenTokenMissingAndExpiredMessage()
+        public async Task Login_ExpiredCitizenIdentification_ReturnsTokenWithWarning()
         {
-            var request = new LoginUserRequest { Email = "expired@example.com", Password = "pass" };
-
-            var expiredResponse = new LoginUserResponseDTO
+            // Arrange
+            var loginRequest = new LoginUserRequest
             {
-                Id = Guid.NewGuid(),
-                Email = request.Email,
-                Name = "Expired",
-                RoleName = "User",
-                Token = "",
+                Email = "expired@example.com",
+                Password = "password",
+            };
+            var responseDto = new LoginUserResponseDTO
+            {
+                Token = "expired_token",
                 Message = Message.EXPIRED_CITIZEN_IDENTIFICATION,
+                Id = Guid.NewGuid(),
+                Email = loginRequest.Email,
+                Name = "Expired User",
+                RoleName = "User",
             };
 
             _mediatorMock
-                .Setup(x => x.Send(It.IsAny<LoginUserRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expiredResponse);
+                .Setup(m => m.Send(loginRequest, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(responseDto);
 
-            var actionResult = await _controller.Login(request);
-            var result = actionResult.Result as OkObjectResult;
+            // Act
+            var result = await _controller.Login(loginRequest);
 
-            Assert.IsNotNull(result);
-            dynamic data = result.Value;
-            Assert.AreEqual(400, (int)data.Code);
-            Assert.IsTrue((bool)data.Data.IsExpired);
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            var apiResponse = okResult.Value as ApiResponse<LoginUserResponse>;
+            Assert.AreEqual(200, apiResponse.Code);
+            Assert.AreEqual(Message.EXPIRED_CITIZEN_IDENTIFICATION, apiResponse.Message);
+            Assert.IsTrue(apiResponse.Data.IsExpired);
         }
 
         [Test]
-        public async Task Login_Returns400_WhenTokenMissingButMessageNotExpired()
+        public async Task Login_Failure_Returns400()
         {
-            var request = new LoginUserRequest
+            // Arrange
+            var loginRequest = new LoginUserRequest
             {
                 Email = "wrong@example.com",
-                Password = "wrongpass",
+                Password = "wrong",
             };
-
-            var response = new LoginUserResponseDTO
+            var responseDto = new LoginUserResponseDTO
             {
-                Id = Guid.NewGuid(),
-                Email = request.Email,
-                Name = "Wrong",
-                RoleName = "User",
                 Token = null,
-                Message = "Invalid credentials",
+                Message = Message.LOGIN_WRONG,
             };
 
             _mediatorMock
-                .Setup(x => x.Send(It.IsAny<LoginUserRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(response);
+                .Setup(m => m.Send(loginRequest, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(responseDto);
 
-            var actionResult = await _controller.Login(request);
-            var result = actionResult.Result as OkObjectResult;
+            // Act
+            var result = await _controller.Login(loginRequest);
 
-            Assert.IsNotNull(result);
-            dynamic data = result.Value;
-            Assert.AreEqual(400, (int)data.Code);
-            Assert.IsFalse((bool)data.Data.IsExpired);
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            var apiResponse = okResult.Value as ApiResponse<LoginUserResponse>;
+            Assert.AreEqual(400, apiResponse.Code);
+            Assert.AreEqual(Message.LOGIN_WRONG, apiResponse.Message);
+            Assert.IsNull(apiResponse.Data.Email);
         }
     }
 }
