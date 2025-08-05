@@ -12,9 +12,7 @@ using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
-using MyApp.Application.Interfaces.IJwtHelper;
 using MyApp.Application.Interfaces.IUnitOfWork;
-using MyApp.Application.JobBackgroud.AuctionJob;
 
 namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
 {
@@ -24,30 +22,24 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
         private readonly IAuctionCategoriesRepository _categoriesRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IJwtHelper _jwtHelper;
         private readonly IExcelRepository _excelRepository;
         private readonly IAuctionAssetsRepository _auctionAssetRepository;
-        private readonly SetAuctionUpdateableFalse _setAuctionUpdateableFalse;
 
         public UpdateAuctionHandler(
             IAuctionRepository auctionRepository,
             IAuctionCategoriesRepository categoriesRepository,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor,
-            IJwtHelper jwtHelper,
             IExcelRepository excelRepository,
-            IAuctionAssetsRepository auctionAssetRepository,
-            SetAuctionUpdateableFalse setAuctionUpdateableFalse
+            IAuctionAssetsRepository auctionAssetRepository
         )
         {
             _auctionRepository = auctionRepository;
             _categoriesRepository = categoriesRepository;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
-            _jwtHelper = jwtHelper;
             _excelRepository = excelRepository;
             _auctionAssetRepository = auctionAssetRepository;
-            _setAuctionUpdateableFalse = setAuctionUpdateableFalse;
         }
 
         public async Task<Guid> Handle(
@@ -84,7 +76,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             }
 
             _unitOfWork.BeginTransaction();
-            UpdateAuctionResult updateResult;
+
             try
             {
                 bool updateSuccess = await _auctionRepository.UpdateAuctionAsync(
@@ -115,24 +107,6 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                 await _unitOfWork.RollbackAsync();
                 throw;
             }
-
-            //if (updateResult.StatusChangedToTrue)
-            //{
-            //    var delay = updateResult.AuctionEndDate - DateTime.Now;
-            //    if (delay > TimeSpan.Zero)
-            //    {
-            //        BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
-            //            job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
-            //            delay
-            //        );
-            //    }
-            //    else
-            //    {
-            //        await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(
-            //            request.AuctionId
-            //        );
-            //    }
-            //}
 
             return request.AuctionId;
         }

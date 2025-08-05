@@ -128,37 +128,6 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
                 );
             }
 
-            //var existingDocumentInSession = await _dbContext
-            //    .AuctionDocuments.Include(x => x.AuctionAsset)
-            //    .Where(x => x.UserId == request.UserId)
-            //    .Where(x => x.AuctionAsset.AuctionId == request.AuctionId)
-            //    .OrderBy(x => x.NumericalOrder)
-            //    .FirstOrDefaultAsync();
-
-            //int numericalOrder;
-
-            //if (
-            //    existingDocumentInSession != null
-            //    && existingDocumentInSession.NumericalOrder.HasValue
-            //)
-            //{
-            //    numericalOrder = existingDocumentInSession.NumericalOrder.Value;
-            //}
-            //else
-            //{
-            //    var maxOrder = (
-            //        await _dbContext
-            //            .AuctionDocuments.Include(x => x.AuctionAsset)
-            //            .Where(x => x.AuctionAsset.AuctionId == request.AuctionId)
-            //            .Select(x => x.NumericalOrder ?? 0)
-            //            .ToListAsync()
-            //    )
-            //        .DefaultIfEmpty(0)
-            //        .Max();
-
-            //    numericalOrder = maxOrder + 1;
-            //}
-
             var documents = new List<AuctionDocuments>();
             foreach (var assetId in assetIds)
             {
@@ -176,7 +145,6 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
                     CreateAtDeposit = DateTime.Now,
                     StatusTicket = 0,
                     StatusDeposit = 0,
-                    //NumericalOrder = numericalOrder,
                 };
                 documents.Add(doc);
             }
@@ -212,46 +180,9 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
 
                 var userId = auctionDocument.UserId;
 
-                //var auctionId = auctionDocument.AuctionAsset.AuctionId;
-
-                ////tim kiem xem trong phien dau gia cu the
-                ////da ton tai ho so da co so thu tu hay chua?
-                //var existingDocumentInSession = await _dbContext
-                //    .AuctionDocuments.Include(x => x.AuctionAsset)
-                //    .Where(x => x.UserId == userId)
-                //    .Where(x => x.AuctionAsset.AuctionId == auctionId)
-                //    .Where(x => x.NumericalOrder != null)
-                //    .OrderBy(x => x.NumericalOrder)
-                //    .FirstOrDefaultAsync();
-
-                //int numericalOrder;
-
-                ////neu ton tai la lay so thu tu cu
-                //if (
-                //    existingDocumentInSession != null
-                //    && existingDocumentInSession.NumericalOrder.HasValue
-                //)
-                //{
-                //    numericalOrder = existingDocumentInSession.NumericalOrder.Value;
-                //}
-                //else
-                //{
-                //    var maxOrder = (
-                //        await _dbContext
-                //            .AuctionDocuments.Include(x => x.AuctionAsset)
-                //            .Where(x => x.AuctionAsset.AuctionId == auctionId)
-                //            .Select(x => x.NumericalOrder ?? 0)
-                //            .ToListAsync()
-                //    )
-                //        .DefaultIfEmpty(0)
-                //        .Max();
-
-                //    numericalOrder = maxOrder + 1;
-                //}
                 auctionDocument.UpdateAtTicket = DateTime.Now;
                 auctionDocument.StatusTicket = request.StatusTicket;
                 auctionDocument.StatusDeposit = request.StatusDeposit;
-                //auctionDocument.NumericalOrder = numericalOrder;
 
                 _dbContext.AuctionDocuments.Update(auctionDocument);
                 var result = await _dbContext.SaveChangesAsync();
