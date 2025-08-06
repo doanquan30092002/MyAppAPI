@@ -92,9 +92,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentsRepository
 
             if (document == null)
             {
-                throw new KeyNotFoundException(
-                    $"Auction document with ID {auctionDocumentId} not found."
-                );
+                throw new KeyNotFoundException($"Hồ sơ ID {auctionDocumentId} không tồn tại.");
             }
 
             return document;

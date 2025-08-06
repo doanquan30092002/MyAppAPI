@@ -6,6 +6,7 @@ using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund;
 using MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer;
 using MyApp.Application.CQRS.AuctionDocuments.FindHighestPriceAndFlag.Queries;
+using MyApp.Application.CQRS.AuctionDocuments.MarkAsNotAttending;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -16,6 +17,26 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
     [ApiController]
     public class AuctionDocumentsController(IMediator _mediator) : ControllerBase
     {
+        [Authorize(Roles = "Staff")]
+        [HttpPost("mark-attendance")]
+        public async Task<IActionResult> MarkAsNotAttending(
+            [FromBody] MarkAttendanceRequest request
+        )
+        {
+            var result = await _mediator.Send(request);
+
+            return Ok(
+                new ApiResponse<object>
+                {
+                    Code = 200,
+                    Message = result
+                        ? "Cập nhật trạng thái điểm danh thành công"
+                        : "Không tìm thấy hồ sơ để cập nhật",
+                    Data = new { success = result },
+                }
+            );
+        }
+
         [Authorize(Roles = "Staff")]
         [HttpPost("support-register")]
         public async Task<IActionResult> SupportRegisterDocuments(
