@@ -35,6 +35,8 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp
             string userId = _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("User not authenticated.");
             var email = await _updateAccountRepository.GetEmailByUserIdAsync(userId);
             _cache.Set($"update_pending_{email}", request, TimeSpan.FromMinutes(10));
             var response = await _otpService.SendOtpAsync(email);
