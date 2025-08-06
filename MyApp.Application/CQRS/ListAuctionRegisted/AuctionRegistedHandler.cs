@@ -28,7 +28,8 @@ namespace MyApp.Application.CQRS.ListAuctionRegisted
             string userId = _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
-
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("User not authenticated.");
             AuctionRegistedResponse response = await _repository.ListAuctionRegisted(
                 userId,
                 request

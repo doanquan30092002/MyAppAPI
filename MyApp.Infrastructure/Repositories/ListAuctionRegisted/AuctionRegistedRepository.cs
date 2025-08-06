@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
 using MyApp.Infrastructure.Data;
@@ -107,7 +106,7 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
             {
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
-                TotalAuctionRegisted = result.Count,
+                TotalAuctionRegisted = auctionResponses.Count,
                 AuctionResponse = result,
             };
         }
