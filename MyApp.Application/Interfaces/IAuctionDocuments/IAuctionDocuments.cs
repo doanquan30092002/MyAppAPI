@@ -20,6 +20,11 @@ namespace MyApp.Application.Interfaces.IAuctionDocuments
 
         Task<AuctionDocuments?> GetDocumentByIdAndUserIdAsync(Guid auctionDocumentId, Guid userId);
 
-        Task<bool> RequestRefundAsync(List<Guid> auctionDocumentIds, Guid userId);
+        Task<bool> RequestRefundAsync(
+            List<Guid> auctionDocumentIds,
+            Guid userId,
+            string refundProofUrl,
+            string refundReason
+        );
     }
 }

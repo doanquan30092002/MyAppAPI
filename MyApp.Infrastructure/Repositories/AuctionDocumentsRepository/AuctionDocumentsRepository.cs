@@ -98,7 +98,12 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentsRepository
             return document;
         }
 
-        public async Task<bool> RequestRefundAsync(List<Guid> auctionDocumentIds, Guid userId)
+        public async Task<bool> RequestRefundAsync(
+            List<Guid> auctionDocumentIds,
+            Guid userId,
+            string refundProofUrl,
+            string refundReason
+        )
         {
             var documents = await _context
                 .AuctionDocuments.Where(d =>
@@ -116,6 +121,8 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentsRepository
                 if (document.StatusDeposit == 1 && document.StatusRefund == null)
                 {
                     document.StatusRefund = 1;
+                    document.RefundReason = refundReason;
+                    document.RefundProof = refundProofUrl;
                     document.UpdateAtTicket = DateTime.Now;
                 }
             }
