@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
-using MyApp.Application.Interfaces.UpdateExpiredProfile;
 
 namespace MyApp.Application.CQRS.DetailAuctionDocument.Queries
 {
@@ -21,15 +20,9 @@ namespace MyApp.Application.CQRS.DetailAuctionDocument.Queries
             CancellationToken cancellationToken
         )
         {
-            var response =
-                await _detailAuctionDocumentRepository.GetDetailAuctionDocumentByAuctionDocumentsIdAsync(
-                    request.AuctionDocumentsId
-                );
-            if (response == null)
-            {
-                return null;
-            }
-            return response;
+            return await _detailAuctionDocumentRepository.GetDetailAuctionDocumentByAuctionDocumentsIdAsync(
+                request.AuctionDocumentsId
+            );
         }
     }
 }
