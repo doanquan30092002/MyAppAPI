@@ -11,5 +11,15 @@ namespace MyApp.Application.Interfaces.IAuctionDocuments
     public interface IAuctionDocuments
     {
         Task<List<AuctionDocumentDto>> GetAllDocumentsByAuctionIdAsync(Guid auctionId);
+
+        Task<AuctionDocuments> GetDocumentByIdAsync(Guid auctionDocumentId);
+
+        Task<bool> UpdateIsAttendedAsync(List<Guid> auctionDocumentIds, bool isAttended);
+
+        Task<Auction> GetAuctionByAuctionDocumentIdAsync(Guid auctionDocumentId);
+
+        Task<AuctionDocuments?> GetDocumentByIdAndUserIdAsync(Guid auctionDocumentId, Guid userId);
+
+        Task<bool> RequestRefundAsync(List<Guid> auctionDocumentIds, Guid userId);
     }
 }
