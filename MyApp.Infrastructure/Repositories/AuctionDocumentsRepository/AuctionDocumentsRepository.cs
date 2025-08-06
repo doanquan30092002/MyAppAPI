@@ -45,5 +45,147 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentsRepository
 
             return await query.ToListAsync();
         }
+
+        public async Task<Auction> GetAuctionByAuctionDocumentIdAsync(Guid auctionDocumentId)
+        {
+            var document = await _context
+                .AuctionDocuments.Include(d => d.AuctionAsset)
+                .ThenInclude(aa => aa.Auction)
+                .FirstOrDefaultAsync(d => d.AuctionDocumentsId == auctionDocumentId);
+
+            if (document == null)
+            {
+                throw new KeyNotFoundException(
+                    $"Auction document with ID {auctionDocumentId} not found."
+                );
+            }
+
+            if (document.AuctionAsset?.Auction == null)
+            {
+                throw new KeyNotFoundException(
+                    $"Auction not found for document ID {auctionDocumentId}."
+                );
+            }
+
+            return document.AuctionAsset.Auction;
+        }
+
+        public async Task<AuctionDocuments?> GetDocumentByIdAndUserIdAsync(
+            Guid auctionDocumentId,
+            Guid userId
+        )
+        {
+            return await _context
+                .AuctionDocuments.Include(d => d.User)
+                .Include(d => d.AuctionAsset)
+                .FirstOrDefaultAsync(d =>
+                    d.AuctionDocumentsId == auctionDocumentId && d.UserId == userId
+                );
+        }
+
+        public async Task<AuctionDocuments> GetDocumentByIdAsync(Guid auctionDocumentId)
+        {
+            var document = await _context
+                .AuctionDocuments.Include(d => d.User)
+                .Include(d => d.AuctionAsset)
+                .FirstOrDefaultAsync(d => d.AuctionDocumentsId == auctionDocumentId);
+
+            if (document == null)
+            {
+                throw new KeyNotFoundException($"Hồ sơ ID {auctionDocumentId} không tồn tại.");
+            }
+
+            return document;
+        }
+
+        public async Task<bool> RequestRefundAsync(
+            List<Guid> auctionDocumentIds,
+            Guid userId,
+            string refundProofUrl,
+            string refundReason
+        )
+        {
+            var documents = await _context
+                .AuctionDocuments.Where(d =>
+                    auctionDocumentIds.Contains(d.AuctionDocumentsId) && d.UserId == userId
+                )
+                .ToListAsync();
+
+            if (!documents.Any())
+            {
+                return false;
+            }
+
+            foreach (var document in documents)
+            {
+                if (document.StatusDeposit == 1 && document.StatusRefund == null)
+                {
+                    document.StatusRefund = 1;
+                    document.RefundReason = refundReason;
+                    document.RefundProof = refundProofUrl;
+                    document.UpdateAtTicket = DateTime.Now;
+                    document.NoteReviewRefund = null;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ReviewRequestRefundAsync(
+            List<Guid> auctionDocumentIds,
+            int statusRefund,
+            string? noteReviewRefund
+        )
+        {
+            var documents = await _context
+                .AuctionDocuments.Where(d => auctionDocumentIds.Contains(d.AuctionDocumentsId))
+                .ToListAsync();
+
+            if (!documents.Any())
+            {
+                return false;
+            }
+
+            foreach (var document in documents)
+            {
+                // Only allow review if StatusRefund is 1 (Refund requested)
+                if (document.StatusRefund == 1 || document.StatusRefund == 3)
+                {
+                    document.StatusRefund = statusRefund; // 2 (Accepted) or 3 (Rejected)
+                    document.NoteReviewRefund = noteReviewRefund;
+                    document.UpdateAtTicket = DateTime.Now;
+                    document.NoteReviewRefund = noteReviewRefund;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UpdateIsAttendedAsync(
+            List<Guid> auctionDocumentIds,
+            bool isAttended
+        )
+        {
+            var documents = await _context
+                .AuctionDocuments.Where(d => auctionDocumentIds.Contains(d.AuctionDocumentsId))
+                .ToListAsync();
+
+            if (!documents.Any())
+            {
+                return false;
+            }
+
+            foreach (var document in documents)
+            {
+                document.IsAttended = isAttended;
+                document.UpdateAtTicket = DateTime.Now;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

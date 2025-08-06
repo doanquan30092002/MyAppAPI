@@ -49,8 +49,16 @@ namespace MyApp.Core.Entities
         public string? Note { get; set; }
 
         public bool? IsAttended { get; set; }
+
+        /*
+        1: Đã yêu cầu hoàn tiền cọc
+        2: Chấp nhận hoàn cọc
+        3: Từ chối hoàn cọc
+        */
         public int? StatusRefund { get; set; }
         public string? RefundReason { get; set; }
         public string? RefundProof { get; set; }
+
+        public string? NoteReviewRefund { get; set; }
     }
 }
