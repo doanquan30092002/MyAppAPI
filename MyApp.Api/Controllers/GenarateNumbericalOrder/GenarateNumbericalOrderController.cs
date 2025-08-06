@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.GenarateNumbericalOrder;
-using MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp;
 
 namespace MyApp.Api.Controllers.GenarateNumbericalOrder
 {
@@ -21,12 +20,13 @@ namespace MyApp.Api.Controllers.GenarateNumbericalOrder
         {
             var response = await _mediator.Send(request);
             return Ok(
-                new
+                new ApiResponse<bool>
                 {
                     Code = response ? 200 : 400,
                     Message = response
                         ? Message.GENARATE_NUMBERICAL_ORDER_SUCCESS
                         : Message.GENARATE_NUMBERICAL_ORDER_FAIL,
+                    Data = response,
                 }
             );
         }
