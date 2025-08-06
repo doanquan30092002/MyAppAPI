@@ -1,19 +1,20 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.DetailAuctionDocument.Queries;
-using MyApp.Application.CQRS.UpdateExpiredProfile.Command;
 
 namespace MyApp.Api.Controllers.DetailAuctionDocument
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DetailAuctionDocumentController(IMediator _mediator) : ControllerBase
     {
         [HttpGet]
         [Route("Detail-Auction-Document")]
-        public async Task<ActionResult> UpdateExpiredProfile(
+        public async Task<ActionResult> DetailAuctionDocument(
             [FromQuery] DetailAuctionDocumentRequest request
         )
         {
@@ -23,7 +24,7 @@ namespace MyApp.Api.Controllers.DetailAuctionDocument
                 return Ok(new { Code = 404, Message = Message.GET_AUCTION_DOCUMENT_FAIL });
             }
             return Ok(
-                new
+                new ApiResponse<DetailAuctionDocumentResponse>
                 {
                     Code = 200,
                     Message = Message.GET_AUCTION_DOCUMENT_SUCCESS,
