@@ -92,10 +92,10 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
                     );
                 }
 
-                if (document.StatusRefund != null)
+                if (document.StatusRefund == 2)
                 {
                     throw new InvalidOperationException(
-                        $"Hồ sơ với ID {documentId} không đủ điều kiện để yêu cầu hoàn tiền. Trạng thái hiện tại: {(document.StatusRefund == 2 ? "Đã chấp nhận hoàn" : "Không chấp nhận hoàn")}."
+                        $"Hồ sơ với ID {documentId} không đủ điều kiện để yêu cầu hoàn tiền: Đã chấp nhận hoàn."
                     );
                 }
             }

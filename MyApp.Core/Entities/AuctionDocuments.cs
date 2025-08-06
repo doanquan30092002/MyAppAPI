@@ -58,5 +58,7 @@ namespace MyApp.Core.Entities
         public int? StatusRefund { get; set; }
         public string? RefundReason { get; set; }
         public string? RefundProof { get; set; }
+
+        public string? NoteReviewRefund { get; set; }
     }
 }

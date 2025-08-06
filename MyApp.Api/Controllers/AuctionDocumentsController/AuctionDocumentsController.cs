@@ -8,6 +8,7 @@ using MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer;
 using MyApp.Application.CQRS.AuctionDocuments.FindHighestPriceAndFlag.Queries;
 using MyApp.Application.CQRS.AuctionDocuments.MarkAsNotAttending;
 using MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command;
+using MyApp.Application.CQRS.AuctionDocuments.ReviewRequestRefund.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Command;
 using MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -18,6 +19,26 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
     [ApiController]
     public class AuctionDocumentsController(IMediator _mediator) : ControllerBase
     {
+        [Authorize(Roles = "Staff")]
+        [HttpPost("review-refund")]
+        public async Task<IActionResult> ReviewRequestRefund(
+            [FromBody] ReviewRequestRefundRequest request
+        )
+        {
+            var result = await _mediator.Send(request);
+
+            return Ok(
+                new ApiResponse<object>
+                {
+                    Code = 200,
+                    Message = result
+                        ? "Xét duyệt yêu cầu hoàn tiền thành công"
+                        : "Không tìm thấy hồ sơ để xét duyệt",
+                    Data = new { success = result },
+                }
+            );
+        }
+
         [Authorize(Roles = "Customer")]
         [HttpPost("request-refund")]
         [Consumes("multipart/form-data")]

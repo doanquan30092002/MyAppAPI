@@ -26,5 +26,11 @@ namespace MyApp.Application.Interfaces.IAuctionDocuments
             string refundProofUrl,
             string refundReason
         );
+
+        Task<bool> ReviewRequestRefundAsync(
+            List<Guid> auctionDocumentIds,
+            int statusRefund,
+            string? noteReviewRefund
+        );
     }
 }

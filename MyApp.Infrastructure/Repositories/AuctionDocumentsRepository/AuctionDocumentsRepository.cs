@@ -124,10 +124,43 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentsRepository
                     document.RefundReason = refundReason;
                     document.RefundProof = refundProofUrl;
                     document.UpdateAtTicket = DateTime.Now;
+                    document.NoteReviewRefund = null;
                 }
             }
 
             await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ReviewRequestRefundAsync(
+            List<Guid> auctionDocumentIds,
+            int statusRefund,
+            string? noteReviewRefund
+        )
+        {
+            var documents = await _context
+                .AuctionDocuments.Where(d => auctionDocumentIds.Contains(d.AuctionDocumentsId))
+                .ToListAsync();
+
+            if (!documents.Any())
+            {
+                return false;
+            }
+
+            foreach (var document in documents)
+            {
+                // Only allow review if StatusRefund is 1 (Refund requested)
+                if (document.StatusRefund == 1 || document.StatusRefund == 3)
+                {
+                    document.StatusRefund = statusRefund; // 2 (Accepted) or 3 (Rejected)
+                    document.NoteReviewRefund = noteReviewRefund;
+                    document.UpdateAtTicket = DateTime.Now;
+                    document.NoteReviewRefund = noteReviewRefund;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
             return true;
         }
 
