@@ -43,6 +43,7 @@ namespace MyApp.Infrastructure.Repositories.UpdateDepositStatusRepository
             }
 
             auctionDocument.StatusDeposit = 1;
+            auctionDocument.IsAttended = true;
 
             if (!string.IsNullOrEmpty(updateDepositStatusRequest.Note))
             {
