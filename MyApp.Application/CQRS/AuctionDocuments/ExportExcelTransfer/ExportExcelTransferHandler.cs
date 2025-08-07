@@ -36,11 +36,11 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer
                 );
             }
 
-            // status : 3 cancel
-            if (auction.Status != 3)
+            // status : 3 cancel, 2 completed
+            if (auction.Status != 2 && auction.Status != 3)
             {
                 throw new InvalidOperationException(
-                    $"Chỉ có thể xuất danh sách hoàn tiền cho phiên đấu giá đã bị hủy."
+                    "Chỉ có thể xuất danh sách hoàn tiền cho phiên đấu giá đã bị hủy hoặc đã hoàn thành."
                 );
             }
 
