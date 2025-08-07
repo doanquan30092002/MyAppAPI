@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
+using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Sha256Hasher;
 using MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp;
 using MyApp.Application.Interfaces.UpdateAccount.Repository;
 using MyApp.Application.Interfaces.UpdateAccount.Service;
@@ -37,6 +39,12 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.VerifyAndUpdate
             string userId = _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new UpdateAccountResponse { Code = 401, Message = "Unauthorized" };
+            }
+
             var email = await _updateAccountRepository.GetEmailByUserIdAsync(userId);
 
             var isVerify = await _otpService.VerifyOtpAsync(email, request.OtpCode);
@@ -44,28 +52,124 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.VerifyAndUpdate
             {
                 return new UpdateAccountResponse { Code = 400, Message = isVerify.Message };
             }
+
             if (
                 !_cache.TryGetValue(
                     $"update_pending_{email}",
-                    out UpdateAccountRequest updateAccountRequest
+                    out UpdateAccountRequest updateRequest
                 )
             )
             {
                 return new UpdateAccountResponse
                 {
                     Code = 400,
-                    Message = "Không tìm thấy dữ liệu cập nhật.",
+                    Message = Message.NO_FIELDS_PROVIDED,
                 };
             }
-            var response = await _updateAccountRepository.UpdateAccountInfo(
-                userId,
-                updateAccountRequest.Email,
-                updateAccountRequest.PasswordOld,
-                updateAccountRequest.PasswordNew,
-                updateAccountRequest.PhoneNumber
-            );
-            _cache.Remove($"update_pending_{email}");
-            return response;
+
+            // Bắt đầu xử lý logic
+            if (
+                string.IsNullOrEmpty(updateRequest.Email)
+                && string.IsNullOrEmpty(updateRequest.PasswordOld)
+                && string.IsNullOrEmpty(updateRequest.PasswordNew)
+                && string.IsNullOrEmpty(updateRequest.PhoneNumber)
+            )
+            {
+                return new UpdateAccountResponse
+                {
+                    Code = 400,
+                    Message = Message.NO_FIELDS_PROVIDED,
+                };
+            }
+
+            var account = await _updateAccountRepository.GetAccountByUserIdAsync(userId);
+            if (account == null)
+            {
+                return new UpdateAccountResponse
+                {
+                    Code = 404,
+                    Message = Message.ACCOUNT_NOT_EXSIT,
+                };
+            }
+
+            if (!string.IsNullOrEmpty(updateRequest.Email))
+            {
+                var emailUsed = await _updateAccountRepository.IsEmailUsedByOtherAsync(
+                    account.AccountId,
+                    updateRequest.Email
+                );
+                if (emailUsed)
+                {
+                    return new UpdateAccountResponse { Code = 400, Message = Message.EMAIL_EXITS };
+                }
+
+                account.Email = updateRequest.Email;
+            }
+
+            if (!string.IsNullOrEmpty(updateRequest.PhoneNumber))
+            {
+                var phoneUsed = await _updateAccountRepository.IsPhoneUsedByOtherAsync(
+                    account.AccountId,
+                    updateRequest.PhoneNumber
+                );
+                if (phoneUsed)
+                {
+                    return new UpdateAccountResponse
+                    {
+                        Code = 400,
+                        Message = Message.PHONE_NUMBER_EXITS,
+                    };
+                }
+
+                account.PhoneNumber = updateRequest.PhoneNumber;
+            }
+
+            // Password
+            if (
+                !string.IsNullOrEmpty(updateRequest.PasswordOld)
+                || !string.IsNullOrEmpty(updateRequest.PasswordNew)
+            )
+            {
+                if (
+                    string.IsNullOrEmpty(updateRequest.PasswordOld)
+                    || string.IsNullOrEmpty(updateRequest.PasswordNew)
+                )
+                {
+                    return new UpdateAccountResponse
+                    {
+                        Code = 400,
+                        Message = Message.PASSWORD_OLD_OR_NEW_EMPTY,
+                    };
+                }
+
+                string hashedOld = Sha256Hasher.ComputeSha256Hash(updateRequest.PasswordOld);
+                if (hashedOld != account.Password)
+                {
+                    return new UpdateAccountResponse
+                    {
+                        Code = 400,
+                        Message = Message.PASSWORD_OLD_NOT_EQUAL,
+                    };
+                }
+
+                account.Password = Sha256Hasher.ComputeSha256Hash(updateRequest.PasswordNew);
+            }
+
+            try
+            {
+                await _updateAccountRepository.UpdateAccountAsync(account);
+                _cache.Remove($"update_pending_{email}");
+
+                return new UpdateAccountResponse
+                {
+                    Code = 200,
+                    Message = Message.UPDATE_ACCOUNT_SUCCESS,
+                };
+            }
+            catch (Exception)
+            {
+                return new UpdateAccountResponse { Code = 500, Message = Message.SYSTEM_ERROR };
+            }
         }
     }
 }

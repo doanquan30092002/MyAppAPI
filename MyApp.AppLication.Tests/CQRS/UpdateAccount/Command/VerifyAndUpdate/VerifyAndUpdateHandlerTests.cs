@@ -2,157 +2,321 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using MyApp.Application.Common.Message;
+using MyApp.Application.Common.Sha256Hasher;
 using MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp;
 using MyApp.Application.Interfaces.UpdateAccount.Repository;
 using MyApp.Application.Interfaces.UpdateAccount.Service;
+using MyApp.Core.Entities;
 
 namespace MyApp.Application.CQRS.UpdateAccount.Command.VerifyAndUpdate.Tests
 {
     [TestFixture()]
     public class VerifyAndUpdateHandlerTests
     {
-        private Mock<IUpdateAccountRepository> _updateAccountRepoMock;
+        private Mock<IUpdateAccountRepository> _repoMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<IOTPService_1> _otpServiceMock;
-        private IMemoryCache _memoryCache;
-
+        private IMemoryCache _cache;
         private VerifyAndUpdateHandler _handler;
-
-        private const string TestUserId = "test-user-id";
-        private const string TestEmail = "test@example.com";
-        private const string _otpCode = "123456";
+        private DefaultHttpContext _httpContext;
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
-            _updateAccountRepoMock = new Mock<IUpdateAccountRepository>();
+            _repoMock = new Mock<IUpdateAccountRepository>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _otpServiceMock = new Mock<IOTPService_1>();
-            _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-            // Fake HttpContext with User
-            var user = new ClaimsPrincipal(
-                new ClaimsIdentity(
-                    new[] { new Claim(ClaimTypes.NameIdentifier, TestUserId) },
-                    "mock"
-                )
-            );
-
-            var context = new DefaultHttpContext { User = user };
-            _httpContextAccessorMock.Setup(a => a.HttpContext).Returns(context);
+            _cache = new MemoryCache(new MemoryCacheOptions());
 
             _handler = new VerifyAndUpdateHandler(
-                _updateAccountRepoMock.Object,
+                _repoMock.Object,
                 _httpContextAccessorMock.Object,
                 _otpServiceMock.Object,
-                _memoryCache
+                _cache
             );
+
+            _httpContext = new DefaultHttpContext();
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "user-id") };
+            _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(_httpContext);
         }
 
         [TearDown]
         public void TearDown()
         {
-            if (_memoryCache is IDisposable disposable)
+            if (_cache is IDisposable disposable)
             {
                 disposable.Dispose();
             }
         }
 
         [Test]
-        public async Task Handle_InvalidOtp_ReturnsError()
+        public async Task Handle_Unauthorized_Returns401()
         {
-            // Arrange
-            _updateAccountRepoMock
-                .Setup(r => r.GetEmailByUserIdAsync(TestUserId))
-                .ReturnsAsync(TestEmail);
+            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns((HttpContext)null);
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest(),
+                CancellationToken.None
+            );
 
-            _otpServiceMock
-                .Setup(o => o.VerifyOtpAsync(TestEmail, _otpCode))
-                .ReturnsAsync((false, "OTP không hợp lệ."));
-
-            var request = new VerifyAndUpdateRequest { OtpCode = _otpCode };
-
-            // Act
-            var result = await _handler.Handle(request, CancellationToken.None);
-
-            // Assert
-            Assert.That(result.Code, Is.EqualTo(400));
-            Assert.That(result.Message, Is.EqualTo("OTP không hợp lệ."));
+            Assert.AreEqual(401, result.Code);
+            Assert.AreEqual("Unauthorized", result.Message);
         }
 
         [Test]
-        public async Task Handle_MissingCache_ReturnsError()
+        public async Task Handle_VerifyOtpFailed_Returns400()
         {
-            // Arrange
-            _updateAccountRepoMock
-                .Setup(r => r.GetEmailByUserIdAsync(TestUserId))
-                .ReturnsAsync(TestEmail);
-
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
             _otpServiceMock
-                .Setup(o => o.VerifyOtpAsync(TestEmail, _otpCode))
-                .ReturnsAsync((true, "Thành công."));
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((false, "Invalid OTP"));
 
-            var request = new VerifyAndUpdateRequest { OtpCode = _otpCode };
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
 
-            // Act
-            var result = await _handler.Handle(request, CancellationToken.None);
-
-            // Assert
-            Assert.That(result.Code, Is.EqualTo(400));
-            Assert.That(result.Message, Is.EqualTo("Không tìm thấy dữ liệu cập nhật."));
+            Assert.AreEqual(400, result.Code);
+            Assert.AreEqual("Invalid OTP", result.Message);
         }
 
         [Test]
-        public async Task Handle_ValidRequest_ReturnsSuccess()
+        public async Task Handle_MissingCache_Returns400()
         {
-            // Arrange
-            _updateAccountRepoMock
-                .Setup(r => r.GetEmailByUserIdAsync(TestUserId))
-                .ReturnsAsync(TestEmail);
-
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
             _otpServiceMock
-                .Setup(o => o.VerifyOtpAsync(TestEmail, _otpCode))
-                .ReturnsAsync((true, "Thành công."));
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
 
-            var updateRequest = new UpdateAccountRequest
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(400, result.Code);
+            Assert.AreEqual(Message.NO_FIELDS_PROVIDED, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_NoFieldsProvided_Returns400()
+        {
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
+
+            _cache.Set("update_pending_test@example.com", new UpdateAccountRequest());
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(400, result.Code);
+            Assert.AreEqual(Message.NO_FIELDS_PROVIDED, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_AccountNotFound_Returns404()
+        {
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
+            _cache.Set("update_pending_test@example.com", new UpdateAccountRequest { Email = "a" });
+            _repoMock
+                .Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync((Account)null);
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(404, result.Code);
+            Assert.AreEqual(Message.ACCOUNT_NOT_EXSIT, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_EmailAlreadyUsed_Returns400()
+        {
+            var acc = new Account { AccountId = Guid.NewGuid(), Password = "hashedpass" };
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
+            _cache.Set(
+                "update_pending_test@example.com",
+                new UpdateAccountRequest { Email = "EmailAlreadyUsed@example.com" }
+            );
+            _repoMock.Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(acc);
+            _repoMock.Setup(r => r.IsEmailUsedByOtherAsync(acc.AccountId, "a")).ReturnsAsync(true);
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(400, result.Code);
+            Assert.AreEqual(Message.EMAIL_EXITS, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_PhoneAlreadyUsed_Returns400()
+        {
+            var acc = new Account { AccountId = Guid.NewGuid(), Password = "hashedpass" };
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
+            _cache.Set(
+                "update_pending_test@example.com",
+                new UpdateAccountRequest { PhoneNumber = "01234" }
+            );
+            _repoMock.Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(acc);
+            _repoMock
+                .Setup(r => r.IsPhoneUsedByOtherAsync(acc.AccountId, "01234"))
+                .ReturnsAsync(true);
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(400, result.Code);
+            Assert.AreEqual(Message.PHONE_NUMBER_EXITS, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_MissingPassword_Returns400()
+        {
+            var acc = new Account { AccountId = Guid.NewGuid(), Password = "oldhash" };
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
+            _cache.Set(
+                "update_pending_test@example.com",
+                new UpdateAccountRequest { PasswordOld = "old" }
+            );
+            _repoMock.Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(acc);
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(400, result.Code);
+            Assert.AreEqual(Message.PASSWORD_OLD_OR_NEW_EMPTY, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_WrongOldPassword_Returns400()
+        {
+            var acc = new Account { AccountId = Guid.NewGuid(), Password = "wronghash" };
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
+            _cache.Set(
+                "update_pending_test@example.com",
+                new UpdateAccountRequest { PasswordOld = "123", PasswordNew = "456" }
+            );
+            _repoMock.Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(acc);
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(400, result.Code);
+            Assert.AreEqual(Message.PASSWORD_OLD_NOT_EQUAL, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_SuccessfulUpdate_Returns200()
+        {
+            var acc = new Account
             {
-                Email = "new@example.com",
-                PasswordOld = "oldpass",
-                PasswordNew = "newpass",
-                PhoneNumber = "123456789",
+                AccountId = Guid.NewGuid(),
+                Password = Sha256Hasher.ComputeSha256Hash("123"),
             };
 
-            _memoryCache.Set($"update_pending_{TestEmail}", updateRequest);
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
 
-            _updateAccountRepoMock
-                .Setup(r =>
-                    r.UpdateAccountInfo(
-                        TestUserId,
-                        updateRequest.Email,
-                        updateRequest.PasswordOld,
-                        updateRequest.PasswordNew,
-                        updateRequest.PhoneNumber
-                    )
-                )
-                .ReturnsAsync(
-                    new UpdateAccountResponse { Code = 200, Message = "Cập nhật thành công." }
-                );
-
-            var request = new VerifyAndUpdateRequest { OtpCode = _otpCode };
-
-            // Act
-            var result = await _handler.Handle(request, CancellationToken.None);
-
-            // Assert
-            Assert.That(result.Code, Is.EqualTo(200));
-            Assert.That(result.Message, Is.EqualTo("Cập nhật thành công."));
-
-            // Cache phải bị remove sau khi cập nhật
-            var found = _memoryCache.TryGetValue(
-                $"update_pending_{TestEmail}",
-                out UpdateAccountRequest _
+            _cache.Set(
+                "update_pending_test@example.com",
+                new UpdateAccountRequest { PasswordOld = "123", PasswordNew = "456" }
             );
-            Assert.False(found);
+
+            _repoMock.Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(acc);
+            _repoMock.Setup(r => r.UpdateAccountAsync(acc)).Returns(Task.CompletedTask);
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(200, result.Code);
+            Assert.AreEqual(Message.UPDATE_ACCOUNT_SUCCESS, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_UpdateThrowsException_Returns500()
+        {
+            var acc = new Account
+            {
+                AccountId = Guid.NewGuid(),
+                Password = Sha256Hasher.ComputeSha256Hash("123"),
+            };
+
+            _repoMock
+                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
+                .ReturnsAsync("test@example.com");
+            _otpServiceMock
+                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .ReturnsAsync((true, "OK"));
+
+            _cache.Set(
+                "update_pending_test@example.com",
+                new UpdateAccountRequest { PasswordOld = "123", PasswordNew = "456" }
+            );
+
+            _repoMock.Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(acc);
+            _repoMock
+                .Setup(r => r.UpdateAccountAsync(acc))
+                .ThrowsAsync(new Exception("Something went wrong"));
+
+            var result = await _handler.Handle(
+                new VerifyAndUpdateRequest { OtpCode = "1234" },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(500, result.Code);
+            Assert.AreEqual(Message.SYSTEM_ERROR, result.Message);
         }
     }
 }

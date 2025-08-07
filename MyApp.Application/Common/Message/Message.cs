@@ -52,6 +52,8 @@
         public const string OTP_EXPIRED_OR_NOT_EXIST = "OTP đã hết hạn hoặc không tồn tại";
         public const string EMAIL_SUBJECT = "Mã OTP xác thực";
         public const string EMAIL_BODY = "Mã OTP của bạn là: ";
+        public const string ACCOUNT_NOT_EXSIT = "Tài khoản không tồn tại.";
+
         #endregion
         #region UpdateExpiredProfile
         public const string CITIZEN_IDENTIFICATION_NOT_MATCH =
