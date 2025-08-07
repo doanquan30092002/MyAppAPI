@@ -10,6 +10,7 @@ using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
 using MyApp.Application.CQRS.Auction.CancelAuction.Commands;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
+using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
@@ -21,16 +22,19 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
         private readonly AppDbContext _context;
         private readonly IUploadFile _uploadFileService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAuctionAssetsRepository _auctionAssetsRepository;
 
         public AuctionRepository(
             AppDbContext context,
             IUploadFile uploadFileService,
-            IHttpContextAccessor httpContextAccessor
+            IHttpContextAccessor httpContextAccessor,
+            IAuctionAssetsRepository auctionAssetsRepository
         )
         {
             _context = context;
             _uploadFileService = uploadFileService;
             _httpContextAccessor = httpContextAccessor;
+            _auctionAssetsRepository = auctionAssetsRepository;
         }
 
         public async Task<Guid> AddAuctionAsync(AddAuctionCommand command, Guid userId)
@@ -214,15 +218,39 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             Guid auctionId
         )
         {
+            // 1. Lấy danh sách tài sản cùng với người đấu giá cao nhất
+            var auctionAssetsWithWinners =
+                await _auctionAssetsRepository.GetAuctionAssetsWithHighestBidByAuctionIdAsync(
+                    auctionId
+                );
+
+            // 2. Lấy danh sách số căn cước của người thắng thầu (bỏ null và trùng)
+            var excludedCitizenIds = auctionAssetsWithWinners
+                .Where(a =>
+                    a.HighestBid != null
+                    && !string.IsNullOrWhiteSpace(a.HighestBid.CitizenIdentification)
+                )
+                .Select(a => a.HighestBid.CitizenIdentification.Trim())
+                .Distinct()
+                .ToList();
+
+            // 3. Lấy danh sách các AuctionAssetId của phiên đấu giá này
             var auctionAssetIds = await _context
                 .AuctionAssets.Where(x => x.AuctionId == auctionId)
                 .Select(x => x.AuctionAssetsId)
                 .ToListAsync();
 
+            // 4. Lấy danh sách hồ sơ thỏa điều kiện thanh toán/đặt cọc/tham dự nhưng không nằm trong danh sách người thắng
             var documents = await _context
                 .AuctionDocuments.Where(doc =>
                     auctionAssetIds.Contains(doc.AuctionAssetId)
-                    && (doc.StatusTicket == 1 || doc.StatusDeposit == 1)
+                    && (
+                        doc.StatusTicket == 1
+                        || doc.StatusDeposit == 1
+                        || doc.StatusRefund == 1
+                        || doc.IsAttended == true
+                    )
+                    && !excludedCitizenIds.Contains(doc.User.CitizenIdentification)
                 )
                 .Include(doc => doc.User)
                 .Include(doc => doc.AuctionAsset)
