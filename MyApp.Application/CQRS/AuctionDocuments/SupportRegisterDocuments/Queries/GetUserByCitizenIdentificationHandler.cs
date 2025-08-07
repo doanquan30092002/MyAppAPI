@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 using Amazon.Runtime.Internal;
 using MediatR;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
+using MyApp.Core.DTOs.UserDTO;
 using MyApp.Core.Entities;
 
 namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queries
 {
     public class GetUserByCitizenIdentificationHandler
-        : IRequestHandler<GetUserByCitizenIdentificationRequest, User?>
+        : IRequestHandler<
+            GetUserByCitizenIdentificationRequest,
+            GetUserByCitizenIdentificationResponse?
+        >
     {
         private readonly ISupportRegisterDocuments _supportRegisterDocuments;
 
@@ -22,7 +26,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Queri
             _supportRegisterDocuments = supportRegisterDocuments;
         }
 
-        public async Task<User?> Handle(
+        public async Task<GetUserByCitizenIdentificationResponse?> Handle(
             GetUserByCitizenIdentificationRequest request,
             CancellationToken cancellationToken
         )

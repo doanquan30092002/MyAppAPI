@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Core.DTOs.AuctionDocumentsDTO;
+using MyApp.Core.DTOs.UserDTO;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
@@ -74,14 +75,39 @@ namespace MyApp.Infrastructure.Repositories.SupportRegisterDocuments
             return invalidIds;
         }
 
-        public async Task<User?> GetUserByCitizenIdentificationAsync(string citizenIdentification)
+        public async Task<GetUserByCitizenIdentificationResponse?> GetUserByCitizenIdentificationAsync(
+            string citizenIdentification
+        )
         {
             if (string.IsNullOrWhiteSpace(citizenIdentification))
                 return null;
 
-            return await _dbContext
-                .Users.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.CitizenIdentification == citizenIdentification);
+            var result = await (
+                from u in _dbContext.Users
+                join a in _dbContext.Accounts on u.Id equals a.UserId
+                where u.CitizenIdentification == citizenIdentification
+                select new GetUserByCitizenIdentificationResponse
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    CitizenIdentification = u.CitizenIdentification,
+                    BirthDay = u.BirthDay,
+                    Nationality = u.Nationality,
+                    Gender = u.Gender,
+                    ValidDate = u.ValidDate,
+                    OriginLocation = u.OriginLocation,
+                    RecentLocation = u.RecentLocation,
+                    IssueDate = u.IssueDate,
+                    IssueBy = u.IssueBy,
+                    CreatedAt = u.CreatedAt,
+                    CreatedBy = u.CreatedBy,
+                    UpdatedAt = u.UpdatedAt,
+                    UpdatedBy = u.UpdatedBy,
+                    PhoneNumber = a.PhoneNumber,
+                }
+            ).AsNoTracking().FirstOrDefaultAsync();
+
+            return result;
         }
 
         public async Task<Guid> GetUserIdByCitizenIdentificationAsync(string citizenIdentification)
