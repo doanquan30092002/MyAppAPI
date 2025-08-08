@@ -48,7 +48,7 @@ namespace MyApp.Api.Controllers.AuctionController
             return Ok(response);
         }
 
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Manager")]
         [HttpPut("cancel")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> CancelAuction([FromForm] CancelAuctionCommand command)
