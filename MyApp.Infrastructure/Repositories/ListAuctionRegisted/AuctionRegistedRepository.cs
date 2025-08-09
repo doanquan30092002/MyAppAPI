@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
+using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
@@ -14,58 +15,30 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
             _context = context;
         }
 
-        public async Task<AuctionRegistedResponse> ListAuctionRegisted(
-            string? userId,
-            AuctionRegistedRequest request
-        )
+        public async Task<List<Guid>> GetRegisteredAssetIdsAsync(Guid userId)
         {
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
-                return null;
-
-            // Get all AuctionAssetIds the user has registered in AuctionDocuments
-            var registeredAssetIds = await _context
+            return await _context
                 .AuctionDocuments.Where(ad =>
-                    ad.UserId == userGuid && ad.StatusTicket == 2 && ad.StatusDeposit == 1
+                    ad.UserId == userId && ad.StatusTicket == 2 && ad.StatusDeposit == 1
                 )
                 .Select(ad => ad.AuctionAssetId)
                 .ToListAsync();
+        }
 
-            if (!registeredAssetIds.Any())
-                return null;
-
-            // Get all AuctionIds from AuctionAssets the user has registered
-            var registeredAuctionIds = await _context
-                .AuctionAssets.Where(aa => registeredAssetIds.Contains(aa.AuctionAssetsId))
+        public async Task<List<Guid>> GetRegisteredAuctionIdsAsync(List<Guid> assetIds)
+        {
+            return await _context
+                .AuctionAssets.Where(aa => assetIds.Contains(aa.AuctionAssetsId))
                 .Select(aa => aa.AuctionId)
                 .Distinct()
                 .ToListAsync();
+        }
 
-            if (!registeredAuctionIds.Any())
-                return null;
-
-            // Get info of all auctions the user has registered
-            var auctions = _context.Auctions.AsQueryable();
-            if (string.IsNullOrEmpty(request.Search.AuctionName) == false)
-            {
-                auctions = auctions.Where(a =>
-                    a.AuctionName.ToLower().Contains(request.Search.AuctionName.ToLower())
-                );
-            }
-            if (request.Search.AuctionStartDate.HasValue)
-            {
-                auctions = auctions.Where(a =>
-                    a.AuctionStartDate >= request.Search.AuctionStartDate.Value
-                );
-            }
-            if (request.Search.AuctionEndDate.HasValue)
-            {
-                auctions = auctions.Where(a =>
-                    a.AuctionEndDate <= request.Search.AuctionEndDate.Value
-                );
-            }
-
-            var auctionResponses = auctions
-                .Where(a => registeredAuctionIds.Contains(a.AuctionId))
+        public async Task<List<AuctionResponse>> GetAuctionsByIdsAsync(List<Guid> auctionIds)
+        {
+            return await _context
+                .Auctions.Where(a => auctionIds.Contains(a.AuctionId))
+                .Include(a => a.Category)
                 .Select(a => new AuctionResponse
                 {
                     AuctionId = a.AuctionId,
@@ -80,35 +53,31 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
                     AuctionEndDate = a.AuctionEndDate,
                     NumberRoundMax = a.NumberRoundMax,
                     Status = a.Status,
-                    AuctionAssets = _context
-                        .AuctionAssets.Where(aa =>
-                            aa.AuctionId == a.AuctionId
-                            && registeredAssetIds.Contains(aa.AuctionAssetsId)
-                        )
-                        .Select(aa => new AuctionAsset
-                        {
-                            AuctionAssetsId = aa.AuctionAssetsId,
-                            TagName = aa.TagName,
-                            StartingPrice = aa.StartingPrice,
-                            Unit = aa.Unit,
-                            Deposit = aa.Deposit,
-                            RegistrationFee = aa.RegistrationFee,
-                            Description = aa.Description,
-                            AuctionId = aa.AuctionId,
-                        })
-                        .ToList(),
                 })
-                .ToList();
-            var skipResult = (request.PageNumber - 1) * request.PageSize;
-            var result = auctionResponses.Skip(skipResult).Take(request.PageSize).ToList();
+                .ToListAsync();
+        }
 
-            return new AuctionRegistedResponse
-            {
-                PageNumber = request.PageNumber,
-                PageSize = request.PageSize,
-                TotalAuctionRegisted = auctionResponses.Count,
-                AuctionResponse = result,
-            };
+        public async Task<List<AuctionAsset>> GetAuctionAssetsByAuctionIdAsync(
+            Guid auctionId,
+            List<Guid> assetIds
+        )
+        {
+            return await _context
+                .AuctionAssets.Where(aa =>
+                    aa.AuctionId == auctionId && assetIds.Contains(aa.AuctionAssetsId)
+                )
+                .Select(aa => new AuctionAsset
+                {
+                    AuctionAssetsId = aa.AuctionAssetsId,
+                    TagName = aa.TagName,
+                    StartingPrice = aa.StartingPrice,
+                    Unit = aa.Unit,
+                    Deposit = aa.Deposit,
+                    RegistrationFee = aa.RegistrationFee,
+                    Description = aa.Description,
+                    AuctionId = aa.AuctionId,
+                })
+                .ToListAsync();
         }
     }
 }
