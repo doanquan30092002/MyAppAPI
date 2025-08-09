@@ -164,6 +164,7 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                     .Select(ad => new ListAuctionDocumentsDTO
                     {
                         AuctionDocumentsId = ad.AuctionDocumentsId,
+                        UserId = ad.UserId,
                         CitizenIdentification =
                             ad.User != null ? ad.User.CitizenIdentification : string.Empty,
                         Name = ad.User != null ? ad.User.Name : string.Empty,

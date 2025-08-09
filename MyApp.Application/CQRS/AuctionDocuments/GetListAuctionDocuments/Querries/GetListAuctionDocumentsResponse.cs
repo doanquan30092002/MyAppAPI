@@ -14,6 +14,8 @@
     public class ListAuctionDocumentsDTO
     {
         public Guid AuctionDocumentsId { get; set; }
+
+        public Guid UserId { get; set; }
         public string CitizenIdentification { get; set; }
         public string Name { get; set; }
         public string TagName { get; set; }
