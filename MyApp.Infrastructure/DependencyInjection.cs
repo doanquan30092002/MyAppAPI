@@ -34,6 +34,7 @@ using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Application.Interfaces.IUpdateDepositStatus;
 using MyApp.Application.Interfaces.IUpdateWinnerFlagRepository;
+using MyApp.Application.Interfaces.ListAuctionAsset;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ListCustomer;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
@@ -69,6 +70,7 @@ using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.GetListEnteredPricesRepository;
 using MyApp.Infrastructure.Repositories.GetListUserWinnerRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
+using MyApp.Infrastructure.Repositories.ListAuctionAsset;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
 using MyApp.Infrastructure.Repositories.ListCustomer;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
@@ -176,6 +178,7 @@ namespace MyApp.Infrastructure
             services.AddScoped<IAuctionDocuments, AuctionDocumentsRepository>();
             services.AddScoped<IEmployeeManagerRepository, EmployeeManagerRepository>();
             services.AddScoped<IListCustomerRepository, ListCustomerRepository>();
+            services.AddScoped<IListAuctionAssetRepository, ListAuctionAssetRepository>();
 
             return services;
         }
