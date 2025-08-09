@@ -11,7 +11,7 @@ namespace MyApp.Api.Controllers.EmployeeManager
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class EmployeeManagerController(IMediator _mediator) : ControllerBase
     {
         [HttpGet]
