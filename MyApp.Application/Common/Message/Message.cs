@@ -8,7 +8,6 @@
         public const string HANDLER_ERROR = "Xử lý xảy ra lỗi";
         public const string SYSTEM_ERROR = "Hệ thống đang bị lỗi. Xin thử lại sau!";
         #endregion
-
         #region SignUp
         public const string EMAIL_EXITS = "Email đã được sử dụng";
         public const string PHONE_NUMBER_EXITS = "Số diện thoại đã được sử dụng";
@@ -17,12 +16,10 @@
         public const string CREATE_SUCCESS = "Đăng ký tài khoản thành công";
         public const string VALIDATION_FAILED = "Xác thực thất bại";
         #endregion
-
         #region GetUserInfo
         public const string GET_USER_INFO_SUCCESS = "Lấy thông tin người dùng thành công";
         public const string GET_USER_INFO_FAIL = "Lấy thông tin người dùng thất bại";
         #endregion
-
         #region Login
         public const string LOGIN_SUCCESS = "Đăng nhập thành công";
         public const string ACCOUNT_LOCKED = "Tài khoản của bạn đã bị khóa";
@@ -30,11 +27,9 @@
         public const string EXPIRED_CITIZEN_IDENTIFICATION =
             "Căn cước công dân hết hạn. Vui lòng cập nhật!";
         #endregion
-
         #region Logout
         public const string LOGOUT_SUCCESS = "Đăng xuất thành công.";
         #endregion
-
         #region SearchUserAttendance
         public const string FOUND_NUMERICAL_ORDER = "Tìm thấy số thứ tự";
         public const string NOT_FOUND_NUMERICAL_ORDER = "Không tìm thấy số thứ tự";
@@ -59,6 +54,9 @@
         public const string CITIZEN_IDENTIFICATION_NOT_MATCH =
             "Số Căn Cước Công Dân không trùng với số đã đăng ký ban đầu";
         public const string UPDATE_PROFILE_SUCCESS = "Cập nhật thông tin cá nhân thành công";
+        public const string USER_DOES_NOT_EXSIT = "Người dùng không tồn tại.";
+        public const string LOGIN_INFO_NOT_FOUND = "Không tìm thấy thông tin đăng nhập.";
+
         #endregion
         #region RegisterAuctionDocument
         public const string CREATE_QR_SUCCESS = "Tạo QR thành công";
@@ -108,7 +106,6 @@
             "Không tìm thấy danh sách hồ sơ đăng ký.";
         public const string GET_LIST_AUCTION_SUCESS = "Lấy danh sách hồ sơ thành công.";
         #endregion
-
         #region UpdateDepositStatus
         public const string UPDATE_DEPOSIT_STATUS_SUCESS = "Cập nhật trạng thái cọc thành công";
         public const string UPDATE_DEPOSIT_STATUS_FAIL = "Cập nhật trạng thái cọc thất bại";
