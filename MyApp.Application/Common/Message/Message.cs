@@ -198,5 +198,9 @@
         public const string CHANGE_PERMISSTION_EMPLOYEE_ACCOUNT_SUCCESS =
             "Thay đổi quyền hạn tài khoản nhân viên thành công";
         #endregion
+        #region ListCustomer
+        public const string GET_LIST_CUSTOMER_SUCCESS = "Lấy danh sách khách hàng thành công";
+        public const string GET_LIST_CUSTOMER_NOT_FOUND = "Không tìm thấy danh sách khách hàng";
+        #endregion
     }
 }
