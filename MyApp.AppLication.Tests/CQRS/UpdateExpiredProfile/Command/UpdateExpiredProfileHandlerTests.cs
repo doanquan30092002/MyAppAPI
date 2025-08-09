@@ -163,15 +163,15 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command.Tests
             var request = new UpdateExpiredProfileRequest
             {
                 CitizenIdentification = "123456789",
-                Name = "Nguyễn Văn E",
-                BirthDay = new DateTime(1995, 5, 5),
+                Name = "Nguyễn Văn D",
+                BirthDay = new DateTime(2000, 1, 1),
                 Nationality = "Việt Nam",
-                Gender = false,
-                ValidDate = DateTime.UtcNow.AddYears(5),
-                OriginLocation = "Huế",
-                RecentLocation = "Đà Nẵng",
-                IssueDate = DateTime.UtcNow,
-                IssueBy = "Công an tỉnh",
+                Gender = true,
+                ValidDate = new DateTime(2035, 1, 1),
+                OriginLocation = "Hà Nội",
+                RecentLocation = "TP. Hồ Chí Minh",
+                IssueDate = new DateTime(2025, 1, 1),
+                IssueBy = "Cục Cảnh sát QLHC về TTXH",
             };
 
             // Act
