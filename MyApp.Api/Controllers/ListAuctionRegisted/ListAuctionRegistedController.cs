@@ -9,7 +9,7 @@ namespace MyApp.Api.Controllers.ListAuctionRegisted
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Customer")]
+    [Authorize]
     public class ListAuctionRegistedController(IMediator _mediator) : ControllerBase
     {
         [HttpPost]
