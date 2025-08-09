@@ -19,7 +19,7 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             this._context = context;
         }
 
-        public async Task<AuctionDocuments?> CheckAuctionDocumentPaid(
+        public async Task<AuctionDocumentResponse?> CheckAuctionDocumentPaid(
             string? userId,
             string auctionAssetsId
         )
@@ -31,7 +31,11 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
             {
                 return null;
             }
-            return auctionDocument;
+            return new AuctionDocumentResponse
+            {
+                AuctionDocumentsId = auctionDocument.AuctionDocumentsId,
+                StatusTicket = auctionDocument.StatusTicket,
+            };
         }
 
         public async Task<RegisterAuctionDocumentResponse> CreateQRForPayTicket(
