@@ -202,9 +202,9 @@
         public const string GET_LIST_CUSTOMER_SUCCESS = "Lấy danh sách khách hàng thành công";
         public const string GET_LIST_CUSTOMER_NOT_FOUND = "Không tìm thấy danh sách khách hàng";
         #endregion
-        #region SearchAuctionAsset
-        public const string SEARCH_NOT_FOUND = "Không tìm thấy tài sản đấu giá nào";
-        public const string SEARCH_SUCCESS = "Tìm kiếm tài sản đấu giá thành công";
+        #region ListAuctionAsset & DetailAuctionAsset
+        public const string SEARCH_AUCTION_ASSET_NOT_FOUND = "Không tìm thấy tài sản đấu giá nào";
+        public const string SEARCH_AUCTION_ASSET_SUCCESS = "Tìm kiếm tài sản đấu giá thành công";
         #endregion
     }
 }
