@@ -23,4 +23,10 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
         public decimal? AmountTicket { get; set; }
         public string? Description { get; set; }
     }
+
+    public class AuctionDocumentResponse
+    {
+        public Guid AuctionDocumentsId { get; set; }
+        public int StatusTicket { get; set; }
+    }
 }
