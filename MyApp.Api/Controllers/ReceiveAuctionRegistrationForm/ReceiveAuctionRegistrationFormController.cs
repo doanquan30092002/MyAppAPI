@@ -1,10 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.ReceiveAuctionRegistrationForm;
-using MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp;
 
 namespace MyApp.Api.Controllers.ReceiveAuctionRegistrationForm
 {

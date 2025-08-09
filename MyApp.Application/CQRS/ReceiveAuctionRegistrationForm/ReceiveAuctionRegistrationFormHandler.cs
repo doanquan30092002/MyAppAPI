@@ -37,7 +37,8 @@ namespace MyApp.Application.CQRS.ReceiveAuctionRegistrationForm
                     request.AuctionDocumentsId
                 );
                 // save notification to the database
-                var message = Message.RECEIVED_FORM_SUCCESS;
+                var message = string.Format(Message.RECEIVED_FORM_SUCCESS, auctionName);
+                ;
                 await _notificationSender.SendToUsersAsync(userId, message);
                 // send notification to the user
                 await _repository.SaveNotificationAsync(userId, message);
