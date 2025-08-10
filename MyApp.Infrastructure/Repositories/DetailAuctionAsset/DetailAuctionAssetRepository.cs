@@ -37,15 +37,15 @@ namespace MyApp.Infrastructure.Repositories.DetailAuctionAsset
 
         public async Task<int> GetTotalAuctionDocumentsAsync(Guid auctionAssetsId)
         {
-            return await _context.AuctionDocuments.CountAsync(ad =>
-                ad.AuctionAssetId == auctionAssetsId
-            );
+            return await _context
+                .AuctionDocuments.Where(a => a.StatusTicket != 0)
+                .CountAsync(ad => ad.AuctionAssetId == auctionAssetsId);
         }
 
         public async Task<decimal> GetTotalDepositAsync(Guid auctionAssetsId)
         {
             int totalDocuments = await _context
-                .AuctionDocuments.Where(a => a.StatusDeposit == 1)
+                .AuctionDocuments.Where(a => a.StatusDeposit != 0)
                 .CountAsync(a => a.AuctionAsset.AuctionAssetsId == auctionAssetsId);
             decimal depositByAuctionAssetsId = await _context
                 .AuctionAssets.Where(a => a.AuctionAssetsId == auctionAssetsId)
@@ -57,7 +57,7 @@ namespace MyApp.Infrastructure.Repositories.DetailAuctionAsset
         public async Task<decimal> GetTotalRegistrationFeeAsync(Guid auctionAssetsId)
         {
             int totalDocuments = await _context
-                .AuctionDocuments.Where(a => a.StatusTicket == 2)
+                .AuctionDocuments.Where(a => a.StatusTicket != 0)
                 .CountAsync(a => a.AuctionAsset.AuctionAssetsId == auctionAssetsId);
             decimal registrationFeeByAuctionAssetsId = await _context
                 .AuctionAssets.Where(a => a.AuctionAssetsId == auctionAssetsId)
