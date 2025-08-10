@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace MyApp.Application.CQRS.Blog.UpdateBlog
