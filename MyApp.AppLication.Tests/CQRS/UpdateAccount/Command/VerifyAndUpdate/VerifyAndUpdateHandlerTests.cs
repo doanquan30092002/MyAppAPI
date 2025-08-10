@@ -150,19 +150,28 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.VerifyAndUpdate.Tests
         [Test]
         public async Task Handle_EmailAlreadyUsed_Returns400()
         {
-            var acc = new Account { AccountId = Guid.NewGuid(), Password = "hashedpass" };
-            _repoMock
-                .Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>()))
-                .ReturnsAsync("test@example.com");
+            var acc = new Account
+            {
+                AccountId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                Password = "hashedpass",
+            };
+
+            // Email trả về từ repo và cache phải trùng nhau
+            string email = "EmailAlreadyUsed@example.com";
+
+            _repoMock.Setup(r => r.GetEmailByUserIdAsync(It.IsAny<string>())).ReturnsAsync(email);
+
             _otpServiceMock
-                .Setup(o => o.VerifyOtpAsync("test@example.com", It.IsAny<string>()))
+                .Setup(o => o.VerifyOtpAsync(email, It.IsAny<string>()))
                 .ReturnsAsync((true, "OK"));
-            _cache.Set(
-                "update_pending_test@example.com",
-                new UpdateAccountRequest { Email = "EmailAlreadyUsed@example.com" }
-            );
+
+            _cache.Set($"update_pending_{email}", new UpdateAccountRequest { Email = email });
+
             _repoMock.Setup(r => r.GetAccountByUserIdAsync(It.IsAny<string>())).ReturnsAsync(acc);
-            _repoMock.Setup(r => r.IsEmailUsedByOtherAsync(acc.AccountId, "a")).ReturnsAsync(true);
+
+            _repoMock
+                .Setup(r => r.IsEmailUsedByOtherAsync(acc.AccountId, email))
+                .ReturnsAsync(true);
 
             var result = await _handler.Handle(
                 new VerifyAndUpdateRequest { OtpCode = "1234" },
