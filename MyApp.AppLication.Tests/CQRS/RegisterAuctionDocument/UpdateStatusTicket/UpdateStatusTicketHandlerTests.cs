@@ -28,7 +28,7 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.UpdateStatusTicket.Test
         public async Task Handle_UpdateSuccess_ShouldSendAndSaveNotification()
         {
             // Arrange
-            var auctionDocId = Guid.Parse(" ");
+            var auctionDocId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
             var staffIds = new List<Guid>
             {
                 Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
