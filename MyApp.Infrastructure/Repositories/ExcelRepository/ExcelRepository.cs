@@ -69,7 +69,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                             return false;
 
                         // Cột 2: starting_price (phải là số)
-                        if (!IsValidDecimal(worksheet.Cells[row, 2].Text))
+                        if (!IsValidPrice(worksheet.Cells[row, 2], min: 0))
                             return false;
 
                         // Cột 3: Unit (string, bắt buộc có)
@@ -77,11 +77,11 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                             return false;
 
                         // Cột 4: Deposit (phải là số)
-                        if (!IsValidDecimal(worksheet.Cells[row, 4].Text))
+                        if (!IsValidPrice(worksheet.Cells[row, 4], min: 0))
                             return false;
 
                         // Cột 5: Registration_fee (phải là số)
-                        if (!IsValidDecimal(worksheet.Cells[row, 5].Text))
+                        if (!IsValidPrice(worksheet.Cells[row, 5], min: 0))
                             return false;
 
                         // Cột 6: Description (string, cho phép rỗng)
@@ -92,18 +92,39 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
             return true;
         }
 
-        private bool IsValidDecimal(string input)
+        private bool IsValidPrice(ExcelRange cell, decimal min = 0, decimal? max = null)
         {
-            if (string.IsNullOrWhiteSpace(input))
+            if (cell.Value == null)
                 return false;
-            var style =
-                NumberStyles.Number | NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint;
-            return decimal.TryParse(
-                input.Replace(",", "").Replace(" ", ""),
-                style,
-                CultureInfo.InvariantCulture,
-                out _
-            );
+
+            // Trường hợp giá trị là số thực tế
+            if (cell.Value is double || cell.Value is decimal || cell.Value is int)
+            {
+                decimal price = Convert.ToDecimal(cell.Value);
+                if (price < min)
+                    return false;
+                if (max.HasValue && price > max.Value)
+                    return false;
+                return true;
+            }
+
+            // Trường hợp là chuỗi, cần parse
+            var text = cell.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            // Xử lý chuỗi chứa dấu phẩy hoặc chấm
+            text = text.Replace(",", "").Replace(" ", "");
+            if (decimal.TryParse(text, out var parsedPrice))
+            {
+                if (parsedPrice < min)
+                    return false;
+                if (max.HasValue && parsedPrice > max.Value)
+                    return false;
+                return true;
+            }
+
+            return false;
         }
 
         public async Task SaveAssetsFromExcelAsync(Guid auctionId, IFormFile excelFile, Guid userId)
@@ -115,7 +136,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
             using (var stream = new MemoryStream())
             {
                 await excelFile.CopyToAsync(stream);
-                using (var package = new OfficeOpenXml.ExcelPackage(stream))
+                using (var package = new ExcelPackage(stream))
                 {
                     var worksheet = package.Workbook.Worksheets[0];
                     int rowCount = worksheet.Dimension.Rows;
@@ -125,35 +146,73 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                         var asset = new AuctionAssets
                         {
                             AuctionAssetsId = Guid.NewGuid(),
-                            TagName = worksheet.Cells[row, 1].Text,
-                            StartingPrice = decimal.Parse(
-                                worksheet.Cells[row, 2].Text,
-                                NumberStyles.Any,
-                                CultureInfo.InvariantCulture
+                            TagName = worksheet.Cells[row, 1].Text?.Trim(),
+                            StartingPrice = ParseDecimalCell(
+                                worksheet.Cells[row, 2],
+                                "Giá khởi điểm",
+                                row
                             ),
-                            Unit = worksheet.Cells[row, 3].Text,
-                            Deposit = decimal.Parse(
-                                worksheet.Cells[row, 4].Text,
-                                NumberStyles.Any,
-                                CultureInfo.InvariantCulture
+                            Unit = worksheet.Cells[row, 3].Text?.Trim(),
+                            Deposit = ParseDecimalCell(
+                                worksheet.Cells[row, 4],
+                                "Tiền đặt cọc",
+                                row
                             ),
-                            RegistrationFee = decimal.Parse(
-                                worksheet.Cells[row, 5].Text,
-                                NumberStyles.Any,
-                                CultureInfo.InvariantCulture
+                            RegistrationFee = ParseDecimalCell(
+                                worksheet.Cells[row, 5],
+                                "Phí đăng ký",
+                                row
                             ),
-                            Description = worksheet.Cells[row, 6].Text,
+                            Description = worksheet.Cells[row, 6].Text?.Trim(),
                             CreatedAt = DateTime.UtcNow,
                             CreatedBy = userId,
                             UpdatedAt = DateTime.UtcNow,
                             UpdatedBy = userId,
                             AuctionId = auctionId,
                         };
+
                         assets.Add(asset);
                     }
                 }
             }
+
             await _context.AuctionAssets.AddRangeAsync(assets);
+        }
+
+        private decimal ParseDecimalCell(ExcelRange cell, string columnName, int rowNumber)
+        {
+            if (cell?.Value == null || string.IsNullOrWhiteSpace(cell.Text))
+                throw new FormatException($"Ô {columnName} ở dòng {rowNumber} đang trống.");
+
+            // Nếu ô thực sự là số (nhờ VBA format)
+            if (cell.Value is double || cell.Value is int || cell.Value is decimal)
+            {
+                decimal num = Convert.ToDecimal(cell.Value);
+                if (num < 0)
+                    throw new FormatException($"Ô {columnName} ở dòng {rowNumber} không được âm.");
+                return num;
+            }
+
+            // Nếu vẫn là chuỗi (trong trường hợp không format)
+            string raw = cell.Text.Trim();
+            raw = raw.Replace(",", "").Replace(" ", ""); // bỏ dấu phân cách nghìn
+            if (
+                decimal.TryParse(
+                    raw,
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out var parsed
+                )
+            )
+            {
+                if (parsed < 0)
+                    throw new FormatException($"Ô {columnName} ở dòng {rowNumber} không được âm.");
+                return parsed;
+            }
+
+            throw new FormatException(
+                $"Ô {columnName} ở dòng {rowNumber} không phải là số hợp lệ."
+            );
         }
 
         public async Task<byte[]> ExportRefundDocumentsExcelAsync(Guid auctionId)
