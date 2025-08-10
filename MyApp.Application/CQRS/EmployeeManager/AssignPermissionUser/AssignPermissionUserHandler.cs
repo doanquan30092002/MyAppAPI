@@ -27,6 +27,8 @@ namespace MyApp.Application.CQRS.EmployeeManager.AssignPermissionUser
             var userIdStr = _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
+            if (string.IsNullOrEmpty(userIdStr))
+                throw new UnauthorizedAccessException("Yêu cầu đăng nhập");
             bool response = await _employeeManagerRepository.AssignPermissionUser(
                 request.AccountId,
                 request.RoleId,

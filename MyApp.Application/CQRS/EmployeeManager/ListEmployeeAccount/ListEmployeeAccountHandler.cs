@@ -30,7 +30,7 @@ namespace MyApp.Application.CQRS.EmployeeManager.ListEmployeeAccount
                 EmployeeAccounts = employeeAccounts,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
-                TotalCount = employeeAccounts.Count,
+                TotalCount = await _employeeManagerRepository.GetEmployeeAccountTotal(),
             };
         }
     }
