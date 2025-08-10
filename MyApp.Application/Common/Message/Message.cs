@@ -7,6 +7,7 @@
         public const string HANDLER_SUCCESS = "Xử lý thành công";
         public const string HANDLER_ERROR = "Xử lý xảy ra lỗi";
         public const string SYSTEM_ERROR = "Hệ thống đang bị lỗi. Xin thử lại sau!";
+        public const string ID_AUCTION_NOT_FOUND = "Id phiên đấu giá không hợp lệ";
         #endregion
 
         #region SignUp

@@ -18,6 +18,7 @@ using MyApp.Application.Interfaces.IExcelRepository;
 using MyApp.Application.Interfaces.IFindHighestPriceAndFlag;
 using MyApp.Application.Interfaces.IForgetPasswordRepository;
 using MyApp.Application.Interfaces.IGetAuctionByIdRepository;
+using MyApp.Application.Interfaces.IGetAuctionRoundStatisticsRepository;
 using MyApp.Application.Interfaces.IGetListAuctionRoundRepository;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListEnteredPricesRepository;
@@ -62,6 +63,7 @@ using MyApp.Infrastructure.Repositories.ForgetPassRepository;
 using MyApp.Infrastructure.Repositories.GenarateNumbericalOrder;
 using MyApp.Infrastructure.Repositories.GetAuctionByIdRepository;
 using MyApp.Infrastructure.Repositories.GetAuctioneers;
+using MyApp.Infrastructure.Repositories.GetAuctionRoundStatisticsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
@@ -173,6 +175,10 @@ namespace MyApp.Infrastructure
 
             services.AddScoped<IAuctionDocuments, AuctionDocumentsRepository>();
             services.AddScoped<IEmployeeManagerRepository, EmployeeManagerRepository>();
+            services.AddScoped<
+                IGetAuctionRoundStatisticsRepository,
+                GetAuctionRoundStatisticsRepository
+            >();
 
             return services;
         }
