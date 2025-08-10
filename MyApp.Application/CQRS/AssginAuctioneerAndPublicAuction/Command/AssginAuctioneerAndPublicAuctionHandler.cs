@@ -17,13 +17,13 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
     {
         private readonly IAssginAuctioneerAndPublicAuctionRepository _repository;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly SetAuctionUpdateableFalse _setAuctionUpdateableFalse;
+        private readonly ISetAuctionUpdateableFalse _setAuctionUpdateableFalse;
         private readonly INotificationSender _notificationSender;
 
         public AssginAuctioneerAndPublicAuctionHandler(
             IAssginAuctioneerAndPublicAuctionRepository repository,
             IHttpContextAccessor httpContextAccessor,
-            SetAuctionUpdateableFalse setAuctionUpdateableFalse,
+            ISetAuctionUpdateableFalse setAuctionUpdateableFalse,
             INotificationSender notificationSender
         )
         {
