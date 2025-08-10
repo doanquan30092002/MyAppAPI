@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
 using MyApp.Application.Interfaces.AuctionDocumentRegisted;
 
 namespace MyApp.Application.CQRS.AuctionDocumentRegisted
@@ -9,15 +7,10 @@ namespace MyApp.Application.CQRS.AuctionDocumentRegisted
         : IRequestHandler<AuctionDocumentRegistedRequest, List<AuctionDocumentRegistedResponse>?>
     {
         private readonly IAuctionDocumentRegistedRepository _repository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuctionDocumentRegistedHandler(
-            IAuctionDocumentRegistedRepository repository,
-            IHttpContextAccessor httpContextAccessor
-        )
+        public AuctionDocumentRegistedHandler(IAuctionDocumentRegistedRepository repository)
         {
             _repository = repository;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<List<AuctionDocumentRegistedResponse>?> Handle(
@@ -25,13 +18,11 @@ namespace MyApp.Application.CQRS.AuctionDocumentRegisted
             CancellationToken cancellationToken
         )
         {
-            string userId = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return null;
             List<AuctionDocumentRegistedResponse>? auctionDocuments =
-                await _repository.GetAuctionDocumentRegistedByAuctionId(userId, request.AuctionId);
+                await _repository.GetAuctionDocumentRegistedByAuctionId(
+                    request.UserId,
+                    request.AuctionId
+                );
             return auctionDocuments;
         }
     }

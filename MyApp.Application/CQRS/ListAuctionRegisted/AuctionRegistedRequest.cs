@@ -6,6 +6,7 @@ namespace MyApp.Application.CQRS.ListAuctionRegisted
     {
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
+        public Guid UserId { get; set; }
         public SearchAuctionRegisted Search { get; set; }
     }
 

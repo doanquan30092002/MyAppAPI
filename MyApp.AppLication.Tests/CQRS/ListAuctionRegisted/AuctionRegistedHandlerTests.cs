@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using Moq;
+﻿using Moq;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
 
 namespace MyApp.Application.CQRS.ListAuctionRegisted.Tests
@@ -8,145 +6,307 @@ namespace MyApp.Application.CQRS.ListAuctionRegisted.Tests
     [TestFixture()]
     public class AuctionRegistedHandlerTests
     {
-        private Mock<IAuctionRegistedRepository> _repositoryMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<IAuctionRegistedRepository> _repoMock;
         private AuctionRegistedHandler _handler;
 
+        private Guid _userId;
+        private Guid _auctionId;
+        private Guid _assetId;
+
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
-            _repositoryMock = new Mock<IAuctionRegistedRepository>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-            _handler = new AuctionRegistedHandler(
-                _repositoryMock.Object,
-                _httpContextAccessorMock.Object
-            );
+            _repoMock = new Mock<IAuctionRegistedRepository>();
+            _handler = new AuctionRegistedHandler(_repoMock.Object);
+
+            _userId = Guid.Parse("68faa0b5-2e6b-4792-8ceb-8a5e951a3e1e");
+            _auctionId = Guid.Parse("A6BB60B6-C387-4764-99AB-B01FBAB2B13D");
+            _assetId = Guid.Parse("259BD93F-6967-42E7-AF05-AB1BEE026F75");
         }
 
         [Test]
-        public async Task Handle_ReturnsExpectedResponse_WhenUserIdExists()
+        public async Task Handle_ShouldReturnEmpty_WhenNoAssets()
         {
-            var userId = "b3f571aa-f81d-4d70-a451-291bcf149741";
-
-            var fixedAuctionId = Guid.Parse("e51877c2-4dce-463a-a7a0-728264b09315");
-            var fixedAssetId = Guid.Parse("b95e2c92-fec0-4cd3-8882-d9bfbad5ee95");
-            var fixedDate = new DateTime(2025, 8, 1, 0, 0, 0, DateTimeKind.Utc);
-
             var request = new AuctionRegistedRequest
             {
                 PageNumber = 1,
                 PageSize = 10,
-                Search = new SearchAuctionRegisted
-                {
-                    AuctionName = "Test Auction",
-                    AuctionStartDate = fixedDate.AddDays(-5), // 2025-07-27
-                    AuctionEndDate = fixedDate.AddDays(2), // 2025-08-03
-                },
+                UserId = _userId,
             };
 
-            var expectedResponse = new AuctionRegistedResponse
-            {
-                PageNumber = 1,
-                PageSize = 10,
-                TotalAuctionRegisted = 1,
-                AuctionResponse = new List<AuctionResponse>
-                {
-                    new AuctionResponse
-                    {
-                        AuctionId = fixedAuctionId,
-                        AuctionName = "Test Auction",
-                        CategoryName = "Land",
-                        AuctionDescription = "Auctioning a piece of land",
-                        AuctionRules = "No refunds",
-                        AuctionPlanningMap = "http://map.com/image",
-                        RegisterOpenDate = fixedDate.AddDays(-5),
-                        RegisterEndDate = fixedDate.AddDays(-1),
-                        AuctionStartDate = fixedDate,
-                        AuctionEndDate = fixedDate,
-                        NumberRoundMax = 3,
-                        Status = 1,
-                        AuctionAssets = new List<AuctionAsset>
-                        {
-                            new AuctionAsset
-                            {
-                                AuctionAssetsId = fixedAssetId,
-                                TagName = "Plot A1",
-                                StartingPrice = 50000,
-                                Unit = "m2",
-                                Deposit = 10000,
-                                RegistrationFee = 200,
-                                Description = "Prime land",
-                                AuctionId = fixedAuctionId,
-                            },
-                        },
-                    },
-                },
-            };
+            _repoMock
+                .Setup(r => r.GetRegisteredAssetIdsAsync(_userId))
+                .ReturnsAsync(new List<Guid>());
 
-            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims, "TestAuth");
-            var principal = new ClaimsPrincipal(identity);
+            var result = await _handler.Handle(request, CancellationToken.None);
 
-            var httpContextMock = new Mock<HttpContext>();
-            httpContextMock.Setup(c => c.User).Returns(principal);
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContextMock.Object);
-
-            _repositoryMock
-                .Setup(repo => repo.ListAuctionRegisted(userId, request))
-                .ReturnsAsync(expectedResponse);
-
-            // Act
-            var result = await _handler.Handle(request, default);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.AreEqual(1, result.PageNumber);
-            Assert.AreEqual(10, result.PageSize);
-            Assert.AreEqual(1, result.TotalAuctionRegisted);
-            Assert.AreEqual(1, result.AuctionResponse.Count);
-
-            var actualAuction = result.AuctionResponse[0];
-            Assert.AreEqual(fixedAuctionId, actualAuction.AuctionId);
-            Assert.AreEqual("Test Auction", actualAuction.AuctionName);
-            Assert.AreEqual("Land", actualAuction.CategoryName);
-            Assert.AreEqual("Auctioning a piece of land", actualAuction.AuctionDescription);
-            Assert.AreEqual("No refunds", actualAuction.AuctionRules);
-            Assert.AreEqual("http://map.com/image", actualAuction.AuctionPlanningMap);
-            Assert.AreEqual(fixedDate.AddDays(-5), actualAuction.RegisterOpenDate);
-            Assert.AreEqual(fixedDate.AddDays(-1), actualAuction.RegisterEndDate);
-            Assert.AreEqual(fixedDate, actualAuction.AuctionStartDate);
-            Assert.AreEqual(fixedDate, actualAuction.AuctionEndDate);
-            Assert.AreEqual(3, actualAuction.NumberRoundMax);
-            Assert.AreEqual(1, actualAuction.Status);
-            Assert.AreEqual(1, actualAuction.AuctionAssets.Count);
-
-            var actualAsset = actualAuction.AuctionAssets[0];
-            Assert.AreEqual(fixedAssetId, actualAsset.AuctionAssetsId);
-            Assert.AreEqual("Plot A1", actualAsset.TagName);
-            Assert.AreEqual(50000, actualAsset.StartingPrice);
-            Assert.AreEqual("m2", actualAsset.Unit);
-            Assert.AreEqual(10000, actualAsset.Deposit);
-            Assert.AreEqual(200, actualAsset.RegistrationFee);
-            Assert.AreEqual("Prime land", actualAsset.Description);
-            Assert.AreEqual(fixedAuctionId, actualAsset.AuctionId);
+            Assert.That(result.TotalAuctionRegisted, Is.EqualTo(0));
+            Assert.That(result.AuctionResponse, Is.Null);
         }
 
         [Test]
-        public void Handle_ThrowsException_WhenUserIdIsMissing()
+        public async Task Handle_ShouldReturnEmpty_WhenNoAuctions()
         {
-            // Arrange
-            var request = new AuctionRegistedRequest { PageNumber = 1, PageSize = 10 };
+            var request = new AuctionRegistedRequest
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                UserId = _userId,
+            };
 
-            var mockHttpContext = new Mock<HttpContext>();
-            mockHttpContext.Setup(c => c.User).Returns(new ClaimsPrincipal()); // Không có claim
+            _repoMock
+                .Setup(r => r.GetRegisteredAssetIdsAsync(_userId))
+                .ReturnsAsync(new List<Guid> { _assetId });
 
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
+            _repoMock
+                .Setup(r => r.GetRegisteredAuctionIdsAsync(It.IsAny<List<Guid>>()))
+                .ReturnsAsync(new List<Guid>());
 
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(
-                () => _handler.Handle(request, default)
-            );
-            Assert.That(ex.Message, Is.EqualTo("User not authenticated."));
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.That(result.TotalAuctionRegisted, Is.EqualTo(0));
+            Assert.That(result.AuctionResponse, Is.Null);
+        }
+
+        [Test]
+        public async Task Handle_ShouldReturnEmpty_WhenSearchFiltersOutAll()
+        {
+            var request = new AuctionRegistedRequest
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                UserId = _userId,
+                Search = new SearchAuctionRegisted
+                {
+                    AuctionName = "Không tồn tại",
+                    AuctionStartDate = new DateTime(2025, 5, 1),
+                    AuctionEndDate = new DateTime(2025, 4, 30), // end date < start date
+                },
+            };
+
+            _repoMock
+                .Setup(r => r.GetRegisteredAssetIdsAsync(_userId))
+                .ReturnsAsync(new List<Guid> { _assetId });
+
+            _repoMock
+                .Setup(r => r.GetRegisteredAuctionIdsAsync(It.IsAny<List<Guid>>()))
+                .ReturnsAsync(new List<Guid> { _auctionId });
+
+            _repoMock
+                .Setup(r => r.GetAuctionsByIdsAsync(It.IsAny<List<Guid>>()))
+                .ReturnsAsync(
+                    new List<AuctionResponse>
+                    {
+                        new AuctionResponse
+                        {
+                            AuctionId = _auctionId,
+                            AuctionName = "Đấu giá vàng",
+                            CategoryName = "Vàng",
+                            AuctionDescription = "Phiên đấu giá vàng",
+                            AuctionRules = "Không hoàn tiền cọc",
+                            AuctionPlanningMap = null,
+                            RegisterOpenDate = new DateTime(2025, 4, 20),
+                            RegisterEndDate = new DateTime(2025, 4, 25),
+                            AuctionStartDate = new DateTime(2025, 5, 1),
+                            AuctionEndDate = new DateTime(2025, 5, 5),
+                            NumberRoundMax = 3,
+                            Status = 1,
+                        },
+                    }
+                );
+
+            _repoMock
+                .Setup(r =>
+                    r.GetAuctionAssetsByAuctionIdAsync(It.IsAny<Guid>(), It.IsAny<List<Guid>>())
+                )
+                .ReturnsAsync(new List<AuctionAsset>());
+
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.That(result.TotalAuctionRegisted, Is.EqualTo(0));
+            Assert.That(result.AuctionResponse, Is.Empty);
+        }
+
+        [Test]
+        public async Task Handle_ShouldReturnPagedResults_WhenMultipleAuctions()
+        {
+            var request = new AuctionRegistedRequest
+            {
+                PageNumber = 2,
+                PageSize = 1,
+                UserId = _userId,
+            };
+
+            _repoMock
+                .Setup(r => r.GetRegisteredAssetIdsAsync(_userId))
+                .ReturnsAsync(new List<Guid> { _assetId });
+
+            _repoMock
+                .Setup(r => r.GetRegisteredAuctionIdsAsync(It.IsAny<List<Guid>>()))
+                .ReturnsAsync(new List<Guid> { _auctionId, Guid.NewGuid() });
+
+            var auctionList = new List<AuctionResponse>
+            {
+                new AuctionResponse
+                {
+                    AuctionId = _auctionId,
+                    AuctionName = "Đấu giá 1",
+                    CategoryName = "Bất động sản",
+                    AuctionDescription = "Mô tả 1",
+                    AuctionRules = "Luật 1",
+                    AuctionPlanningMap = "Map1",
+                    RegisterOpenDate = new DateTime(2025, 3, 1),
+                    RegisterEndDate = new DateTime(2025, 3, 5),
+                    AuctionStartDate = new DateTime(2025, 3, 10),
+                    AuctionEndDate = new DateTime(2025, 3, 15),
+                    NumberRoundMax = 3,
+                    Status = 1,
+                },
+                new AuctionResponse
+                {
+                    AuctionId = Guid.NewGuid(),
+                    AuctionName = "Đấu giá 2",
+                    CategoryName = "Ô tô",
+                    AuctionDescription = "Mô tả 2",
+                    AuctionRules = "Luật 2",
+                    AuctionPlanningMap = "Map2",
+                    RegisterOpenDate = new DateTime(2025, 4, 1),
+                    RegisterEndDate = new DateTime(2025, 4, 5),
+                    AuctionStartDate = new DateTime(2025, 4, 10),
+                    AuctionEndDate = new DateTime(2025, 4, 15),
+                    NumberRoundMax = 4,
+                    Status = 2,
+                },
+            };
+
+            _repoMock
+                .Setup(r => r.GetAuctionsByIdsAsync(It.IsAny<List<Guid>>()))
+                .ReturnsAsync(auctionList);
+
+            _repoMock
+                .Setup(r =>
+                    r.GetAuctionAssetsByAuctionIdAsync(It.IsAny<Guid>(), It.IsAny<List<Guid>>())
+                )
+                .ReturnsAsync(
+                    new List<AuctionAsset>
+                    {
+                        new AuctionAsset
+                        {
+                            AuctionAssetsId = _assetId,
+                            TagName = "Tài sản 1",
+                            StartingPrice = 1000,
+                            Unit = "VNĐ",
+                            Deposit = 100,
+                            RegistrationFee = 50,
+                            Description = "TS1",
+                            AuctionId = _auctionId,
+                        },
+                    }
+                );
+
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.That(result.PageNumber, Is.EqualTo(2));
+            Assert.That(result.PageSize, Is.EqualTo(1));
+            Assert.That(result.TotalAuctionRegisted, Is.EqualTo(2));
+            Assert.That(result.AuctionResponse.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task Handle_ShouldReturnFullData_WhenSearchMatches()
+        {
+            var request = new AuctionRegistedRequest
+            {
+                PageNumber = 1,
+                PageSize = 5,
+                UserId = _userId,
+                Search = new SearchAuctionRegisted
+                {
+                    AuctionName = "Đấu giá vàng",
+                    AuctionStartDate = new DateTime(2025, 1, 15),
+                    AuctionEndDate = new DateTime(2025, 1, 20),
+                },
+            };
+
+            _repoMock
+                .Setup(r => r.GetRegisteredAssetIdsAsync(_userId))
+                .ReturnsAsync(new List<Guid> { _assetId });
+
+            _repoMock
+                .Setup(r => r.GetRegisteredAuctionIdsAsync(It.IsAny<List<Guid>>()))
+                .ReturnsAsync(new List<Guid> { _auctionId });
+
+            _repoMock
+                .Setup(r => r.GetAuctionsByIdsAsync(It.IsAny<List<Guid>>()))
+                .ReturnsAsync(
+                    new List<AuctionResponse>
+                    {
+                        new AuctionResponse
+                        {
+                            AuctionId = _auctionId,
+                            AuctionName = "Đấu giá vàng",
+                            CategoryName = "Vàng",
+                            AuctionDescription = "Phiên đấu giá vàng miếng",
+                            AuctionRules = "Không hoàn tiền cọc",
+                            AuctionPlanningMap = "http://example.com/map.png",
+                            RegisterOpenDate = new DateTime(2025, 1, 1),
+                            RegisterEndDate = new DateTime(2025, 1, 10),
+                            AuctionStartDate = new DateTime(2025, 1, 15),
+                            AuctionEndDate = new DateTime(2025, 1, 20),
+                            NumberRoundMax = 3,
+                            Status = 1,
+                        },
+                    }
+                );
+
+            _repoMock
+                .Setup(r => r.GetAuctionAssetsByAuctionIdAsync(_auctionId, It.IsAny<List<Guid>>()))
+                .ReturnsAsync(
+                    new List<AuctionAsset>
+                    {
+                        new AuctionAsset
+                        {
+                            AuctionAssetsId = _assetId,
+                            TagName = "Lô vàng 1kg",
+                            StartingPrice = 100000000m,
+                            Unit = "VNĐ",
+                            Deposit = 5000000m,
+                            RegistrationFee = 200000m,
+                            Description = "Vàng 9999",
+                            AuctionId = _auctionId,
+                        },
+                    }
+                );
+
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.That(result.PageNumber, Is.EqualTo(1));
+            Assert.That(result.PageSize, Is.EqualTo(5));
+            Assert.That(result.TotalAuctionRegisted, Is.EqualTo(1));
+
+            var auction = result.AuctionResponse.First();
+            Assert.That(auction.AuctionId, Is.EqualTo(_auctionId));
+            Assert.That(auction.AuctionName, Is.EqualTo("Đấu giá vàng"));
+            Assert.That(auction.CategoryName, Is.EqualTo("Vàng"));
+            Assert.That(auction.AuctionDescription, Is.EqualTo("Phiên đấu giá vàng miếng"));
+            Assert.That(auction.AuctionRules, Is.EqualTo("Không hoàn tiền cọc"));
+            Assert.That(auction.AuctionPlanningMap, Is.EqualTo("http://example.com/map.png"));
+            Assert.That(auction.RegisterOpenDate, Is.EqualTo(new DateTime(2025, 1, 1)));
+            Assert.That(auction.RegisterEndDate, Is.EqualTo(new DateTime(2025, 1, 10)));
+            Assert.That(auction.AuctionStartDate, Is.EqualTo(new DateTime(2025, 1, 15)));
+            Assert.That(auction.AuctionEndDate, Is.EqualTo(new DateTime(2025, 1, 20)));
+            Assert.That(auction.NumberRoundMax, Is.EqualTo(3));
+            Assert.That(auction.Status, Is.EqualTo(1));
+
+            var asset = auction.AuctionAssets.First();
+            Assert.That(asset.AuctionAssetsId, Is.EqualTo(_assetId));
+            Assert.That(asset.TagName, Is.EqualTo("Lô vàng 1kg"));
+            Assert.That(asset.StartingPrice, Is.EqualTo(100000000m));
+            Assert.That(asset.Unit, Is.EqualTo("VNĐ"));
+            Assert.That(asset.Deposit, Is.EqualTo(5000000m));
+            Assert.That(asset.RegistrationFee, Is.EqualTo(200000m));
+            Assert.That(asset.Description, Is.EqualTo("Vàng 9999"));
+            Assert.That(asset.AuctionId, Is.EqualTo(_auctionId));
         }
     }
 }

@@ -5,7 +5,10 @@ namespace MyApp.Application.Interfaces.RegisterAuctionDocument.Repository
 {
     public interface IRegisterAuctionDocumentRepository
     {
-        Task<AuctionDocuments?> CheckAuctionDocumentPaid(string? userId, string auctionAssetsId);
+        Task<AuctionDocumentResponse?> CheckAuctionDocumentPaid(
+            string? userId,
+            string auctionAssetsId
+        );
         Task<RegisterAuctionDocumentResponse> CreateQRForPayTicket(Guid auctionDocumentsId);
         Task<string> GetAuctionNameByAuctionDocumentsIdAsync(Guid? auctionDocumentsId);
         Task<List<Guid>> GetUserIdByRoleAsync();

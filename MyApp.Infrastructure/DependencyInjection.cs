@@ -5,6 +5,7 @@ using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.Interfaces.AuctionDocumentRegisted;
 using MyApp.Application.Interfaces.Blog;
 using MyApp.Application.Interfaces.ChangeStatusAuctionRound;
+using MyApp.Application.Interfaces.DetailAuctionAsset;
 using MyApp.Application.Interfaces.DetailAuctionDocument;
 using MyApp.Application.Interfaces.EmployeeManager;
 using MyApp.Application.Interfaces.GenarateNumbericalOrder;
@@ -35,7 +36,9 @@ using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.Interfaces.IUnitOfWork;
 using MyApp.Application.Interfaces.IUpdateDepositStatus;
 using MyApp.Application.Interfaces.IUpdateWinnerFlagRepository;
+using MyApp.Application.Interfaces.ListAuctionAsset;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
+using MyApp.Application.Interfaces.ListCustomer;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
 using MyApp.Application.Interfaces.SearchUserAttendance;
@@ -55,6 +58,7 @@ using MyApp.Infrastructure.Repositories.AuctionRepository;
 using MyApp.Infrastructure.Repositories.Blog;
 using MyApp.Infrastructure.Repositories.ChangeStatusAuctionRound;
 using MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository;
+using MyApp.Infrastructure.Repositories.DetailAuctionAsset;
 using MyApp.Infrastructure.Repositories.DetailAuctionDocument;
 using MyApp.Infrastructure.Repositories.EmployeeManager;
 using MyApp.Infrastructure.Repositories.ExcelRepository;
@@ -70,7 +74,9 @@ using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.GetListEnteredPricesRepository;
 using MyApp.Infrastructure.Repositories.GetListUserWinnerRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
+using MyApp.Infrastructure.Repositories.ListAuctionAsset;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
+using MyApp.Infrastructure.Repositories.ListCustomer;
 using MyApp.Infrastructure.Repositories.LoginUserRepository;
 using MyApp.Infrastructure.Repositories.NotificationsRepository;
 using MyApp.Infrastructure.Repositories.PaymentDepositRepository;
@@ -179,6 +185,10 @@ namespace MyApp.Infrastructure
                 IGetAuctionRoundStatisticsRepository,
                 GetAuctionRoundStatisticsRepository
             >();
+            services.AddScoped<IListCustomerRepository, ListCustomerRepository>();
+            services.AddScoped<IListAuctionAssetRepository, ListAuctionAssetRepository>();
+            services.AddScoped<IDetailAuctionAssetRepository, DetailAuctionAssetRepository>();
+
 
             return services;
         }

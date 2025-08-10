@@ -82,6 +82,7 @@ namespace MyApp.Application
             services.AddScoped<INotificationSender, NotificationSender>();
 
             services.AddScoped<IAuctionBookExporter, AuctionBookExporter>();
+            services.AddScoped<ISetAuctionUpdateableFalse, SetAuctionUpdateableFalse>();
 
             return services;
         }

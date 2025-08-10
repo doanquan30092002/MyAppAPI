@@ -9,7 +9,12 @@ using MyApp.Application.Interfaces.IAuctionRepository;
 
 namespace MyApp.Application.JobBackgroud.AuctionJob
 {
-    public class SetAuctionUpdateableFalse
+    public interface ISetAuctionUpdateableFalse
+    {
+        Task SetAuctionUpdateableFalseAsync(Guid auctionId);
+    }
+
+    public class SetAuctionUpdateableFalse : ISetAuctionUpdateableFalse
     {
         private readonly IAuctionRepository _AuctionRepository;
         private readonly ILogger<SetAuctionUpdateableFalse> _logger;

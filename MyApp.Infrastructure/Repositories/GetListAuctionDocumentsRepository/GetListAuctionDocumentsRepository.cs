@@ -164,11 +164,13 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                     .Select(ad => new ListAuctionDocumentsDTO
                     {
                         AuctionDocumentsId = ad.AuctionDocumentsId,
+                        UserId = ad.UserId,
                         CitizenIdentification =
                             ad.User != null ? ad.User.CitizenIdentification : string.Empty,
                         Name = ad.User != null ? ad.User.Name : string.Empty,
                         TagName = ad.AuctionAsset != null ? ad.AuctionAsset.TagName : string.Empty,
                         Deposit = ad.AuctionAsset != null ? ad.AuctionAsset.Deposit : 0,
+                        StatusDeposit = ad.StatusDeposit,
                         RegistrationFee =
                             ad.AuctionAsset != null ? ad.AuctionAsset.RegistrationFee : 0,
                         StatusTicket = ad.StatusTicket,

@@ -9,106 +9,138 @@ namespace MyApp.Application.CQRS.AuctionDocumentRegisted.Tests
     public class AuctionDocumentRegistedHandlerTests
     {
         private Mock<IAuctionDocumentRegistedRepository> _repositoryMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private AuctionDocumentRegistedHandler _handler;
 
+        // Dùng Guid cố định cho tất cả test
+        private static readonly Guid FixedUserId = Guid.Parse(
+            "11111111-1111-1111-1111-111111111111"
+        );
+        private static readonly Guid FixedAuctionId = Guid.Parse(
+            "22222222-2222-2222-2222-222222222222"
+        );
+        private static readonly Guid FixedDocumentId = Guid.Parse(
+            "33333333-3333-3333-3333-333333333333"
+        );
+
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
             _repositoryMock = new Mock<IAuctionDocumentRegistedRepository>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _handler = new AuctionDocumentRegistedHandler(_repositoryMock.Object);
+        }
 
-            _handler = new AuctionDocumentRegistedHandler(
-                _repositoryMock.Object,
-                _httpContextAccessorMock.Object
+        [Test]
+        public async Task Handle_ShouldReturnNull_WhenRepositoryReturnsNull()
+        {
+            // Arrange
+            var request = new AuctionDocumentRegistedRequest
+            {
+                UserId = FixedUserId,
+                AuctionId = FixedAuctionId,
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetAuctionDocumentRegistedByAuctionId(FixedUserId, FixedAuctionId))
+                .ReturnsAsync((List<AuctionDocumentRegistedResponse>?)null);
+
+            // Act
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.IsNull(result);
+            _repositoryMock.Verify(
+                r => r.GetAuctionDocumentRegistedByAuctionId(FixedUserId, FixedAuctionId),
+                Times.Once
             );
         }
 
         [Test]
-        public async Task Handle_WithValidUserIdAndAuctionId_ReturnsAuctionDocuments()
+        public async Task Handle_ShouldReturnEmptyList_WhenRepositoryReturnsEmptyList()
         {
             // Arrange
-            var userId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa").ToString();
-            var auctionId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+            var request = new AuctionDocumentRegistedRequest
+            {
+                UserId = FixedUserId,
+                AuctionId = FixedAuctionId,
+            };
 
-            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims, "Test");
-            var claimsPrincipal = new ClaimsPrincipal(identity);
-            var httpContext = new DefaultHttpContext { User = claimsPrincipal };
+            var emptyList = new List<AuctionDocumentRegistedResponse>();
 
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+            _repositoryMock
+                .Setup(r => r.GetAuctionDocumentRegistedByAuctionId(FixedUserId, FixedAuctionId))
+                .ReturnsAsync(emptyList);
 
-            var expectedDocuments = new List<AuctionDocumentRegistedResponse>
+            // Act
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public async Task Handle_ShouldReturnList_WhenRepositoryReturnsList()
+        {
+            // Arrange
+            var request = new AuctionDocumentRegistedRequest
+            {
+                UserId = FixedUserId,
+                AuctionId = FixedAuctionId,
+            };
+
+            var responseList = new List<AuctionDocumentRegistedResponse>
             {
                 new AuctionDocumentRegistedResponse
                 {
-                    AuctionDocumentsId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                    AuctionDocumentsId = FixedDocumentId,
                     CitizenIdentification = "0123456789",
-                    Deposit = 5000000,
-                    Name = "Nguyen Van A",
-                    Note = "Đã nộp",
-                    NumericalOrder = 1,
-                    RegistrationFee = 100000,
+                    Deposit = 1500000m,
+                    Name = "Nguyễn Văn A",
+                    Note = "Ghi chú kiểm tra",
+                    NumericalOrder = 5,
+                    RegistrationFee = 500000m,
                     StatusDeposit = 1,
-                    StatusTicket = 0,
-                    TagName = "Tag A",
-                    BankAccount = "VCB",
-                    BankAccountNumber = "123456789",
-                    BankBranch = "Hà Nội",
+                    StatusTicket = 2,
+                    TagName = "Phiên đấu giá A",
+                    BankAccount = "Ngân hàng ABC",
+                    BankAccountNumber = "123456789012",
+                    BankBranch = "Chi nhánh Hà Nội",
+                    IsAttended = true,
+                    RefundProof = "Ảnh xác nhận",
+                    RefundReason = "Hoàn tiền do hủy phiên",
+                    StatusRefund = 0,
                 },
             };
 
             _repositoryMock
-                .Setup(x => x.GetAuctionDocumentRegistedByAuctionId(userId, auctionId))
-                .ReturnsAsync(expectedDocuments);
-
-            var request = new AuctionDocumentRegistedRequest { AuctionId = auctionId };
+                .Setup(r => r.GetAuctionDocumentRegistedByAuctionId(FixedUserId, FixedAuctionId))
+                .ReturnsAsync(responseList);
 
             // Act
-            var result = await _handler.Handle(request, default);
+            var result = await _handler.Handle(request, CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
-            var doc = result[0];
-            Assert.AreEqual(
-                Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                doc.AuctionDocumentsId
-            );
-            Assert.AreEqual("0123456789", doc.CitizenIdentification);
-            Assert.AreEqual(5000000, doc.Deposit);
-            Assert.AreEqual("Nguyen Van A", doc.Name);
-            Assert.AreEqual("Đã nộp", doc.Note);
-            Assert.AreEqual(1, doc.NumericalOrder);
-            Assert.AreEqual(100000, doc.RegistrationFee);
-            Assert.AreEqual(1, doc.StatusDeposit);
-            Assert.AreEqual(0, doc.StatusTicket);
-            Assert.AreEqual("Tag A", doc.TagName);
-            Assert.AreEqual("VCB", doc.BankAccount);
-            Assert.AreEqual("123456789", doc.BankAccountNumber);
-            Assert.AreEqual("Hà Nội", doc.BankBranch);
-        }
 
-        [Test]
-        public async Task Handle_WithMissingUserId_ReturnsNull()
-        {
-            // Arrange
-            var auctionId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
-            var request = new AuctionDocumentRegistedRequest { AuctionId = auctionId };
-
-            var httpContext = new DefaultHttpContext(); // Không có user
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
-
-            // Act
-            var result = await _handler.Handle(request, default);
-
-            // Assert
-            _repositoryMock.Verify(
-                x => x.GetAuctionDocumentRegistedByAuctionId(It.IsAny<string>(), It.IsAny<Guid>()),
-                Times.Never
-            );
-
-            Assert.IsNull(result);
+            var item = result[0];
+            Assert.AreEqual(FixedDocumentId, item.AuctionDocumentsId);
+            Assert.AreEqual("0123456789", item.CitizenIdentification);
+            Assert.AreEqual(1500000m, item.Deposit);
+            Assert.AreEqual("Nguyễn Văn A", item.Name);
+            Assert.AreEqual("Ghi chú kiểm tra", item.Note);
+            Assert.AreEqual(5, item.NumericalOrder);
+            Assert.AreEqual(500000m, item.RegistrationFee);
+            Assert.AreEqual(1, item.StatusDeposit);
+            Assert.AreEqual(2, item.StatusTicket);
+            Assert.AreEqual("Phiên đấu giá A", item.TagName);
+            Assert.AreEqual("Ngân hàng ABC", item.BankAccount);
+            Assert.AreEqual("123456789012", item.BankAccountNumber);
+            Assert.AreEqual("Chi nhánh Hà Nội", item.BankBranch);
+            Assert.IsTrue(item.IsAttended);
+            Assert.AreEqual("Ảnh xác nhận", item.RefundProof);
+            Assert.AreEqual("Hoàn tiền do hủy phiên", item.RefundReason);
+            Assert.AreEqual(0, item.StatusRefund);
         }
     }
 }

@@ -15,5 +15,9 @@
         public string? BankAccount { get; set; }
         public string? BankAccountNumber { get; set; }
         public string? BankBranch { get; set; }
+        public bool? IsAttended { get; set; }
+        public string? RefundProof { get; set; }
+        public string? RefundReason { get; set; }
+        public int? StatusRefund { get; set; }
     }
 }
