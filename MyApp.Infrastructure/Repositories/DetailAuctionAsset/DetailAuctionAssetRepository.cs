@@ -44,16 +44,26 @@ namespace MyApp.Infrastructure.Repositories.DetailAuctionAsset
 
         public async Task<decimal> GetTotalDepositAsync(Guid auctionAssetsId)
         {
-            return await _context
+            int totalDocuments = await _context
+                .AuctionDocuments.Where(a => a.StatusDeposit == 1)
+                .CountAsync(a => a.AuctionAsset.AuctionAssetsId == auctionAssetsId);
+            decimal depositByAuctionAssetsId = await _context
                 .AuctionAssets.Where(a => a.AuctionAssetsId == auctionAssetsId)
-                .SumAsync(a => a.Deposit);
+                .Select(x => x.Deposit)
+                .FirstOrDefaultAsync();
+            return depositByAuctionAssetsId * totalDocuments;
         }
 
-        public Task<decimal> GetTotalRegistrationFeeAsync(Guid auctionAssetsId)
+        public async Task<decimal> GetTotalRegistrationFeeAsync(Guid auctionAssetsId)
         {
-            return _context
+            int totalDocuments = await _context
+                .AuctionDocuments.Where(a => a.StatusTicket == 2)
+                .CountAsync(a => a.AuctionAsset.AuctionAssetsId == auctionAssetsId);
+            decimal registrationFeeByAuctionAssetsId = await _context
                 .AuctionAssets.Where(a => a.AuctionAssetsId == auctionAssetsId)
-                .SumAsync(a => a.RegistrationFee);
+                .Select(x => x.RegistrationFee)
+                .FirstOrDefaultAsync();
+            return registrationFeeByAuctionAssetsId * totalDocuments;
         }
     }
 }
