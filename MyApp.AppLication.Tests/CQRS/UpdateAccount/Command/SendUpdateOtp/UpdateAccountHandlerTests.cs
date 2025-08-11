@@ -1,7 +1,6 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.UpdateAccount.Repository;
 using MyApp.Application.Interfaces.UpdateAccount.Service;
 
@@ -11,44 +10,25 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp.Tests
     public class UpdateAccountHandlerTests
     {
         private Mock<IUpdateAccountRepository> _updateAccountRepoMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<ICurrentUserService> _currentUserServiceMock;
         private Mock<IOTPService_1> _otpServiceMock;
         private IMemoryCache _memoryCache;
-        private Mock<ICacheEntry> _cacheEntryMock;
         private UpdateAccountHandler _handler;
 
         [SetUp]
         public void Setup()
         {
             _updateAccountRepoMock = new Mock<IUpdateAccountRepository>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _currentUserServiceMock = new Mock<ICurrentUserService>();
             _otpServiceMock = new Mock<IOTPService_1>();
-
-            (_memoryCache, _cacheEntryMock) = CreateMockMemoryCache();
+            _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
             _handler = new UpdateAccountHandler(
                 _updateAccountRepoMock.Object,
-                _httpContextAccessorMock.Object,
+                _currentUserServiceMock.Object,
                 _otpServiceMock.Object,
                 _memoryCache
             );
-        }
-
-        private (IMemoryCache, Mock<ICacheEntry>) CreateMockMemoryCache()
-        {
-            var cacheEntryMock = new Mock<ICacheEntry>();
-            cacheEntryMock.SetupAllProperties();
-
-            var memoryCacheMock = new Mock<IMemoryCache>();
-            memoryCacheMock
-                .Setup(m => m.CreateEntry(It.IsAny<object>()))
-                .Returns(cacheEntryMock.Object);
-
-            // Optional: TryGetValue can be set to return false
-            object dummy;
-            memoryCacheMock.Setup(m => m.TryGetValue(It.IsAny<object>(), out dummy)).Returns(false);
-
-            return (memoryCacheMock.Object, cacheEntryMock);
         }
 
         [TearDown]
@@ -68,14 +48,7 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp.Tests
             var email = "test@example.com";
             var request = new UpdateAccountRequest();
 
-            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims, "TestAuth");
-            var principal = new ClaimsPrincipal(identity);
-
-            var httpContext = new Mock<HttpContext>();
-            httpContext.Setup(x => x.User).Returns(principal);
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext.Object);
-
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(userId);
             _updateAccountRepoMock.Setup(r => r.GetEmailByUserIdAsync(userId)).ReturnsAsync(email);
             _otpServiceMock.Setup(s => s.SendOtpAsync(email)).ReturnsAsync(true);
 
@@ -84,6 +57,7 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp.Tests
 
             // Assert
             Assert.IsTrue(result);
+            Assert.IsTrue(_memoryCache.TryGetValue($"update_pending_{email}", out _));
             _otpServiceMock.Verify(s => s.SendOtpAsync(email), Times.Once);
         }
 
@@ -92,17 +66,13 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp.Tests
         {
             // Arrange
             var request = new UpdateAccountRequest();
-
-            var mockHttpContext = new Mock<HttpContext>();
-            mockHttpContext.Setup(c => c.User).Returns(new ClaimsPrincipal()); // Không có claim
-
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns((string?)null);
 
             // Act & Assert
             var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(
                 () => _handler.Handle(request, default)
             );
-            Assert.That(ex.Message, Is.EqualTo("User not authenticated."));
+            Assert.That(ex!.Message, Is.EqualTo("Yêu cầu đăng nhập"));
         }
 
         [Test]
@@ -113,14 +83,7 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp.Tests
             var email = "test@example.com";
             var request = new UpdateAccountRequest();
 
-            var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims);
-            var principal = new ClaimsPrincipal(identity);
-
-            var httpContext = new Mock<HttpContext>();
-            httpContext.Setup(x => x.User).Returns(principal);
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext.Object);
-
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(userId);
             _updateAccountRepoMock.Setup(r => r.GetEmailByUserIdAsync(userId)).ReturnsAsync(email);
             _otpServiceMock.Setup(s => s.SendOtpAsync(email)).ReturnsAsync(false);
 
