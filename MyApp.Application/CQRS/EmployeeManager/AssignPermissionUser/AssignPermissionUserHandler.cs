@@ -1,22 +1,23 @@
 ﻿using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.EmployeeManager;
 
 namespace MyApp.Application.CQRS.EmployeeManager.AssignPermissionUser
 {
     public class AssignPermissionUserHandler : IRequestHandler<AssignPermissionUserRequest, bool>
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IEmployeeManagerRepository _employeeManagerRepository;
 
         public AssignPermissionUserHandler(
             IEmployeeManagerRepository employeeManagerRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _employeeManagerRepository = employeeManagerRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(
@@ -24,15 +25,13 @@ namespace MyApp.Application.CQRS.EmployeeManager.AssignPermissionUser
             CancellationToken cancellationToken
         )
         {
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-            if (string.IsNullOrEmpty(userIdStr))
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
                 throw new UnauthorizedAccessException("Yêu cầu đăng nhập");
             bool response = await _employeeManagerRepository.AssignPermissionUser(
                 request.AccountId,
                 request.RoleId,
-                Guid.Parse(userIdStr)
+                Guid.Parse(userId)
             );
             return response;
         }
