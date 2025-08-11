@@ -12,8 +12,7 @@ namespace MyApp.Application.CQRS.SignUp.SignUpUser.Command
 
         public SignUpHandler(ISignUpRepository signUpRepository)
         {
-            _signUpRepository =
-                signUpRepository ?? throw new ArgumentNullException(nameof(signUpRepository));
+            _signUpRepository = signUpRepository;
         }
 
         public async Task<SignUpResponse> Handle(
