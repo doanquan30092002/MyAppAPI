@@ -1,7 +1,6 @@
-﻿using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Moq;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.Interfaces.Blog;
@@ -12,7 +11,7 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog.Tests
     public class CreateBlogHandlerTests
     {
         private Mock<IBlogRepository> _blogRepoMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<ICurrentUserService> _currentUserServiceMock;
         private Mock<IUploadFile> _uploadFileMock;
         private CreateBlogHandler _handler;
         private readonly string _fixedUserId = "22222222-2222-2222-2222-222222222222";
@@ -21,33 +20,23 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog.Tests
         public void Setup()
         {
             _blogRepoMock = new Mock<IBlogRepository>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _currentUserServiceMock = new Mock<ICurrentUserService>();
             _uploadFileMock = new Mock<IUploadFile>();
 
             _handler = new CreateBlogHandler(
                 _blogRepoMock.Object,
-                _httpContextAccessorMock.Object,
+                _currentUserServiceMock.Object,
                 _uploadFileMock.Object
             );
 
-            var claimsPrincipal = new ClaimsPrincipal(
-                new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, _fixedUserId) })
-            );
-            var httpContext = new DefaultHttpContext { User = claimsPrincipal };
-            _httpContextAccessorMock.Setup(a => a.HttpContext).Returns(httpContext);
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(_fixedUserId);
         }
 
         [Test]
         public async Task Handle_WithThumbnail_CreateSuccess_ReturnsSuccess()
         {
-            // Arrange
             var fileMock = new Mock<IFormFile>();
-            var content = "fake image content";
-            var fileName = "test.png";
-            var ms = new MemoryStream(Encoding.UTF8.GetBytes(content));
-            fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-            fileMock.Setup(f => f.FileName).Returns(fileName);
-            fileMock.Setup(f => f.Length).Returns(ms.Length);
+            fileMock.Setup(f => f.Length).Returns(10);
 
             _uploadFileMock
                 .Setup(u => u.UploadAsync(It.IsAny<IFormFile>()))
@@ -71,10 +60,8 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog.Tests
                 Thumbnail = fileMock.Object,
             };
 
-            // Act
             var response = await _handler.Handle(request, CancellationToken.None);
 
-            // Assert
             Assert.That(response.Code, Is.EqualTo(200));
             Assert.That(response.Message, Is.EqualTo(Message.CREATE_BLOG_SUCCESS));
         }
@@ -82,7 +69,6 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog.Tests
         [Test]
         public async Task Handle_NoThumbnail_CreateSuccess_ReturnsSuccess()
         {
-            // Arrange
             _blogRepoMock
                 .Setup(r => r.CreateBlogAsync("Tiêu đề", "Nội dung", "", _fixedUserId))
                 .ReturnsAsync(true);
@@ -94,10 +80,8 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog.Tests
                 Thumbnail = null,
             };
 
-            // Act
             var response = await _handler.Handle(request, CancellationToken.None);
 
-            // Assert
             Assert.That(response.Code, Is.EqualTo(200));
             Assert.That(response.Message, Is.EqualTo(Message.CREATE_BLOG_SUCCESS));
             _uploadFileMock.Verify(u => u.UploadAsync(It.IsAny<IFormFile>()), Times.Never);
@@ -106,7 +90,6 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog.Tests
         [Test]
         public async Task Handle_WithThumbnail_CreateFail_ReturnsFail()
         {
-            // Arrange
             var fileMock = new Mock<IFormFile>();
             fileMock.Setup(f => f.Length).Returns(10);
 
@@ -132,12 +115,60 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog.Tests
                 Thumbnail = fileMock.Object,
             };
 
+            var response = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.That(response.Code, Is.EqualTo(500));
+            Assert.That(response.Message, Is.EqualTo(Message.CREATE_BLOG_FAIL));
+        }
+
+        [Test]
+        public async Task Handle_ThumbnailLengthZero_CreateSuccess_ReturnsSuccess()
+        {
+            // Arrange
+            var fileMock = new Mock<IFormFile>();
+            fileMock.Setup(f => f.Length).Returns(0);
+
+            _blogRepoMock
+                .Setup(r => r.CreateBlogAsync("Tiêu đề", "Nội dung", "", _fixedUserId))
+                .ReturnsAsync(true);
+
+            var request = new CreateBlogRequest
+            {
+                Title = "Tiêu đề",
+                Content = "Nội dung",
+                Thumbnail = fileMock.Object,
+            };
+
             // Act
             var response = await _handler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.That(response.Code, Is.EqualTo(500));
-            Assert.That(response.Message, Is.EqualTo(Message.CREATE_BLOG_FAIL));
+            Assert.That(response.Code, Is.EqualTo(200));
+            Assert.That(response.Message, Is.EqualTo(Message.CREATE_BLOG_SUCCESS));
+            _uploadFileMock.Verify(u => u.UploadAsync(It.IsAny<IFormFile>()), Times.Never);
+        }
+
+        [Test]
+        public async Task Handle_UserIdNull_ReturnsUnauthorized()
+        {
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns((string)null);
+
+            var request = new CreateBlogRequest { Title = "Tiêu đề", Content = "Nội dung" };
+
+            var response = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.That(response.Code, Is.EqualTo(401));
+            Assert.That(response.Message, Is.EqualTo(Message.UNAUTHORIZED));
+            _blogRepoMock.Verify(
+                r =>
+                    r.CreateBlogAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>()
+                    ),
+                Times.Never
+            );
         }
     }
 }

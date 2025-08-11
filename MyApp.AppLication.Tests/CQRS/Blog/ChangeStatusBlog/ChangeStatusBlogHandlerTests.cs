@@ -1,19 +1,17 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using Moq;
+﻿using Moq;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.Blog;
 
 namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog.Tests
 {
-    [TestFixture()]
+    [TestFixture]
     public class ChangeStatusBlogHandlerTests
     {
         private Mock<IBlogRepository> _blogRepoMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<ICurrentUserService> _currentUserServiceMock;
         private ChangeStatusBlogHandler _handler;
 
-        // Dùng Guid cố định cho predict dễ dàng
         private readonly Guid _fixedBlogId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         private readonly string _fixedUserId = "22222222-2222-2222-2222-222222222222";
 
@@ -21,10 +19,10 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog.Tests
         public void Setup()
         {
             _blogRepoMock = new Mock<IBlogRepository>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _currentUserServiceMock = new Mock<ICurrentUserService>();
             _handler = new ChangeStatusBlogHandler(
                 _blogRepoMock.Object,
-                _httpContextAccessorMock.Object
+                _currentUserServiceMock.Object
             );
         }
 
@@ -39,12 +37,7 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog.Tests
                 Note = "Đã duyệt",
             };
 
-            var claimsPrincipal = new ClaimsPrincipal(
-                new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, _fixedUserId) })
-            );
-            var httpContext = new DefaultHttpContext { User = claimsPrincipal };
-            _httpContextAccessorMock.Setup(a => a.HttpContext).Returns(httpContext);
-
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(_fixedUserId);
             _blogRepoMock
                 .Setup(r => r.ChangeStatusBlogAsync(_fixedBlogId, 1, "Đã duyệt", _fixedUserId))
                 .ReturnsAsync(true);
@@ -72,12 +65,7 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog.Tests
                 Note = "Từ chối",
             };
 
-            var claimsPrincipal = new ClaimsPrincipal(
-                new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, _fixedUserId) })
-            );
-            var httpContext = new DefaultHttpContext { User = claimsPrincipal };
-            _httpContextAccessorMock.Setup(a => a.HttpContext).Returns(httpContext);
-
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(_fixedUserId);
             _blogRepoMock
                 .Setup(r => r.ChangeStatusBlogAsync(_fixedBlogId, 0, "Từ chối", _fixedUserId))
                 .ReturnsAsync(false);
@@ -90,6 +78,96 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog.Tests
             Assert.That(response.Message, Is.EqualTo(Message.UPDATE_STATUS_BLOG_FAIL));
             _blogRepoMock.Verify(
                 r => r.ChangeStatusBlogAsync(_fixedBlogId, 0, "Từ chối", _fixedUserId),
+                Times.Once
+            );
+        }
+
+        [Test]
+        public async Task Handle_WhenUserIdIsNull_ReturnsUnauthorized()
+        {
+            // Arrange
+            var request = new ChangeStatusBlogRequest
+            {
+                BlogId = _fixedBlogId,
+                Status = 1,
+                Note = "Note test",
+            };
+
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns((string)null);
+
+            // Act
+            var response = await _handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.That(response.Code, Is.EqualTo(401));
+            Assert.That(response.Message, Is.EqualTo(Message.UNAUTHORIZED));
+            _blogRepoMock.Verify(
+                r =>
+                    r.ChangeStatusBlogAsync(
+                        It.IsAny<Guid>(),
+                        It.IsAny<int>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>()
+                    ),
+                Times.Never
+            );
+        }
+
+        [Test]
+        public async Task Handle_WhenUserIdIsEmpty_ReturnsUnauthorized()
+        {
+            // Arrange
+            var request = new ChangeStatusBlogRequest
+            {
+                BlogId = _fixedBlogId,
+                Status = 2,
+                Note = "Note test",
+            };
+
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(string.Empty);
+
+            // Act
+            var response = await _handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.That(response.Code, Is.EqualTo(401));
+            Assert.That(response.Message, Is.EqualTo(Message.UNAUTHORIZED));
+            _blogRepoMock.Verify(
+                r =>
+                    r.ChangeStatusBlogAsync(
+                        It.IsAny<Guid>(),
+                        It.IsAny<int>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>()
+                    ),
+                Times.Never
+            );
+        }
+
+        [Test]
+        public async Task Handle_WhenNoteIsNull_StillProcessesCorrectly()
+        {
+            // Arrange
+            var request = new ChangeStatusBlogRequest
+            {
+                BlogId = _fixedBlogId,
+                Status = 1,
+                Note = null,
+            };
+
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(_fixedUserId);
+            _blogRepoMock
+                .Setup(r => r.ChangeStatusBlogAsync(_fixedBlogId, 1, null, _fixedUserId))
+                .ReturnsAsync(true);
+
+            // Act
+            var response = await _handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.That(response.Code, Is.EqualTo(200));
+            Assert.That(response.Message, Is.EqualTo(Message.UPDATE_STATUS_BLOG_SUCCESS));
+            _blogRepoMock.Verify(
+                r => r.ChangeStatusBlogAsync(_fixedBlogId, 1, null, _fixedUserId),
                 Times.Once
             );
         }

@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.Blog;
 
@@ -10,15 +9,15 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog
         : IRequestHandler<ChangeStatusBlogRequest, ChangeStatusBlogResponse>
     {
         private readonly IBlogRepository _blogRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public ChangeStatusBlogHandler(
             IBlogRepository blogRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             this._blogRepository = blogRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<ChangeStatusBlogResponse> Handle(
@@ -26,14 +25,16 @@ namespace MyApp.Application.CQRS.Blog.ChangeStatusBlog
             CancellationToken cancellationToken
         )
         {
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new ChangeStatusBlogResponse { Code = 401, Message = Message.UNAUTHORIZED };
+            }
             bool isChangeSuccess = await _blogRepository.ChangeStatusBlogAsync(
                 request.BlogId,
                 request.Status,
                 request.Note,
-                userIdStr
+                userId
             );
             if (!isChangeSuccess)
             {
