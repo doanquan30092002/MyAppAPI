@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
-using Moq;
+﻿using Moq;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
 
@@ -10,18 +9,18 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command.Tests
     public class UpdateExpiredProfileHandlerTests
     {
         private Mock<IUpdateExpiredProfileRepository> _repositoryMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<ICurrentUserService> _currentUserServiceMock;
         private UpdateExpiredProfileHandler _handler;
 
         [SetUp]
         public void Setup()
         {
             _repositoryMock = new Mock<IUpdateExpiredProfileRepository>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _currentUserServiceMock = new Mock<ICurrentUserService>();
 
             _handler = new UpdateExpiredProfileHandler(
                 _repositoryMock.Object,
-                _httpContextAccessorMock.Object
+                _currentUserServiceMock.Object
             );
         }
 
@@ -29,7 +28,7 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command.Tests
         public async Task Handle_ShouldReturn401_WhenUserIdIsMissing()
         {
             // Arrange
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns((string)null);
 
             var request = new UpdateExpiredProfileRequest
             {
@@ -50,12 +49,7 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command.Tests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims);
-            var principal = new ClaimsPrincipal(identity);
-            var context = new DefaultHttpContext { User = principal };
-
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(userId);
             _repositoryMock.Setup(r => r.GetUserByIdAsync(userId)).ReturnsAsync((UserResponse)null);
 
             var request = new UpdateExpiredProfileRequest
@@ -77,15 +71,9 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command.Tests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims);
-            var principal = new ClaimsPrincipal(identity);
-            var context = new DefaultHttpContext { User = principal };
-
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(userId);
 
             var existingUser = new UserResponse { CitizenIdentification = "987654321" };
-
             _repositoryMock.Setup(r => r.GetUserByIdAsync(userId)).ReturnsAsync(existingUser);
 
             var request = new UpdateExpiredProfileRequest
@@ -107,15 +95,9 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command.Tests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims);
-            var principal = new ClaimsPrincipal(identity);
-            var context = new DefaultHttpContext { User = principal };
-
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(userId);
 
             var existingUser = new UserResponse { CitizenIdentification = "123456789" };
-
             _repositoryMock.Setup(r => r.GetUserByIdAsync(userId)).ReturnsAsync(existingUser);
 
             var request = new UpdateExpiredProfileRequest
@@ -146,16 +128,11 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command.Tests
         {
             // Arrange
             var userId = Guid.NewGuid().ToString();
-            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId) };
-            var identity = new ClaimsIdentity(claims);
-            var principal = new ClaimsPrincipal(identity);
-            var context = new DefaultHttpContext { User = principal };
-
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(userId);
 
             var existingUser = new UserResponse { CitizenIdentification = "123456789" };
-
             _repositoryMock.Setup(r => r.GetUserByIdAsync(userId)).ReturnsAsync(existingUser);
+
             _repositoryMock
                 .Setup(r => r.UpdateUserAsync(It.IsAny<UserResponse>()))
                 .ThrowsAsync(new Exception("Lỗi hệ thống"));

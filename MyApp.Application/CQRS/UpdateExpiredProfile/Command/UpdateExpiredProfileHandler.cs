@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
 
@@ -10,15 +9,15 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command
         : IRequestHandler<UpdateExpiredProfileRequest, UpdateExpiredProfileResponse>
     {
         private readonly IUpdateExpiredProfileRepository _updateExpiredProfileRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public UpdateExpiredProfileHandler(
             IUpdateExpiredProfileRepository updateExpiredProfileRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _updateExpiredProfileRepository = updateExpiredProfileRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<UpdateExpiredProfileResponse> Handle(
@@ -26,9 +25,7 @@ namespace MyApp.Application.CQRS.UpdateExpiredProfile.Command
             CancellationToken cancellationToken
         )
         {
-            string userId = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
 
             if (string.IsNullOrEmpty(userId))
             {
