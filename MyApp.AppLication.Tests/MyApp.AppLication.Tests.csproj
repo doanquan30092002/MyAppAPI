@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <Folder Include="CQRS\LoginUser\MockData\" />
+    <Folder Include="TestResults\" />
   </ItemGroup>
 
 </Project>

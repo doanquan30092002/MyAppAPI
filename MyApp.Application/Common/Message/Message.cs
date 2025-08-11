@@ -7,6 +7,7 @@
         public const string HANDLER_SUCCESS = "Xử lý thành công";
         public const string HANDLER_ERROR = "Xử lý xảy ra lỗi";
         public const string SYSTEM_ERROR = "Hệ thống đang bị lỗi. Xin thử lại sau!";
+        public const string UNAUTHORIZED = "Bạn không có quyền truy cập vào chức năng này";
         #endregion
         #region SignUp
         public const string EMAIL_EXITS = "Email đã được sử dụng";

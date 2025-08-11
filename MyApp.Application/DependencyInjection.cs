@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Amazon.S3;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Services.ExportWord.ExportAuctionBook;
 using MyApp.Application.Common.Services.ExportWord.ExportAuctionDocuments;
 using MyApp.Application.Common.Services.JwtHelper;
@@ -15,9 +11,6 @@ using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.ForgotPassword.Service;
 using MyApp.Application.Interfaces.IJwtHelper;
-using MyApp.Application.Interfaces.INotificationsRepository;
-using MyApp.Application.Interfaces.IRefundRepository;
-using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Application.JobBackgroud.AuctionJob;
 using MyApp.Core.Models;
 
@@ -83,6 +76,7 @@ namespace MyApp.Application
 
             services.AddScoped<IAuctionBookExporter, AuctionBookExporter>();
             services.AddScoped<ISetAuctionUpdateableFalse, SetAuctionUpdateableFalse>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }

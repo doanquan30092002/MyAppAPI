@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Microsoft.AspNetCore.Http;
 using Moq;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
@@ -10,13 +10,13 @@ using MyApp.Application.JobBackgroud.AuctionJob;
 
 namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command.Tests
 {
-    [TestFixture()]
+    [TestFixture]
     public class AssginAuctioneerAndPublicAuctionHandlerTests
     {
         private Mock<IAssginAuctioneerAndPublicAuctionRepository> _repoMock;
         private Mock<ISetAuctionUpdateableFalse> _setAuctionJobMock;
         private Mock<INotificationSender> _notificationSenderMock;
-        private IHttpContextAccessor _httpContextAccessor;
+        private Mock<ICurrentUserService> _currentUserServiceMock;
         private AssginAuctioneerAndPublicAuctionHandler _handler;
         private Guid _auctionId;
         private Guid _auctioneerId;
@@ -29,20 +29,17 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command.Tests
             _repoMock = new Mock<IAssginAuctioneerAndPublicAuctionRepository>();
             _setAuctionJobMock = new Mock<ISetAuctionUpdateableFalse>();
             _notificationSenderMock = new Mock<INotificationSender>();
+            _currentUserServiceMock = new Mock<ICurrentUserService>();
+
             _auctionId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             _auctioneerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
-            var claims = new ClaimsPrincipal(
-                new ClaimsIdentity(
-                    new[] { new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()) }
-                )
-            );
-            var httpContext = new DefaultHttpContext { User = claims };
-            _httpContextAccessor = new HttpContextAccessor { HttpContext = httpContext };
+            // Setup mặc định cho GetUserId()
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns(Guid.NewGuid().ToString());
 
             _handler = new AssginAuctioneerAndPublicAuctionHandler(
                 _repoMock.Object,
-                _httpContextAccessor,
+                _currentUserServiceMock.Object,
                 _setAuctionJobMock.Object,
                 _notificationSenderMock.Object
             );
@@ -239,6 +236,64 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command.Tests
             );
             Assert.AreEqual(200, result.Code);
             Assert.AreEqual(Message.ASSGIN_AUCTIONEER_AND_PUBLIC_AUCTION_SUCCESS, result.Message);
+        }
+
+        [Test]
+        public async Task Handle_UserIdIsNull_Returns401()
+        {
+            // Arrange
+            _currentUserServiceMock.Setup(s => s.GetUserId()).Returns((string)null);
+
+            var result = await _handler.Handle(
+                new AssginAuctioneerAndPublicAuctionRequest
+                {
+                    AuctionId = _auctionId,
+                    Auctioneer = _auctioneerId,
+                },
+                CancellationToken.None
+            );
+
+            Assert.AreEqual(401, result.Code);
+            Assert.AreEqual(Message.UNAUTHORIZED, result.Message);
+        }
+
+        [Test]
+        public void Handle_SendNotificationThrows_ExceptionBubblesUp()
+        {
+            _repoMock.Setup(r => r.CheckStatusAuctionIsWaitingAsync(_auctionId)).ReturnsAsync(true);
+            _repoMock
+                .Setup(r =>
+                    r.CheckAuctioneerAssignedToAnotherAuctionAsync(_auctioneerId, _auctionId)
+                )
+                .ReturnsAsync(false);
+            _repoMock
+                .Setup(r =>
+                    r.AssignAuctioneerToAuctionAndPublicAuctionAsync(
+                        _auctionId,
+                        _auctioneerId,
+                        It.IsAny<string>()
+                    )
+                )
+                .ReturnsAsync((true, DateTime.Now.AddMinutes(5).ToString(), "AuctionName"));
+            _repoMock
+                .Setup(r => r.GetAllUserIdRoleCustomer())
+                .ReturnsAsync(new List<Guid> { Guid.NewGuid() });
+
+            _notificationSenderMock
+                .Setup(s => s.SendToUsersAsync(It.IsAny<List<Guid>>(), It.IsAny<object>()))
+                .ThrowsAsync(new Exception("Notification error"));
+
+            Assert.ThrowsAsync<Exception>(async () =>
+            {
+                await _handler.Handle(
+                    new AssginAuctioneerAndPublicAuctionRequest
+                    {
+                        AuctionId = _auctionId,
+                        Auctioneer = _auctioneerId,
+                    },
+                    CancellationToken.None
+                );
+            });
         }
     }
 }

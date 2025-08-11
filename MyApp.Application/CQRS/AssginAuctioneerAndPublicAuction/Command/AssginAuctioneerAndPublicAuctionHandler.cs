@@ -1,7 +1,6 @@
-﻿using System.Security.Claims;
-using Hangfire;
+﻿using Hangfire;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
@@ -16,19 +15,19 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
         >
     {
         private readonly IAssginAuctioneerAndPublicAuctionRepository _repository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly ISetAuctionUpdateableFalse _setAuctionUpdateableFalse;
         private readonly INotificationSender _notificationSender;
 
         public AssginAuctioneerAndPublicAuctionHandler(
             IAssginAuctioneerAndPublicAuctionRepository repository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             ISetAuctionUpdateableFalse setAuctionUpdateableFalse,
             INotificationSender notificationSender
         )
         {
             _repository = repository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _setAuctionUpdateableFalse = setAuctionUpdateableFalse;
             _notificationSender = notificationSender;
         }
@@ -38,9 +37,16 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
             CancellationToken cancellationToken
         )
         {
-            string userId = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new AssginAuctioneerAndPublicAuctionResponse
+                {
+                    Code = 401,
+                    Message = Message.UNAUTHORIZED,
+                };
+            }
+
             // check status Auction is waiting
             var checkStatusAuction = await _repository.CheckStatusAuctionIsWaitingAsync(
                 request.AuctionId
@@ -53,6 +59,7 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                     Message = Message.AUCTION_NOT_WAITING,
                 };
             }
+
             // check 1 auctioneer cannot be assigned to 2 auctions at the same time
             var checkAuctioneerAssigned =
                 await _repository.CheckAuctioneerAssignedToAnotherAuctionAsync(
@@ -74,49 +81,8 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                 request.Auctioneer,
                 userId
             );
-            if (result.Item1)
-            {
-                // get userId role customer
-                List<Guid> userIds = await _repository.GetAllUserIdRoleCustomer();
-                // send notification to customer
-                var message = string.Format(Message.NEW_AUCTION_TO_CUSTOMER, result.Item3);
-                await _notificationSender.SendToUsersAsync(userIds, new { Message = message });
-                // save notification to database
-                var checkSaveNotificationAsync = await _repository.SaveNotificationAsync(
-                    userIds,
-                    message
-                );
-                if (!checkSaveNotificationAsync)
-                {
-                    return new AssginAuctioneerAndPublicAuctionResponse
-                    {
-                        Code = 500,
-                        Message = Message.SYSTEM_ERROR,
-                    };
-                }
-                // Set Auction Updateable False
-                var delaySetAuctionUpdateableFalse = DateTime.Parse(result.Item2) - DateTime.Now;
-                if (delaySetAuctionUpdateableFalse > TimeSpan.Zero)
-                {
-                    BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
-                        job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
-                        delaySetAuctionUpdateableFalse
-                    );
-                }
-                else
-                {
-                    await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(
-                        request.AuctionId
-                    );
-                }
 
-                return new AssginAuctioneerAndPublicAuctionResponse
-                {
-                    Code = 200,
-                    Message = Message.ASSGIN_AUCTIONEER_AND_PUBLIC_AUCTION_SUCCESS,
-                };
-            }
-            else
+            if (!result.Item1)
             {
                 return new AssginAuctioneerAndPublicAuctionResponse
                 {
@@ -124,6 +90,47 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                     Message = Message.SYSTEM_ERROR,
                 };
             }
+
+            // get userId role customer
+            List<Guid> userIds = await _repository.GetAllUserIdRoleCustomer();
+
+            // send notification to customer
+            var message = string.Format(Message.NEW_AUCTION_TO_CUSTOMER, result.Item3);
+            await _notificationSender.SendToUsersAsync(userIds, new { Message = message });
+
+            // save notification to database
+            var checkSaveNotificationAsync = await _repository.SaveNotificationAsync(
+                userIds,
+                message
+            );
+            if (!checkSaveNotificationAsync)
+            {
+                return new AssginAuctioneerAndPublicAuctionResponse
+                {
+                    Code = 500,
+                    Message = Message.SYSTEM_ERROR,
+                };
+            }
+
+            // Set Auction Updateable False
+            var delaySetAuctionUpdateableFalse = DateTime.Parse(result.Item2) - DateTime.Now;
+            if (delaySetAuctionUpdateableFalse > TimeSpan.Zero)
+            {
+                BackgroundJob.Schedule<SetAuctionUpdateableFalse>(
+                    job => job.SetAuctionUpdateableFalseAsync(request.AuctionId),
+                    delaySetAuctionUpdateableFalse
+                );
+            }
+            else
+            {
+                await _setAuctionUpdateableFalse.SetAuctionUpdateableFalseAsync(request.AuctionId);
+            }
+
+            return new AssginAuctioneerAndPublicAuctionResponse
+            {
+                Code = 200,
+                Message = Message.ASSGIN_AUCTIONEER_AND_PUBLIC_AUCTION_SUCCESS,
+            };
         }
     }
 }
