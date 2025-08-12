@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.Interfaces.Blog;
@@ -10,17 +9,17 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog
     public class CreateBlogHandler : IRequestHandler<CreateBlogRequest, CreateBlogResponse>
     {
         private readonly IBlogRepository _createBlogRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IUploadFile _uploadFileService;
 
         public CreateBlogHandler(
             IBlogRepository createBlogRepository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             IUploadFile uploadFileService
         )
         {
             _createBlogRepository = createBlogRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _uploadFileService = uploadFileService;
         }
 
@@ -29,9 +28,11 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog
             CancellationToken cancellationToken
         )
         {
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new CreateBlogResponse { Code = 401, Message = Message.UNAUTHORIZED };
+            }
             // upload file
             string thumbnailUrl = "";
             if (request.Thumbnail != null && request.Thumbnail.Length > 0)
@@ -43,7 +44,7 @@ namespace MyApp.Application.CQRS.Blog.CreateBlog
                 request.Title,
                 request.Content,
                 thumbnailUrl,
-                userIdStr
+                userId
             );
             if (!createBlogStatus)
             {

@@ -10,6 +10,7 @@ using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.CQRS.Auction.AddAuction.Commands;
 using MyApp.Application.CQRS.Auction.CancelAuction.Commands;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
+using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
@@ -21,16 +22,19 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
         private readonly AppDbContext _context;
         private readonly IUploadFile _uploadFileService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAuctionAssetsRepository _auctionAssetsRepository;
 
         public AuctionRepository(
             AppDbContext context,
             IUploadFile uploadFileService,
-            IHttpContextAccessor httpContextAccessor
+            IHttpContextAccessor httpContextAccessor,
+            IAuctionAssetsRepository auctionAssetsRepository
         )
         {
             _context = context;
             _uploadFileService = uploadFileService;
             _httpContextAccessor = httpContextAccessor;
+            _auctionAssetsRepository = auctionAssetsRepository;
         }
 
         public async Task<Guid> AddAuctionAsync(AddAuctionCommand command, Guid userId)
@@ -214,19 +218,48 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             Guid auctionId
         )
         {
+            var auctionAssetsWithWinners =
+                await _auctionAssetsRepository.GetAuctionAssetsWithHighestBidByAuctionIdAsync(
+                    auctionId
+                );
+
+            var excludedPairs = auctionAssetsWithWinners
+                .Where(a =>
+                    a.HighestBid != null
+                    && !string.IsNullOrWhiteSpace(a.HighestBid.CitizenIdentification)
+                )
+                .Select(a => new
+                {
+                    AuctionAssetId = a.AuctionAssetsId,
+                    CitizenId = a.HighestBid.CitizenIdentification.Trim(),
+                })
+                .ToList();
+
             var auctionAssetIds = await _context
                 .AuctionAssets.Where(x => x.AuctionId == auctionId)
                 .Select(x => x.AuctionAssetsId)
                 .ToListAsync();
 
-            var documents = await _context
+            var documents = _context
                 .AuctionDocuments.Where(doc =>
                     auctionAssetIds.Contains(doc.AuctionAssetId)
-                    && (doc.StatusTicket == 1 || doc.StatusDeposit == 1)
+                    && (
+                        doc.StatusTicket == 1
+                        || doc.StatusDeposit == 1
+                        || doc.StatusRefund == 1
+                        || doc.IsAttended == true
+                    )
                 )
                 .Include(doc => doc.User)
                 .Include(doc => doc.AuctionAsset)
-                .ToListAsync();
+                .AsEnumerable()
+                .Where(doc =>
+                    !excludedPairs.Any(p =>
+                        p.AuctionAssetId == doc.AuctionAssetId
+                        && p.CitizenId == doc.User.CitizenIdentification
+                    )
+                )
+                .ToList();
 
             return documents;
         }

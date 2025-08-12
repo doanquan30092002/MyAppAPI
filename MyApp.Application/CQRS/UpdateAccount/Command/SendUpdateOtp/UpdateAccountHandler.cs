@@ -1,7 +1,6 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.UpdateAccount.Repository;
 using MyApp.Application.Interfaces.UpdateAccount.Service;
 
@@ -10,19 +9,19 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp
     public class UpdateAccountHandler : IRequestHandler<UpdateAccountRequest, bool>
     {
         private readonly IUpdateAccountRepository _updateAccountRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IOTPService_1 _otpService;
         private readonly IMemoryCache _cache;
 
         public UpdateAccountHandler(
             IUpdateAccountRepository updateAccountRepository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             IOTPService_1 otpService,
             IMemoryCache cache
         )
         {
             _updateAccountRepository = updateAccountRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _otpService = otpService;
             _cache = cache;
         }
@@ -32,9 +31,9 @@ namespace MyApp.Application.CQRS.UpdateAccount.Command.SendUpdateOtp
             CancellationToken cancellationToken
         )
         {
-            string userId = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("Yêu cầu đăng nhập");
             var email = await _updateAccountRepository.GetEmailByUserIdAsync(userId);
             _cache.Set($"update_pending_{email}", request, TimeSpan.FromMinutes(10));
             var response = await _otpService.SendOtpAsync(email);

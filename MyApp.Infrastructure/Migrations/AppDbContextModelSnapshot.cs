@@ -259,6 +259,9 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("NoteReviewRefund")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("NumericalOrder")
                         .HasColumnType("int");
 

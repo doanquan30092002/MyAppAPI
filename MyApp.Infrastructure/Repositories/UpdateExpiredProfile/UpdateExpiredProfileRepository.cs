@@ -1,6 +1,8 @@
-﻿using MyApp.Application.Common.Message;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.UpdateExpiredProfile.Command;
 using MyApp.Application.Interfaces.UpdateExpiredProfile;
+using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.UpdateExpiredProfile
@@ -14,65 +16,44 @@ namespace MyApp.Infrastructure.Repositories.UpdateExpiredProfile
             _context = context;
         }
 
-        public async Task<UpdateExpiredProfileResponse> UpdateExpiredProfileAsync(
-            string userId,
-            UpdateExpiredProfileRequest updateExpiredProfileRequest
-        )
+        public async Task<UserResponse> GetUserByIdAsync(string userId)
         {
-            var user = _context.Users.FirstOrDefault(x => x.Id.ToString() == userId);
-            bool isMatchCitizenIdentification = CheckIsMatchCitizenIdentification(
-                updateExpiredProfileRequest.CitizenIdentification,
-                user.CitizenIdentification
-            );
-
-            if (isMatchCitizenIdentification)
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id.ToString() == userId);
+            return new UserResponse
             {
-                try
-                {
-                    user.Name = updateExpiredProfileRequest.Name;
-                    user.BirthDay = updateExpiredProfileRequest.BirthDay;
-                    user.Nationality = updateExpiredProfileRequest.Nationality;
-                    user.Gender = updateExpiredProfileRequest.Gender;
-                    user.ValidDate = updateExpiredProfileRequest.ValidDate;
-                    user.OriginLocation = updateExpiredProfileRequest.OriginLocation;
-                    user.RecentLocation = updateExpiredProfileRequest.RecentLocation;
-                    user.IssueDate = updateExpiredProfileRequest.IssueDate;
-                    user.IssueBy = updateExpiredProfileRequest.IssueBy;
-                    user.UpdatedAt = DateTime.UtcNow;
-                    user.UpdatedBy = Guid.Parse(userId);
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
-                    return new UpdateExpiredProfileResponse
-                    {
-                        Code = 200,
-                        Message = Message.UPDATE_PROFILE_SUCCESS,
-                    };
-                }
-                catch (Exception)
-                {
-                    return new UpdateExpiredProfileResponse
-                    {
-                        Code = 500,
-                        Message = Message.SYSTEM_ERROR,
-                    };
-                }
-            }
-            else
-            {
-                return new UpdateExpiredProfileResponse
-                {
-                    Code = 400,
-                    Message = Message.CITIZEN_IDENTIFICATION_NOT_MATCH,
-                };
-            }
+                Id = user.Id,
+                Name = user.Name,
+                CitizenIdentification = user.CitizenIdentification,
+                BirthDay = user.BirthDay,
+                Nationality = user.Nationality,
+                Gender = user.Gender,
+                ValidDate = user.ValidDate,
+                OriginLocation = user.OriginLocation,
+                RecentLocation = user.RecentLocation,
+                IssueDate = user.IssueDate,
+                IssueBy = user.IssueBy,
+                UpdatedAt = user.UpdatedAt,
+                UpdatedBy = user.UpdatedBy,
+            };
         }
 
-        private bool CheckIsMatchCitizenIdentification(
-            string citizenIdentificationRequest,
-            string citizenIdentificationExsit
-        )
+        public async Task UpdateUserAsync(UserResponse userNew)
         {
-            return citizenIdentificationRequest == citizenIdentificationExsit == true;
+            var userExist = await _context.Users.FirstOrDefaultAsync(x => x.Id == userNew.Id);
+            userExist.Name = userNew.Name;
+            userExist.BirthDay = userNew.BirthDay;
+            userExist.Nationality = userNew.Nationality;
+            userExist.Gender = userNew.Gender;
+            userExist.ValidDate = userNew.ValidDate;
+            userExist.OriginLocation = userNew.OriginLocation;
+            userExist.RecentLocation = userNew.RecentLocation;
+            userExist.IssueDate = userNew.IssueDate;
+            userExist.IssueBy = userNew.IssueBy;
+            userExist.UpdatedAt = userNew.UpdatedAt;
+            userExist.UpdatedBy = userNew.UpdatedBy;
+
+            _context.Users.Update(userExist);
+            await _context.SaveChangesAsync();
         }
     }
 }

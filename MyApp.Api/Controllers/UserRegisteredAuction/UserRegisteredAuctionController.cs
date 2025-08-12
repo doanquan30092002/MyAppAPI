@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.UserRegisteredAuction;
 
 namespace MyApp.Api.Controllers.UserRegisteredAuction

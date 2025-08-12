@@ -5,9 +5,7 @@ namespace MyApp.Application.Interfaces.UpdateExpiredProfile
 {
     public interface IUpdateExpiredProfileRepository
     {
-        Task<UpdateExpiredProfileResponse> UpdateExpiredProfileAsync(
-            string userId,
-            UpdateExpiredProfileRequest updateExpiredProfileRequest
-        );
+        Task<UserResponse> GetUserByIdAsync(string userId);
+        Task UpdateUserAsync(UserResponse user);
     }
 }

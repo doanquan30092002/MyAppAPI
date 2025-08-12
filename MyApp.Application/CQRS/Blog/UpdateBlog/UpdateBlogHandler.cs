@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.Interfaces.Blog;
@@ -10,17 +9,17 @@ namespace MyApp.Application.CQRS.Blog.UpdateBlog
     public class UpdateBlogHandler : IRequestHandler<UpdateBlogRequest, UpdateBlogResponse>
     {
         private readonly IBlogRepository _blogRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IUploadFile _uploadFileService;
 
         public UpdateBlogHandler(
             IBlogRepository blogRepository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             IUploadFile uploadFileService
         )
         {
             _blogRepository = blogRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _uploadFileService = uploadFileService;
         }
 
@@ -29,9 +28,16 @@ namespace MyApp.Application.CQRS.Blog.UpdateBlog
             CancellationToken cancellationToken
         )
         {
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new UpdateBlogResponse
+                {
+                    Code = 401,
+                    Message = Message.UNAUTHORIZED,
+                    Data = null,
+                };
+            }
             // upload file
             string thumbnailUrl = null;
             if (request.Thumbnail != null && request.Thumbnail.Length > 0)
@@ -43,7 +49,7 @@ namespace MyApp.Application.CQRS.Blog.UpdateBlog
                 request.Title,
                 request.Content,
                 thumbnailUrl,
-                userIdStr
+                userId
             );
             if (!updateBlogStatus)
             {

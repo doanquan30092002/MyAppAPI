@@ -63,6 +63,11 @@ namespace MyApp.Infrastructure.Repositories.EmployeeManager
             }
         }
 
+        public Task<int> GetEmployeeAccountTotal()
+        {
+            return context.Accounts.CountAsync(x => x.RoleId != 1 && x.RoleId != 2); // Exclude Admin, Customer
+        }
+
         public Task<List<EmployeeAccountResponse>> ListEmployeeAccount(
             int pageNumber,
             int pageSize,

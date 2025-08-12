@@ -7,8 +7,7 @@ namespace MyApp.Api.Controllers.AssginAuctioneerAndPublicAuction
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Manager")]
-    [Authorize]
+    [Authorize(Roles = "Manager")]
     public class AssginAuctioneerAndPublicAuctionController(IMediator _mediator) : ControllerBase
     {
         [HttpPost]

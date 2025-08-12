@@ -1,5 +1,4 @@
-﻿using Amazon.Runtime.Internal;
-using MediatR;
+﻿using MediatR;
 using MyApp.Application.Interfaces.Blog;
 
 namespace MyApp.Application.CQRS.Blog.GetListBlog

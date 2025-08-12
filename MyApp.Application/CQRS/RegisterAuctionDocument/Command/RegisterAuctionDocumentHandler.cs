@@ -1,24 +1,22 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
-using MyApp.Core.Entities;
 
 namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
 {
     public class RegisterAuctionDocumentHandler
         : IRequestHandler<RegisterAuctionDocumentRequest, RegisterAuctionDocumentResponse>
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IRegisterAuctionDocumentRepository _repository;
 
         public RegisterAuctionDocumentHandler(
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             IRegisterAuctionDocumentRepository repository
         )
         {
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _repository = repository;
         }
 
@@ -28,9 +26,15 @@ namespace MyApp.Application.CQRS.RegisterAuctionDocument.Command
         )
         {
             var result = new RegisterAuctionDocumentResponse();
-            string? userId = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new RegisterAuctionDocumentResponse
+                {
+                    Code = 401,
+                    Message = Message.UNAUTHORIZED,
+                };
+            }
             var auctionDocument = await _repository.CheckAuctionDocumentPaid(
                 userId,
                 request.AuctionAssetsId

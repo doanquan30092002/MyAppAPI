@@ -86,6 +86,12 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                 // Calculate total count before pagination
                 int totalCount = await query.CountAsync();
 
+                // Group by AuctionAssetId and count documents for DocumentsAssetList
+                var documentsAssetList = await query
+                    .GroupBy(ad => ad.AuctionAssetId)
+                    .Select(g => new DocumentsAssetDto { AssetId = g.Key, Quantity = g.Count() })
+                    .ToListAsync();
+
                 // Sort by specified field
                 if (!string.IsNullOrEmpty(getListAuctionDocumentsRequest.SortBy))
                 {
@@ -136,13 +142,15 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                                 : query.OrderByDescending(ad => ad.NumericalOrder);
                             break;
                         default:
-                            query = query.OrderBy(ad => ad.User.Name); // Default sort by user name
+                            query = query.OrderBy(ad =>
+                                ad.User != null ? ad.User.Name : string.Empty
+                            );
                             break;
                     }
                 }
                 else
                 {
-                    query = query.OrderBy(ad => ad.User.Name); // Default sort by user name
+                    query = query.OrderBy(ad => ad.User != null ? ad.User.Name : string.Empty);
                 }
 
                 // Apply pagination
@@ -156,6 +164,7 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                     .Select(ad => new ListAuctionDocumentsDTO
                     {
                         AuctionDocumentsId = ad.AuctionDocumentsId,
+                        UserId = ad.UserId,
                         CitizenIdentification =
                             ad.User != null ? ad.User.CitizenIdentification : string.Empty,
                         Name = ad.User != null ? ad.User.Name : string.Empty,
@@ -165,6 +174,10 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                         RegistrationFee =
                             ad.AuctionAsset != null ? ad.AuctionAsset.RegistrationFee : 0,
                         StatusTicket = ad.StatusTicket,
+                        IsAttended = ad.IsAttended ?? false,
+                        StatusRefund = ad.StatusRefund ?? 0,
+                        RefundReason = ad.RefundReason ?? string.Empty,
+                        RefundProof = ad.RefundProof ?? string.Empty,
                         NumericalOrder = ad.NumericalOrder,
                         Note = ad.Note,
                     })
@@ -174,6 +187,7 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                 var response = new GetListAuctionDocumentsResponse
                 {
                     TotalCount = totalCount,
+                    DocumentsAssetList = documentsAssetList,
                     AuctionDocuments = auctionDocuments,
                 };
 

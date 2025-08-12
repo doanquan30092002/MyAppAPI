@@ -15,49 +15,25 @@ namespace MyApp.Infrastructure.Repositories.SearchUserAttendance
             this.context = context;
         }
 
-        public async Task<SearchUserAttendanceResponseDTO> SearchUserAttendanceAsync(
-            Guid auctionId,
-            string citizenIdentification
-        )
+        public async Task<int?> GetNumericalOrderAsync(Guid auctionId, string citizenIdentification)
         {
-            var auctionSearch = await context.Auctions.FindAsync(auctionId);
-            if (auctionSearch != null)
-            {
-                var numericalOrder = await context
-                    .AuctionDocuments.Include(x => x.AuctionAsset)
-                    .ThenInclude(x => x.Auction)
-                    .Where(x => x.AuctionAsset.Auction.AuctionId.Equals(auctionId))
-                    .Include(x => x.User)
-                    .Where(x => x.User.CitizenIdentification.Equals(citizenIdentification))
-                    .Where(x => x.StatusTicket == 2)
-                    .Where(x => x.StatusDeposit == 1)
-                    .Select(x => x.NumericalOrder)
-                    .FirstOrDefaultAsync();
-                if (numericalOrder != null)
-                {
-                    return new SearchUserAttendanceResponseDTO
-                    {
-                        Message = Message.FOUND_NUMERICAL_ORDER,
-                        AuctionName = auctionSearch.AuctionName,
-                        NumericalOrder = numericalOrder,
-                    };
-                }
-                else
-                {
-                    return new SearchUserAttendanceResponseDTO
-                    {
-                        Message = Message.NOT_FOUND_NUMERICAL_ORDER,
-                        AuctionName = auctionSearch.AuctionName,
-                        NumericalOrder = null,
-                    };
-                }
-            }
-            return new SearchUserAttendanceResponseDTO
-            {
-                Message = Message.AUCTION_NOT_EXIST,
-                AuctionName = null,
-                NumericalOrder = null,
-            };
+            return await context
+                .AuctionDocuments.Include(x => x.AuctionAsset)
+                .ThenInclude(x => x.Auction)
+                .Where(x => x.AuctionAsset.Auction.AuctionId == auctionId)
+                .Include(x => x.User)
+                .Where(x => x.User.CitizenIdentification == citizenIdentification)
+                .Where(x => x.StatusTicket == 2 && x.StatusDeposit == 1)
+                .Select(x => x.NumericalOrder)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<string?> GetAuctionNameAsync(Guid auctionId)
+        {
+            return await context
+                .Auctions.Where(a => a.AuctionId == auctionId)
+                .Select(a => a.AuctionName)
+                .FirstOrDefaultAsync();
         }
     }
 }

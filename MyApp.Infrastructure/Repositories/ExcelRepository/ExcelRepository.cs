@@ -69,7 +69,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                             return false;
 
                         // Cột 2: starting_price (phải là số)
-                        if (!IsValidDecimal(worksheet.Cells[row, 2].Text))
+                        if (!IsValidPrice(worksheet.Cells[row, 2], min: 0))
                             return false;
 
                         // Cột 3: Unit (string, bắt buộc có)
@@ -77,11 +77,11 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                             return false;
 
                         // Cột 4: Deposit (phải là số)
-                        if (!IsValidDecimal(worksheet.Cells[row, 4].Text))
+                        if (!IsValidPrice(worksheet.Cells[row, 4], min: 0))
                             return false;
 
                         // Cột 5: Registration_fee (phải là số)
-                        if (!IsValidDecimal(worksheet.Cells[row, 5].Text))
+                        if (!IsValidPrice(worksheet.Cells[row, 5], min: 0))
                             return false;
 
                         // Cột 6: Description (string, cho phép rỗng)
@@ -92,18 +92,39 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
             return true;
         }
 
-        private bool IsValidDecimal(string input)
+        private bool IsValidPrice(ExcelRange cell, decimal min = 0, decimal? max = null)
         {
-            if (string.IsNullOrWhiteSpace(input))
+            if (cell.Value == null)
                 return false;
-            var style =
-                NumberStyles.Number | NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint;
-            return decimal.TryParse(
-                input.Replace(",", "").Replace(" ", ""),
-                style,
-                CultureInfo.InvariantCulture,
-                out _
-            );
+
+            // Trường hợp giá trị là số thực tế
+            if (cell.Value is double || cell.Value is decimal || cell.Value is int)
+            {
+                decimal price = Convert.ToDecimal(cell.Value);
+                if (price < min)
+                    return false;
+                if (max.HasValue && price > max.Value)
+                    return false;
+                return true;
+            }
+
+            // Trường hợp là chuỗi, cần parse
+            var text = cell.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            // Xử lý chuỗi chứa dấu phẩy hoặc chấm
+            text = text.Replace(",", "").Replace(" ", "");
+            if (decimal.TryParse(text, out var parsedPrice))
+            {
+                if (parsedPrice < min)
+                    return false;
+                if (max.HasValue && parsedPrice > max.Value)
+                    return false;
+                return true;
+            }
+
+            return false;
         }
 
         public async Task SaveAssetsFromExcelAsync(Guid auctionId, IFormFile excelFile, Guid userId)
@@ -115,7 +136,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
             using (var stream = new MemoryStream())
             {
                 await excelFile.CopyToAsync(stream);
-                using (var package = new OfficeOpenXml.ExcelPackage(stream))
+                using (var package = new ExcelPackage(stream))
                 {
                     var worksheet = package.Workbook.Worksheets[0];
                     int rowCount = worksheet.Dimension.Rows;
@@ -125,35 +146,73 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                         var asset = new AuctionAssets
                         {
                             AuctionAssetsId = Guid.NewGuid(),
-                            TagName = worksheet.Cells[row, 1].Text,
-                            StartingPrice = decimal.Parse(
-                                worksheet.Cells[row, 2].Text,
-                                NumberStyles.Any,
-                                CultureInfo.InvariantCulture
+                            TagName = worksheet.Cells[row, 1].Text?.Trim(),
+                            StartingPrice = ParseDecimalCell(
+                                worksheet.Cells[row, 2],
+                                "Giá khởi điểm",
+                                row
                             ),
-                            Unit = worksheet.Cells[row, 3].Text,
-                            Deposit = decimal.Parse(
-                                worksheet.Cells[row, 4].Text,
-                                NumberStyles.Any,
-                                CultureInfo.InvariantCulture
+                            Unit = worksheet.Cells[row, 3].Text?.Trim(),
+                            Deposit = ParseDecimalCell(
+                                worksheet.Cells[row, 4],
+                                "Tiền đặt cọc",
+                                row
                             ),
-                            RegistrationFee = decimal.Parse(
-                                worksheet.Cells[row, 5].Text,
-                                NumberStyles.Any,
-                                CultureInfo.InvariantCulture
+                            RegistrationFee = ParseDecimalCell(
+                                worksheet.Cells[row, 5],
+                                "Phí đăng ký",
+                                row
                             ),
-                            Description = worksheet.Cells[row, 6].Text,
+                            Description = worksheet.Cells[row, 6].Text?.Trim(),
                             CreatedAt = DateTime.UtcNow,
                             CreatedBy = userId,
                             UpdatedAt = DateTime.UtcNow,
                             UpdatedBy = userId,
                             AuctionId = auctionId,
                         };
+
                         assets.Add(asset);
                     }
                 }
             }
+
             await _context.AuctionAssets.AddRangeAsync(assets);
+        }
+
+        private decimal ParseDecimalCell(ExcelRange cell, string columnName, int rowNumber)
+        {
+            if (cell?.Value == null || string.IsNullOrWhiteSpace(cell.Text))
+                throw new FormatException($"Ô {columnName} ở dòng {rowNumber} đang trống.");
+
+            // Nếu ô thực sự là số (nhờ VBA format)
+            if (cell.Value is double || cell.Value is int || cell.Value is decimal)
+            {
+                decimal num = Convert.ToDecimal(cell.Value);
+                if (num < 0)
+                    throw new FormatException($"Ô {columnName} ở dòng {rowNumber} không được âm.");
+                return num;
+            }
+
+            // Nếu vẫn là chuỗi (trong trường hợp không format)
+            string raw = cell.Text.Trim();
+            raw = raw.Replace(",", "").Replace(" ", ""); // bỏ dấu phân cách nghìn
+            if (
+                decimal.TryParse(
+                    raw,
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out var parsed
+                )
+            )
+            {
+                if (parsed < 0)
+                    throw new FormatException($"Ô {columnName} ở dòng {rowNumber} không được âm.");
+                return parsed;
+            }
+
+            throw new FormatException(
+                $"Ô {columnName} ở dòng {rowNumber} không phải là số hợp lệ."
+            );
         }
 
         public async Task<byte[]> ExportRefundDocumentsExcelAsync(Guid auctionId)
@@ -166,110 +225,123 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
 
             using (var package = new ExcelPackage())
             {
-                var worksheet = package.Workbook.Worksheets.Add("HoSoHoanTien");
+                // Tách danh sách
+                var bankRefunds = documents
+                    .Where(doc =>
+                        !string.IsNullOrWhiteSpace(doc.BankAccount)
+                        && !string.IsNullOrWhiteSpace(doc.BankAccountNumber)
+                        && !string.IsNullOrWhiteSpace(doc.BankBranch)
+                    )
+                    .ToList();
 
-                // Header
-                worksheet.Cells[1, 1].Value = "STT";
-                worksheet.Cells[1, 2].Value = "Mã hồ sơ";
-                worksheet.Cells[1, 3].Value = "Tên khách hàng";
-                worksheet.Cells[1, 4].Value = "Số CCCD";
-                worksheet.Cells[1, 5].Value = "Tài khoản ngân hàng";
-                worksheet.Cells[1, 6].Value = "Số tài khoản";
-                worksheet.Cells[1, 7].Value = "Chi nhánh";
-                worksheet.Cells[1, 8].Value = "Mã tài sản";
-                worksheet.Cells[1, 9].Value = "Tên tài sản";
-                worksheet.Cells[1, 10].Value = "Tiền đặt cọc";
-                worksheet.Cells[1, 11].Value = "Phí đăng ký";
-                worksheet.Cells[1, 12].Value = "Trạng thái phiếu hồ sơ";
-                worksheet.Cells[1, 13].Value = "Trạng thái tiền cọc";
+                var cashRefunds = documents.Except(bankRefunds).ToList();
 
-                int row = 2,
-                    stt = 1;
-                foreach (var doc in documents)
-                {
-                    worksheet.Cells[row, 1].Value = stt++;
-                    worksheet.Cells[row, 2].Value =
-                        doc.AuctionDocumentsId != Guid.Empty
-                            ? doc.AuctionDocumentsId.ToString()
-                            : "";
-                    worksheet.Cells[row, 3].Value = doc.User?.Name ?? "";
-                    worksheet.Cells[row, 4].Value = doc.User?.CitizenIdentification ?? "";
-                    worksheet.Cells[row, 5].Value = doc.BankAccount;
-                    worksheet.Cells[row, 6].Value = doc.BankAccountNumber;
-                    worksheet.Cells[row, 7].Value = doc.BankBranch;
-                    worksheet.Cells[row, 8].Value = doc.AuctionAsset?.TagName ?? "";
-                    worksheet.Cells[row, 9].Value = doc.AuctionAsset?.Description ?? "";
-
-                    // Tiền có dấu phẩy phân cách hàng nghìn
-                    worksheet.Cells[row, 10].Value = doc.AuctionAsset?.Deposit ?? 0;
-                    worksheet.Cells[row, 10].Style.Numberformat.Format = "#,##0";
-
-                    worksheet.Cells[row, 11].Value = doc.AuctionAsset?.RegistrationFee ?? 0;
-                    worksheet.Cells[row, 11].Style.Numberformat.Format = "#,##0";
-
-                    worksheet.Cells[row, 12].Value = GetStatusTicketText(doc.StatusTicket);
-                    worksheet.Cells[row, 13].Value = GetStatusDepositText(doc.StatusDeposit);
-
-                    row++;
-                }
-
-                // Format header bold
-                using (var range = worksheet.Cells[1, 1, 1, 13])
-                {
-                    range.Style.Font.Bold = true;
-                }
-                worksheet.Cells.AutoFitColumns();
-
-                // Dropdown cho "Trạng thái phiếu hồ sơ" (cột 12)
-                string[] statusTicketOptions = new[]
-                {
-                    "Chưa chuyển tiền",
-                    "Đã chuyển tiền",
-                    "Đã ký phiếu",
-                    "Đã hoàn",
-                    "Không xác định",
-                };
-                // Dropdown cho "Trạng thái tiền cọc" (cột 13)
-                string[] statusDepositOptions = new[]
-                {
-                    "Chưa cọc",
-                    "Đã cọc",
-                    "Đã hoàn tiền",
-                    "Đã hoàn",
-                    "Không xác định",
-                };
-
-                for (int r = 2; r < row; r++)
-                {
-                    // Dropdown cho cột 12
-                    var statusTicketValidation = worksheet.DataValidations.AddListValidation(
-                        $"L{r}"
-                    );
-                    foreach (var opt in statusTicketOptions)
-                        statusTicketValidation.Formula.Values.Add(opt);
-
-                    // Dropdown cho cột 13
-                    var statusDepositValidation = worksheet.DataValidations.AddListValidation(
-                        $"M{r}"
-                    );
-                    foreach (var opt in statusDepositOptions)
-                        statusDepositValidation.Formula.Values.Add(opt);
-                }
-
-                // Khoá (locked) tất cả các ô
-                worksheet.Protection.IsProtected = true;
-                worksheet.Protection.SetPassword("1234"); // Có thể set password nếu muốn
-
-                // Mở khoá hai cột cuối cho phép chỉnh sửa (Trạng thái phiếu hồ sơ, Trạng thái tiền cọc)
-                for (int r = 2; r < row; r++)
-                {
-                    worksheet.Cells[r, 12].Style.Locked = false; // Trạng thái phiếu hồ sơ
-                    worksheet.Cells[r, 13].Style.Locked = false; // Trạng thái tiền cọc
-                }
-                worksheet.Cells[1, 12, 1, 13].Style.Locked = false; // Cho phép đổi tiêu đề nếu muốn
+                // Ghi từng sheet
+                WriteRefundSheet(package, bankRefunds, "HoanTien_ChuyenKhoan");
+                WriteRefundSheet(package, cashRefunds, "HoanTien_TienMat");
 
                 return await Task.FromResult(package.GetAsByteArray());
             }
+        }
+
+        private void WriteRefundSheet(
+            ExcelPackage package,
+            List<AuctionDocuments> documents,
+            string sheetName
+        )
+        {
+            var worksheet = package.Workbook.Worksheets.Add(sheetName);
+
+            // Header
+            worksheet.Cells[1, 1].Value = "STT";
+            worksheet.Cells[1, 2].Value = "Mã hồ sơ";
+            worksheet.Cells[1, 3].Value = "Tên khách hàng";
+            worksheet.Cells[1, 4].Value = "Số CCCD";
+            worksheet.Cells[1, 5].Value = "Tài khoản ngân hàng";
+            worksheet.Cells[1, 6].Value = "Số tài khoản";
+            worksheet.Cells[1, 7].Value = "Chi nhánh";
+            worksheet.Cells[1, 8].Value = "Mã tài sản";
+            worksheet.Cells[1, 9].Value = "Tên tài sản";
+            worksheet.Cells[1, 10].Value = "Tiền đặt cọc";
+            worksheet.Cells[1, 11].Value = "Phí đăng ký";
+            worksheet.Cells[1, 12].Value = "Trạng thái phiếu hồ sơ";
+            worksheet.Cells[1, 13].Value = "Trạng thái tiền cọc";
+
+            int row = 2,
+                stt = 1;
+            foreach (var doc in documents)
+            {
+                worksheet.Cells[row, 1].Value = stt++;
+                worksheet.Cells[row, 2].Value =
+                    doc.AuctionDocumentsId != Guid.Empty ? doc.AuctionDocumentsId.ToString() : "";
+                worksheet.Cells[row, 3].Value = doc.User?.Name ?? "";
+                worksheet.Cells[row, 4].Value = doc.User?.CitizenIdentification ?? "";
+                worksheet.Cells[row, 5].Value = doc.BankAccount;
+                worksheet.Cells[row, 6].Value = doc.BankAccountNumber;
+                worksheet.Cells[row, 7].Value = doc.BankBranch;
+                worksheet.Cells[row, 8].Value = doc.AuctionAsset?.TagName ?? "";
+                worksheet.Cells[row, 9].Value = doc.AuctionAsset?.Description ?? "";
+
+                worksheet.Cells[row, 10].Value = doc.AuctionAsset?.Deposit ?? 0;
+                worksheet.Cells[row, 10].Style.Numberformat.Format = "#,##0";
+
+                worksheet.Cells[row, 11].Value = doc.AuctionAsset?.RegistrationFee ?? 0;
+                worksheet.Cells[row, 11].Style.Numberformat.Format = "#,##0";
+
+                worksheet.Cells[row, 12].Value = GetStatusTicketText(doc.StatusTicket);
+                worksheet.Cells[row, 13].Value = GetStatusDepositText(doc.StatusDeposit);
+
+                row++;
+            }
+
+            // Format header bold
+            using (var range = worksheet.Cells[1, 1, 1, 13])
+            {
+                range.Style.Font.Bold = true;
+            }
+
+            worksheet.Cells.AutoFitColumns();
+
+            // Dropdown cho trạng thái (cột 12, 13)
+            string[] statusTicketOptions =
+            {
+                "Chưa chuyển tiền",
+                "Đã chuyển tiền",
+                "Đã ký phiếu",
+                "Đã hoàn",
+                "Không xác định",
+            };
+            string[] statusDepositOptions =
+            {
+                "Chưa cọc",
+                "Đã cọc",
+                "Đã hoàn tiền",
+                "Đã hoàn",
+                "Không xác định",
+            };
+
+            for (int r = 2; r < row; r++)
+            {
+                var statusTicketValidation = worksheet.DataValidations.AddListValidation($"L{r}");
+                foreach (var opt in statusTicketOptions)
+                    statusTicketValidation.Formula.Values.Add(opt);
+
+                var statusDepositValidation = worksheet.DataValidations.AddListValidation($"M{r}");
+                foreach (var opt in statusDepositOptions)
+                    statusDepositValidation.Formula.Values.Add(opt);
+            }
+
+            // Lock toàn bộ rồi mở khoá 2 cột cuối
+            worksheet.Protection.IsProtected = true;
+            worksheet.Protection.SetPassword("1234");
+
+            for (int r = 2; r < row; r++)
+            {
+                worksheet.Cells[r, 12].Style.Locked = false;
+                worksheet.Cells[r, 13].Style.Locked = false;
+            }
+
+            worksheet.Cells[1, 12, 1, 13].Style.Locked = false;
         }
 
         private string GetStatusTicketText(int status)

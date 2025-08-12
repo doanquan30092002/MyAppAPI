@@ -19,5 +19,9 @@ namespace MyApp.Application.Interfaces.IActionAssetsRepository
             int pageNumber,
             int pageSize
         );
+
+        Task<
+            List<AuctionAssetsWithHighestBidResponse>
+        > GetAuctionAssetsWithHighestBidByAuctionIdAsync(Guid auctionId);
     }
 }

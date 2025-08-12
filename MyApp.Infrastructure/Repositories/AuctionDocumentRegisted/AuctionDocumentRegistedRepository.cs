@@ -15,7 +15,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentRegisted
         }
 
         public async Task<List<AuctionDocumentRegistedResponse>?> GetAuctionDocumentRegistedByAuctionId(
-            string? userId,
+            Guid userId,
             Guid auctionId
         )
         {
@@ -26,7 +26,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentRegisted
                 join user in _context.Users on auctionDocument.UserId equals user.Id
                 where
                     auctionAsset.AuctionId == auctionId
-                    && auctionDocument.UserId.ToString() == userId
+                    && auctionDocument.UserId == userId
                     && auctionDocument.StatusTicket == 2
                     && auctionDocument.StatusDeposit == 1
                 select new AuctionDocumentRegistedResponse
@@ -44,6 +44,10 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentRegisted
                     BankAccount = auctionDocument.BankAccount,
                     BankAccountNumber = auctionDocument.BankAccountNumber,
                     BankBranch = auctionDocument.BankBranch,
+                    IsAttended = auctionDocument.IsAttended,
+                    RefundProof = auctionDocument.RefundProof,
+                    RefundReason = auctionDocument.RefundReason,
+                    StatusRefund = auctionDocument.StatusRefund,
                 }
             ).ToListAsync();
 

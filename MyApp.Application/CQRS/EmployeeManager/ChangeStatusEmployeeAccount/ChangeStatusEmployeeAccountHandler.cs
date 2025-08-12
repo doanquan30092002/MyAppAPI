@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.EmployeeManager;
 
 namespace MyApp.Application.CQRS.EmployeeManager.ChangeStatusEmployeeAccount
@@ -8,16 +7,16 @@ namespace MyApp.Application.CQRS.EmployeeManager.ChangeStatusEmployeeAccount
     public class ChangeStatusEmployeeAccountHandler
         : IRequestHandler<ChangeStatusEmployeeAccountRequest, bool>
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IEmployeeManagerRepository _employeeManagerRepository;
 
         public ChangeStatusEmployeeAccountHandler(
             IEmployeeManagerRepository employeeManagerRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _employeeManagerRepository = employeeManagerRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(
@@ -25,14 +24,14 @@ namespace MyApp.Application.CQRS.EmployeeManager.ChangeStatusEmployeeAccount
             CancellationToken cancellationToken
         )
         {
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("Yêu cầu đăng nhập");
             bool changeStatusEmployeeAccountResponse =
                 await _employeeManagerRepository.ChangeStatusEmployeeAccount(
                     request.AccountId,
                     request.IsActive,
-                    Guid.Parse(userIdStr)
+                    Guid.Parse(userId)
                 );
             return changeStatusEmployeeAccountResponse;
         }

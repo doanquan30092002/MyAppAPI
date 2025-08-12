@@ -7,8 +7,9 @@
         public const string HANDLER_SUCCESS = "Xử lý thành công";
         public const string HANDLER_ERROR = "Xử lý xảy ra lỗi";
         public const string SYSTEM_ERROR = "Hệ thống đang bị lỗi. Xin thử lại sau!";
+        public const string ID_AUCTION_NOT_FOUND = "Id phiên đấu giá không hợp lệ";
+        public const string UNAUTHORIZED = "Bạn không có quyền truy cập vào chức năng này";
         #endregion
-
         #region SignUp
         public const string EMAIL_EXITS = "Email đã được sử dụng";
         public const string PHONE_NUMBER_EXITS = "Số diện thoại đã được sử dụng";
@@ -17,12 +18,10 @@
         public const string CREATE_SUCCESS = "Đăng ký tài khoản thành công";
         public const string VALIDATION_FAILED = "Xác thực thất bại";
         #endregion
-
         #region GetUserInfo
         public const string GET_USER_INFO_SUCCESS = "Lấy thông tin người dùng thành công";
         public const string GET_USER_INFO_FAIL = "Lấy thông tin người dùng thất bại";
         #endregion
-
         #region Login
         public const string LOGIN_SUCCESS = "Đăng nhập thành công";
         public const string ACCOUNT_LOCKED = "Tài khoản của bạn đã bị khóa";
@@ -30,11 +29,9 @@
         public const string EXPIRED_CITIZEN_IDENTIFICATION =
             "Căn cước công dân hết hạn. Vui lòng cập nhật!";
         #endregion
-
         #region Logout
         public const string LOGOUT_SUCCESS = "Đăng xuất thành công.";
         #endregion
-
         #region SearchUserAttendance
         public const string FOUND_NUMERICAL_ORDER = "Tìm thấy số thứ tự";
         public const string NOT_FOUND_NUMERICAL_ORDER = "Không tìm thấy số thứ tự";
@@ -52,11 +49,16 @@
         public const string OTP_EXPIRED_OR_NOT_EXIST = "OTP đã hết hạn hoặc không tồn tại";
         public const string EMAIL_SUBJECT = "Mã OTP xác thực";
         public const string EMAIL_BODY = "Mã OTP của bạn là: ";
+        public const string ACCOUNT_NOT_EXSIT = "Tài khoản không tồn tại.";
+
         #endregion
         #region UpdateExpiredProfile
         public const string CITIZEN_IDENTIFICATION_NOT_MATCH =
             "Số Căn Cước Công Dân không trùng với số đã đăng ký ban đầu";
         public const string UPDATE_PROFILE_SUCCESS = "Cập nhật thông tin cá nhân thành công";
+        public const string USER_DOES_NOT_EXSIT = "Người dùng không tồn tại.";
+        public const string LOGIN_INFO_NOT_FOUND = "Không tìm thấy thông tin đăng nhập.";
+
         #endregion
         #region RegisterAuctionDocument
         public const string CREATE_QR_SUCCESS = "Tạo QR thành công";
@@ -93,7 +95,7 @@
         public const string RECEIVE_AUCTION_REGISTRATION_FORM_FAIL =
             "Nhận hồ sơ đăng ký tham gia đấu giá thất bại";
         public const string RECEIVED_FORM_SUCCESS =
-            "Công ty đã nhận được hồ sơ đăng ký tham gia đấu gia phiên: {}";
+            "Công ty đã nhận được hồ sơ đăng ký tham gia đấu gia phiên: {0}";
         #endregion
         #region GenarateNumbericalOrder
         public const string GENARATE_NUMBERICAL_ORDER_SUCCESS = "Tạo số thứ tự thành công";
@@ -106,7 +108,6 @@
             "Không tìm thấy danh sách hồ sơ đăng ký.";
         public const string GET_LIST_AUCTION_SUCESS = "Lấy danh sách hồ sơ thành công.";
         #endregion
-
         #region UpdateDepositStatus
         public const string UPDATE_DEPOSIT_STATUS_SUCESS = "Cập nhật trạng thái cọc thành công";
         public const string UPDATE_DEPOSIT_STATUS_FAIL = "Cập nhật trạng thái cọc thất bại";
@@ -198,6 +199,14 @@
             "Thay đổi quyền hạn tài khoản nhân viên thất bại";
         public const string CHANGE_PERMISSTION_EMPLOYEE_ACCOUNT_SUCCESS =
             "Thay đổi quyền hạn tài khoản nhân viên thành công";
+        #endregion
+        #region ListCustomer
+        public const string GET_LIST_CUSTOMER_SUCCESS = "Lấy danh sách khách hàng thành công";
+        public const string GET_LIST_CUSTOMER_NOT_FOUND = "Không tìm thấy danh sách khách hàng";
+        #endregion
+        #region ListAuctionAsset & DetailAuctionAsset
+        public const string SEARCH_AUCTION_ASSET_NOT_FOUND = "Không tìm thấy tài sản đấu giá nào";
+        public const string SEARCH_AUCTION_ASSET_SUCCESS = "Tìm kiếm tài sản đấu giá thành công";
         #endregion
     }
 }

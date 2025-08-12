@@ -5,7 +5,7 @@ namespace MyApp.Application.Interfaces.AuctionDocumentRegisted
     public interface IAuctionDocumentRegistedRepository
     {
         Task<List<AuctionDocumentRegistedResponse>?> GetAuctionDocumentRegistedByAuctionId(
-            string? userId,
+            Guid userId,
             Guid auctionId
         );
     }

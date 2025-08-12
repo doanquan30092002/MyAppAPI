@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.UserRegisteredAuction;
 using MyApp.Application.Interfaces.UserRegisteredAuction;
 using MyApp.Core.Entities;

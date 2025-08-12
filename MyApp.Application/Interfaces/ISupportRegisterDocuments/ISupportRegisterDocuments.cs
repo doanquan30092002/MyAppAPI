@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyApp.Core.DTOs.AuctionDocumentsDTO;
+using MyApp.Core.DTOs.UserDTO;
 using MyApp.Core.Entities;
 
 namespace MyApp.Application.Interfaces.ISupportRegisterDocuments
@@ -43,7 +44,9 @@ namespace MyApp.Application.Interfaces.ISupportRegisterDocuments
         /// </summary>
         /// <param name="citizenIdentification">Chuỗi số CCCD/CMND</param>
         /// <returns>Thông tin người dùng. Nếu không tìm thấy, trả về null</returns>
-        Task<User?> GetUserByCitizenIdentificationAsync(string citizenIdentification);
+        Task<GetUserByCitizenIdentificationResponse?> GetUserByCitizenIdentificationAsync(
+            string citizenIdentification
+        );
 
         /// <summary>
         /// Cập nhật trạng thái hồ sơ đấu giá.
