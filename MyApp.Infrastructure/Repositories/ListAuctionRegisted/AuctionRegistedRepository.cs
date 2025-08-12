@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.ListAuctionRegisted;
 using MyApp.Application.Interfaces.ListAuctionRegisted;
-using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
@@ -18,9 +17,7 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
         public async Task<List<Guid>> GetRegisteredAssetIdsAsync(Guid userId)
         {
             return await _context
-                .AuctionDocuments.Where(ad =>
-                    ad.UserId == userId && ad.StatusTicket == 2 && ad.StatusDeposit == 1
-                )
+                .AuctionDocuments.Where(ad => ad.UserId == userId && ad.StatusTicket != 0)
                 .Select(ad => ad.AuctionAssetId)
                 .ToListAsync();
         }
