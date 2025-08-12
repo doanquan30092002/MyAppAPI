@@ -218,30 +218,29 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             Guid auctionId
         )
         {
-            // 1. Lấy danh sách tài sản cùng với người đấu giá cao nhất
             var auctionAssetsWithWinners =
                 await _auctionAssetsRepository.GetAuctionAssetsWithHighestBidByAuctionIdAsync(
                     auctionId
                 );
 
-            // 2. Lấy danh sách số căn cước của người thắng thầu (bỏ null và trùng)
-            var excludedCitizenIds = auctionAssetsWithWinners
+            var excludedPairs = auctionAssetsWithWinners
                 .Where(a =>
                     a.HighestBid != null
                     && !string.IsNullOrWhiteSpace(a.HighestBid.CitizenIdentification)
                 )
-                .Select(a => a.HighestBid.CitizenIdentification.Trim())
-                .Distinct()
+                .Select(a => new
+                {
+                    AuctionAssetId = a.AuctionAssetsId,
+                    CitizenId = a.HighestBid.CitizenIdentification.Trim(),
+                })
                 .ToList();
 
-            // 3. Lấy danh sách các AuctionAssetId của phiên đấu giá này
             var auctionAssetIds = await _context
                 .AuctionAssets.Where(x => x.AuctionId == auctionId)
                 .Select(x => x.AuctionAssetsId)
                 .ToListAsync();
 
-            // 4. Lấy danh sách hồ sơ thỏa điều kiện thanh toán/đặt cọc/tham dự nhưng không nằm trong danh sách người thắng
-            var documents = await _context
+            var documents = _context
                 .AuctionDocuments.Where(doc =>
                     auctionAssetIds.Contains(doc.AuctionAssetId)
                     && (
@@ -250,11 +249,17 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                         || doc.StatusRefund == 1
                         || doc.IsAttended == true
                     )
-                    && !excludedCitizenIds.Contains(doc.User.CitizenIdentification)
                 )
                 .Include(doc => doc.User)
                 .Include(doc => doc.AuctionAsset)
-                .ToListAsync();
+                .AsEnumerable()
+                .Where(doc =>
+                    !excludedPairs.Any(p =>
+                        p.AuctionAssetId == doc.AuctionAssetId
+                        && p.CitizenId == doc.User.CitizenIdentification
+                    )
+                )
+                .ToList();
 
             return documents;
         }
