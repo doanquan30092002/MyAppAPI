@@ -27,8 +27,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentRegisted
                 where
                     auctionAsset.AuctionId == auctionId
                     && auctionDocument.UserId == userId
-                    && auctionDocument.StatusTicket == 2
-                    && auctionDocument.StatusDeposit == 1
+                    && auctionDocument.StatusTicket != 0
                 select new AuctionDocumentRegistedResponse
                 {
                     AuctionDocumentsId = auctionDocument.AuctionDocumentsId,
