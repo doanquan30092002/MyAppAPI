@@ -35,26 +35,64 @@ namespace MyApp.Infrastructure.Repositories.GetListUserWinnerRepository
                 );
             }
 
-            // Lấy RoundNumber cao nhất cho AuctionId
-            var maxRoundNumber = await _context
-                .AuctionRounds.Where(ar => ar.AuctionId == getListUserWinnerRequest.AuctionId)
-                .MaxAsync(ar => ar.RoundNumber);
+            // Check if the auction is completed (Status = 2)
+            var auction = await _context.Auctions.FirstOrDefaultAsync(a =>
+                a.AuctionId == getListUserWinnerRequest.AuctionId
+            );
 
-            var query = _context
-                .AuctionRoundPrices.Include(arp => arp.AuctionRound)
-                .Where(arp =>
-                    arp.AuctionRound.AuctionId == getListUserWinnerRequest.AuctionId
-                    && arp.AuctionRound.RoundNumber == maxRoundNumber
-                    && arp.FlagWinner == true
-                );
+            if (auction == null || auction.Status != 2)
+            {
+                return new GetListUserWinnerResponse
+                {
+                    auctionRoundPrices = new List<AuctionRoundPrices>(),
+                };
+            }
 
-            var winners = await query.ToListAsync(); // Lấy dữ liệu từ DB
-            var groupedWinners = winners
-                .GroupBy(arp => arp.TagName)
-                .SelectMany(g => g.OrderByDescending(arp => arp.AuctionPrice))
-                .ToList();
+            // Get all assets for the auction
+            var assets = await _context
+                .AuctionAssets.Where(aa => aa.AuctionId == getListUserWinnerRequest.AuctionId)
+                .ToListAsync();
 
-            return new GetListUserWinnerResponse { auctionRoundPrices = groupedWinners };
+            if (!assets.Any())
+            {
+                return new GetListUserWinnerResponse
+                {
+                    auctionRoundPrices = new List<AuctionRoundPrices>(),
+                };
+            }
+
+            var winners = new List<AuctionRoundPrices>();
+
+            // For each asset, find the max round and get winners
+            foreach (var asset in assets)
+            {
+                var maxRoundForTag =
+                    await _context
+                        .AuctionRoundPrices.Where(arp =>
+                            arp.TagName == asset.TagName
+                            && arp.AuctionRound.AuctionId == getListUserWinnerRequest.AuctionId
+                        )
+                        .MaxAsync(arp => (int?)arp.AuctionRound.RoundNumber) ?? 0;
+
+                if (maxRoundForTag == 0)
+                    continue;
+
+                // Get winners for this asset in its max round
+                var tagWinners = await _context
+                    .AuctionRoundPrices.Include(arp => arp.AuctionRound)
+                    .Where(arp =>
+                        arp.AuctionRound.AuctionId == getListUserWinnerRequest.AuctionId
+                        && arp.AuctionRound.RoundNumber == maxRoundForTag
+                        && arp.TagName == asset.TagName
+                        && arp.FlagWinner == true
+                    )
+                    .OrderByDescending(arp => arp.AuctionPrice)
+                    .ToListAsync();
+
+                winners.AddRange(tagWinners);
+            }
+
+            return new GetListUserWinnerResponse { auctionRoundPrices = winners };
         }
     }
 }

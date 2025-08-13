@@ -30,17 +30,31 @@ namespace MyApp.Infrastructure.Repositories.GetBusinessOverviewRepository
                 auctionQuery = auctionQuery.Where(a => a.CategoryId == request.CategoryId.Value);
             }
 
-            // Apply date range filters only if valid dates are provided
-            if (request.AuctionStartDate != default(DateTime))
+            // Apply date filters
+            if (
+                request.AuctionStartDate != default(DateTime)
+                && request.AuctionEndDate != default(DateTime)
+            )
             {
+                // Filter auctions that overlap with the provided date range
                 auctionQuery = auctionQuery.Where(a =>
-                    a.AuctionStartDate >= request.AuctionStartDate
+                    a.AuctionStartDate <= request.AuctionEndDate
+                    && a.AuctionEndDate >= request.AuctionStartDate
                 );
             }
-
-            if (request.AuctionEndDate != default(DateTime))
+            else if (request.AuctionStartDate != default(DateTime))
             {
-                auctionQuery = auctionQuery.Where(a => a.AuctionEndDate <= request.AuctionEndDate);
+                // Filter auctions that end on or after the provided start date
+                auctionQuery = auctionQuery.Where(a =>
+                    a.AuctionEndDate >= request.AuctionStartDate
+                );
+            }
+            else if (request.AuctionEndDate != default(DateTime))
+            {
+                // Filter auctions that start on or before the provided end date
+                auctionQuery = auctionQuery.Where(a =>
+                    a.AuctionStartDate <= request.AuctionEndDate
+                );
             }
 
             // Calculate TotalAuctions
@@ -52,7 +66,7 @@ namespace MyApp.Infrastructure.Repositories.GetBusinessOverviewRepository
             // Calculate TotalCancelledAuctions (Status = 3)
             var totalCancelledAuctions = await auctionQuery.Where(a => a.Status == 3).CountAsync();
 
-            // Calculate TotalParticipants
+            // Calculate TotalParticipants (unique users linked to auction assets in the filtered auctions)
             var totalParticipants = await context
                 .AuctionDocuments.Where(ad =>
                     context
@@ -66,7 +80,7 @@ namespace MyApp.Infrastructure.Repositories.GetBusinessOverviewRepository
                 .Distinct()
                 .CountAsync();
 
-            // Construct response
+            // Construct and return the response
             var response = new GetBusinessOverviewResponse
             {
                 TotalAuctions = totalAuctions,
