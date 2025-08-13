@@ -26,6 +26,7 @@ using MyApp.Application.Interfaces.IGetListAuctionRoundRepository;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
 using MyApp.Application.Interfaces.IGetListEnteredPricesRepository;
 using MyApp.Application.Interfaces.IGetListRepository;
+using MyApp.Application.Interfaces.IGetStatisticOverviewRepository;
 using MyApp.Application.Interfaces.IGetUserInfoRepository;
 using MyApp.Application.Interfaces.IListUserWinnerRepository;
 using MyApp.Application.Interfaces.ILoginUserRepository;
@@ -77,6 +78,7 @@ using MyApp.Infrastructure.Repositories.GetListAuctionRepository;
 using MyApp.Infrastructure.Repositories.GetListAuctionRoundRepository;
 using MyApp.Infrastructure.Repositories.GetListEnteredPricesRepository;
 using MyApp.Infrastructure.Repositories.GetListUserWinnerRepository;
+using MyApp.Infrastructure.Repositories.GetStatisticOverviewRepository;
 using MyApp.Infrastructure.Repositories.GetUserInfoRepository;
 using MyApp.Infrastructure.Repositories.ListAuctionAsset;
 using MyApp.Infrastructure.Repositories.ListAuctionRegisted;
@@ -197,6 +199,7 @@ namespace MyApp.Infrastructure
                 GetListAssetInfoStatisticsRepository
             >();
             services.AddScoped<IGetBusinessOverviewRepository, GetBusinessOverviewRepository>();
+            services.AddScoped<IGetStatisticOverviewRepository, GetStatisticOverviewRepository>();
             return services;
         }
     }
