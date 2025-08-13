@@ -9,6 +9,7 @@
         public const string SYSTEM_ERROR = "Hệ thống đang bị lỗi. Xin thử lại sau!";
         public const string ID_AUCTION_NOT_FOUND = "Id phiên đấu giá không hợp lệ";
         public const string UNAUTHORIZED = "Bạn không có quyền truy cập vào chức năng này";
+        public const string NOT_FOUND = "Không tìm thấy dữ liệu";
         #endregion
         #region SignUp
         public const string EMAIL_EXITS = "Email đã được sử dụng";
