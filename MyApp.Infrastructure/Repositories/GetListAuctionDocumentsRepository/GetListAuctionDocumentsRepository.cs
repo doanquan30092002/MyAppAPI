@@ -6,7 +6,6 @@ using MyApp.Application.Common.Message;
 using MyApp.Application.CQRS.Auction.GetListAuction.Querries;
 using MyApp.Application.CQRS.Auction.GetListAution.Querries;
 using MyApp.Application.Interfaces.IGetListDocumentsRepository;
-using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
 
 namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
@@ -83,6 +82,22 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                     );
                 }
 
+                // Filter by IsAttended if provided
+                if (getListAuctionDocumentsRequest.IsAttended.HasValue)
+                {
+                    query = query.Where(ad =>
+                        ad.IsAttended == getListAuctionDocumentsRequest.IsAttended.Value
+                    );
+                }
+
+                // Filter by StatusRefund if provided
+                if (getListAuctionDocumentsRequest.StatusRefund.HasValue)
+                {
+                    query = query.Where(ad =>
+                        ad.StatusRefund == getListAuctionDocumentsRequest.StatusRefund.Value
+                    );
+                }
+
                 // Calculate total count before pagination
                 int totalCount = await query.CountAsync();
 
@@ -140,6 +155,16 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionDocumentsRepository
                             query = getListAuctionDocumentsRequest.IsAscending
                                 ? query.OrderBy(ad => ad.NumericalOrder)
                                 : query.OrderByDescending(ad => ad.NumericalOrder);
+                            break;
+                        case "isattended":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad => ad.IsAttended)
+                                : query.OrderByDescending(ad => ad.IsAttended);
+                            break;
+                        case "statusrefund":
+                            query = getListAuctionDocumentsRequest.IsAscending
+                                ? query.OrderBy(ad => ad.StatusRefund)
+                                : query.OrderByDescending(ad => ad.StatusRefund);
                             break;
                         default:
                             query = query.OrderBy(ad =>
