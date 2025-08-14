@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.UpdateExpiredProfile.Command;
 
 namespace MyApp.Api.Controllers.UpdateExpiredProfile
@@ -12,12 +13,18 @@ namespace MyApp.Api.Controllers.UpdateExpiredProfile
     {
         [HttpPost]
         [Route("Update-Expired-Profile")]
-        public async Task<ActionResult<UpdateExpiredProfileResponse>> UpdateExpiredProfile(
+        public async Task<ActionResult> UpdateExpiredProfile(
             [FromBody] UpdateExpiredProfileRequest request
         )
         {
             var response = await _mediator.Send(request);
-            return Ok(response);
+            return Ok(
+                new ApiResponse<UpdateExpiredProfileResponse>
+                {
+                    Code = response.Code,
+                    Message = response.Message,
+                }
+            );
         }
     }
 }
