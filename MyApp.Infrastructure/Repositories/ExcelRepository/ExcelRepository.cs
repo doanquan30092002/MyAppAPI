@@ -59,11 +59,29 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                             return false;
                     }
 
-                    int rowCount = worksheet.Dimension.Rows;
+                    // 2. Xác định dòng cuối có dữ liệu thật
+                    int lastRowWithData = worksheet
+                        .Cells.Where(c => !string.IsNullOrWhiteSpace(c.Text))
+                        .Select(c => c.Start.Row)
+                        .DefaultIfEmpty(1) // Nếu không có dữ liệu thì trả về 1 (chỉ có header)
+                        .Max();
 
-                    // 2. Check data rows
-                    for (int row = 2; row <= rowCount; row++)
+                    // 3. Check data rows
+                    for (int row = 2; row <= lastRowWithData; row++)
                     {
+                        // Bỏ qua nếu toàn bộ hàng trống
+                        bool isRowEmpty = true;
+                        for (int col = 1; col <= requiredHeaders.Length; col++)
+                        {
+                            if (!string.IsNullOrWhiteSpace(worksheet.Cells[row, col].Text))
+                            {
+                                isRowEmpty = false;
+                                break;
+                            }
+                        }
+                        if (isRowEmpty)
+                            continue;
+
                         // Cột 1: Tag_Name (string, bắt buộc có)
                         if (string.IsNullOrWhiteSpace(worksheet.Cells[row, 1].Text))
                             return false;
@@ -84,8 +102,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                         if (!IsValidPrice(worksheet.Cells[row, 5], min: 0))
                             return false;
 
-                        // Cột 6: Description (string, cho phép rỗng)
-                        // Không cần check
+                        // Cột 6: Description (string, cho phép rỗng) => không check
                     }
                 }
             }
