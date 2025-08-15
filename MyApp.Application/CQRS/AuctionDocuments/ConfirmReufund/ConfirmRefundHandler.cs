@@ -42,7 +42,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund
                 _unitOfWork.BeginTransaction();
 
                 // 1. Xác nhận hoàn tiền
-                var result = await _refundRepository.ConfirmRefundAsync(request.AuctionDocumentIds);
+                var result = await _refundRepository.ConfirmRefundAsync(request);
                 if (!result)
                 {
                     await _unitOfWork.RollbackAsync();
@@ -63,7 +63,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund
                             NotificationId = Guid.NewGuid(),
                             UserId = doc.UserId,
                             Message =
-                                $"Hồ sơ đấu giá của bạn (ID: {doc.AuctionDocumentsId}) đã được hoàn tiền.",
+                                $"Hồ sơ đấu giá của bạn (ID: {doc.AuctionDocumentsId}) đã được hoàn tiền, Vui lòng kiếm tra lại.",
                             NotificationType = 1,
                             SentAt = DateTime.Now,
                             IsRead = false,
