@@ -13,5 +13,9 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund
     {
         [Required(ErrorMessage = "Danh sách mã hồ sơ không được để trống")]
         public List<Guid> AuctionDocumentIds { get; set; }
+
+        public int? StatusTicket { get; set; }
+
+        public int? StatusDeposit { get; set; }
     }
 }

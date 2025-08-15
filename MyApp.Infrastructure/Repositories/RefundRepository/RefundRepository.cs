@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund;
 using MyApp.Application.Interfaces.IRefundRepository;
 using MyApp.Core.Entities;
 using MyApp.Infrastructure.Data;
@@ -19,20 +20,24 @@ namespace MyApp.Infrastructure.Repositories.RefundRepository
             _context = context;
         }
 
-        public async Task<bool> ConfirmRefundAsync(List<Guid> auctionDocumentIds)
+        public async Task<bool> ConfirmRefundAsync(ConfirmRefundCommand request)
         {
             var documents = await _context
                 .Set<AuctionDocuments>()
-                .Where(x => auctionDocumentIds.Contains(x.AuctionDocumentsId))
+                .Where(x => request.AuctionDocumentIds.Contains(x.AuctionDocumentsId))
                 .ToListAsync();
 
-            if (documents.Count != auctionDocumentIds.Count)
+            if (documents.Count != request.AuctionDocumentIds.Count)
                 return false;
 
             foreach (var doc in documents)
             {
-                doc.StatusTicket = 3; // 3: đã hoàn tiền hồ sơ
-                doc.StatusDeposit = 2; // 2: đã hoàn tiền cọc
+                if (request.StatusTicket.HasValue)
+                    doc.StatusTicket = request.StatusTicket.Value;
+
+                if (request.StatusDeposit.HasValue)
+                    doc.StatusDeposit = request.StatusDeposit.Value;
+
                 doc.UpdateAtTicket = DateTime.Now;
             }
 
