@@ -206,32 +206,32 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
         [Authorize(Roles = "Staff")]
         public async Task<IActionResult> ExportRefundDocumentsExcel([FromQuery] Guid auctionId)
         {
-            var command = new ExportExcelTransferCommand { AuctionId = auctionId };
-            var fileBytes = await _mediator.Send(command);
-            var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
-            var base64 = Convert.ToBase64String(fileBytes);
-
-            var response = new ApiResponse<object>
-            {
-                Code = 200,
-                Message = "Xuất file Excel thành công",
-                Data = new
-                {
-                    FileName = fileName,
-                    ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    Base64 = base64,
-                },
-            };
-            return Ok(response);
-
             //var command = new ExportExcelTransferCommand { AuctionId = auctionId };
             //var fileBytes = await _mediator.Send(command);
             //var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
-            //return File(
-            //    fileBytes,
-            //    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            //    fileName
-            //);
+            //var base64 = Convert.ToBase64String(fileBytes);
+
+            //var response = new ApiResponse<object>
+            //{
+            //    Code = 200,
+            //    Message = "Xuất file Excel thành công",
+            //    Data = new
+            //    {
+            //        FileName = fileName,
+            //        ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            //        Base64 = base64,
+            //    },
+            //};
+            //return Ok(response);
+
+            var command = new ExportExcelTransferCommand { AuctionId = auctionId };
+            var fileBytes = await _mediator.Send(command);
+            var fileName = $"ho-so-hoan-tien-{auctionId}.xlsx";
+            return File(
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName
+            );
         }
 
         /// <summary>

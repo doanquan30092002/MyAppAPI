@@ -218,6 +218,14 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             Guid auctionId
         )
         {
+            // Lấy thông tin auction
+            var auction = await _context.Auctions.FirstOrDefaultAsync(a =>
+                a.AuctionId == auctionId
+            );
+            if (auction == null)
+                throw new KeyNotFoundException($"Phiên đấu giá với id {auctionId} không tồn tại.");
+
+            // Danh sách người thắng (winner)
             var auctionAssetsWithWinners =
                 await _auctionAssetsRepository.GetAuctionAssetsWithHighestBidByAuctionIdAsync(
                     auctionId
@@ -235,33 +243,50 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 })
                 .ToList();
 
+            // Lấy danh sách AuctionAssetId thuộc auction
             var auctionAssetIds = await _context
                 .AuctionAssets.Where(x => x.AuctionId == auctionId)
                 .Select(x => x.AuctionAssetsId)
                 .ToListAsync();
 
-            var documents = _context
-                .AuctionDocuments.Where(doc =>
-                    auctionAssetIds.Contains(doc.AuctionAssetId)
-                    && (
-                        doc.StatusTicket == 1
-                        || doc.StatusDeposit == 1
-                        || doc.StatusRefund == 1
-                        || doc.IsAttended == true
-                    )
-                )
+            IQueryable<AuctionDocuments> query = _context
+                .AuctionDocuments.Where(doc => auctionAssetIds.Contains(doc.AuctionAssetId))
                 .Include(doc => doc.User)
-                .Include(doc => doc.AuctionAsset)
-                .AsEnumerable()
-                .Where(doc =>
-                    !excludedPairs.Any(p =>
-                        p.AuctionAssetId == doc.AuctionAssetId
-                        && p.CitizenId == doc.User.CitizenIdentification
-                    )
-                )
-                .ToList();
+                .Include(doc => doc.AuctionAsset);
 
-            return documents;
+            switch (auction.Status)
+            {
+                case 3: // Hủy
+                    query = query.Where(doc => doc.StatusTicket == 1 || doc.StatusDeposit == 1);
+                    break;
+
+                case 2: // Hoàn thành
+                    query = query.Where(doc =>
+                        doc.IsAttended == true || (doc.IsAttended == false && doc.StatusRefund == 2)
+                    );
+                    break;
+
+                default:
+                    return new List<AuctionDocuments>();
+            }
+
+            // Thực thi query trên DB trước
+            var result = await query.ToListAsync();
+
+            // Nếu hoàn thành thì loại bỏ người thắng ở bộ nhớ
+            if (auction.Status == 2)
+            {
+                result = result
+                    .Where(doc =>
+                        !excludedPairs.Any(p =>
+                            p.AuctionAssetId == doc.AuctionAssetId
+                            && p.CitizenId == doc.User.CitizenIdentification
+                        )
+                    )
+                    .ToList();
+            }
+
+            return result;
         }
 
         public async Task<List<string>> GetEmailsByUserIdsAsync(List<Guid> userIds)
