@@ -118,7 +118,16 @@ namespace MyApp.Infrastructure.Repositories.AuctionDocumentsRepository
 
             foreach (var document in documents)
             {
-                if (document.StatusDeposit == 1 && document.StatusRefund == null)
+                //if (document.StatusDeposit == 1 && document.StatusRefund == null)
+                //{
+                //    document.StatusRefund = 1;
+                //    document.RefundReason = refundReason;
+                //    document.RefundProof = refundProofUrl;
+                //    document.UpdateAtTicket = DateTime.Now;
+                //    document.NoteReviewRefund = null;
+                //}
+
+                if (document.StatusRefund == null)
                 {
                     document.StatusRefund = 1;
                     document.RefundReason = refundReason;

@@ -59,11 +59,29 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                             return false;
                     }
 
-                    int rowCount = worksheet.Dimension.Rows;
+                    // 2. Xác định dòng cuối có dữ liệu thật
+                    int lastRowWithData = worksheet
+                        .Cells.Where(c => !string.IsNullOrWhiteSpace(c.Text))
+                        .Select(c => c.Start.Row)
+                        .DefaultIfEmpty(1) // Nếu không có dữ liệu thì trả về 1 (chỉ có header)
+                        .Max();
 
-                    // 2. Check data rows
-                    for (int row = 2; row <= rowCount; row++)
+                    // 3. Check data rows
+                    for (int row = 2; row <= lastRowWithData; row++)
                     {
+                        // Bỏ qua nếu toàn bộ hàng trống
+                        bool isRowEmpty = true;
+                        for (int col = 1; col <= requiredHeaders.Length; col++)
+                        {
+                            if (!string.IsNullOrWhiteSpace(worksheet.Cells[row, col].Text))
+                            {
+                                isRowEmpty = false;
+                                break;
+                            }
+                        }
+                        if (isRowEmpty)
+                            continue;
+
                         // Cột 1: Tag_Name (string, bắt buộc có)
                         if (string.IsNullOrWhiteSpace(worksheet.Cells[row, 1].Text))
                             return false;
@@ -84,8 +102,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                         if (!IsValidPrice(worksheet.Cells[row, 5], min: 0))
                             return false;
 
-                        // Cột 6: Description (string, cho phép rỗng)
-                        // Không cần check
+                        // Cột 6: Description (string, cho phép rỗng) => không check
                     }
                 }
             }
@@ -230,7 +247,6 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                     .Where(doc =>
                         !string.IsNullOrWhiteSpace(doc.BankAccount)
                         && !string.IsNullOrWhiteSpace(doc.BankAccountNumber)
-                        && !string.IsNullOrWhiteSpace(doc.BankBranch)
                     )
                     .ToList();
 
@@ -266,6 +282,8 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
             worksheet.Cells[1, 11].Value = "Phí đăng ký";
             worksheet.Cells[1, 12].Value = "Trạng thái phiếu hồ sơ";
             worksheet.Cells[1, 13].Value = "Trạng thái tiền cọc";
+            worksheet.Cells[1, 14].Value = "Trạng thái điểm danh";
+            worksheet.Cells[1, 15].Value = "Trạng thái hoàn cọc";
 
             int row = 2,
                 stt = 1;
@@ -290,19 +308,21 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
 
                 worksheet.Cells[row, 12].Value = GetStatusTicketText(doc.StatusTicket);
                 worksheet.Cells[row, 13].Value = GetStatusDepositText(doc.StatusDeposit);
+                worksheet.Cells[row, 14].Value = GetIsAttendedText(doc.IsAttended);
+                worksheet.Cells[row, 15].Value = GetStatusRefundText(doc.StatusRefund);
 
                 row++;
             }
 
             // Format header bold
-            using (var range = worksheet.Cells[1, 1, 1, 13])
+            using (var range = worksheet.Cells[1, 1, 1, 15])
             {
                 range.Style.Font.Bold = true;
             }
 
             worksheet.Cells.AutoFitColumns();
 
-            // Dropdown cho trạng thái (cột 12, 13)
+            // Dropdown cho trạng thái (cột 12, 13, 14, 15)
             string[] statusTicketOptions =
             {
                 "Chưa chuyển tiền",
@@ -319,6 +339,15 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 "Đã hoàn",
                 "Không xác định",
             };
+            string[] attendedOptions = { "Không điểm danh", "Đã điểm danh", "Không xác định" };
+            string[] refundOptions =
+            {
+                "Không xác định",
+                "Đã yêu cầu hoàn tiền cọc",
+                "Chấp nhận hoàn cọc",
+                "Từ chối hoàn cọc",
+                "Không xác định",
+            };
 
             for (int r = 2; r < row; r++)
             {
@@ -329,19 +358,29 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 var statusDepositValidation = worksheet.DataValidations.AddListValidation($"M{r}");
                 foreach (var opt in statusDepositOptions)
                     statusDepositValidation.Formula.Values.Add(opt);
+
+                var attendedValidation = worksheet.DataValidations.AddListValidation($"N{r}");
+                foreach (var opt in attendedOptions)
+                    attendedValidation.Formula.Values.Add(opt);
+
+                var refundValidation = worksheet.DataValidations.AddListValidation($"O{r}");
+                foreach (var opt in refundOptions)
+                    refundValidation.Formula.Values.Add(opt);
             }
 
-            // Lock toàn bộ rồi mở khoá 2 cột cuối
+            // Lock toàn bộ rồi mở khoá các cột trạng thái
             worksheet.Protection.IsProtected = true;
             worksheet.Protection.SetPassword("1234");
 
             for (int r = 2; r < row; r++)
             {
-                worksheet.Cells[r, 12].Style.Locked = false;
-                worksheet.Cells[r, 13].Style.Locked = false;
+                worksheet.Cells[r, 12].Style.Locked = false; // phiếu hồ sơ
+                worksheet.Cells[r, 13].Style.Locked = false; // tiền cọc
+                worksheet.Cells[r, 14].Style.Locked = false; // điểm danh
+                worksheet.Cells[r, 15].Style.Locked = false; // hoàn cọc
             }
 
-            worksheet.Cells[1, 12, 1, 13].Style.Locked = false;
+            worksheet.Cells[1, 12, 1, 15].Style.Locked = false;
         }
 
         private string GetStatusTicketText(int status)
@@ -364,6 +403,28 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 1 => "Đã cọc",
                 2 => "Đã hoàn tiền",
                 3 => "Đã hoàn",
+                _ => "Không xác định",
+            };
+        }
+
+        private string GetIsAttendedText(bool? isAttended)
+        {
+            return isAttended switch
+            {
+                true => "Đã điểm danh",
+                false => "Không điểm danh",
+                _ => "Không xác định",
+            };
+        }
+
+        private string GetStatusRefundText(int? statusRefund)
+        {
+            return statusRefund switch
+            {
+                1 => "Đã yêu cầu hoàn tiền cọc",
+                2 => "Chấp nhận hoàn cọc",
+                3 => "Từ chối hoàn cọc",
+                null => "Không xác định",
                 _ => "Không xác định",
             };
         }
