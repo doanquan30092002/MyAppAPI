@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyApp.Application.Common.Response;
 using MyApp.Application.CQRS.UserRegisteredAuction;
 
 namespace MyApp.Api.Controllers.UserRegisteredAuction
@@ -17,7 +18,14 @@ namespace MyApp.Api.Controllers.UserRegisteredAuction
         )
         {
             var response = await _mediator.Send(request);
-            return Ok(response);
+            return Ok(
+                new ApiResponse<UserRegisteredAuctionResponse>
+                {
+                    Code = response.Code,
+                    Message = response.Message,
+                    Data = response.Data,
+                }
+            );
         }
     }
 }
