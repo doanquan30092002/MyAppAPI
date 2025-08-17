@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.IJwtHelper;
 using MyApp.Application.Interfaces.ISupportRegisterDocuments;
 using MyApp.Core.DTOs.AuctionDocumentsDTO;
@@ -17,18 +18,15 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
         : IRequestHandler<SupportRegisterDocumentsCommand, bool>
     {
         private readonly ISupportRegisterDocuments _supportRegisterDocuments;
-        private readonly IJwtHelper _jwtHelper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public SupportRegisterDocumentsHandler(
             ISupportRegisterDocuments supportRegisterDocuments,
-            IJwtHelper jwtHelper,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _supportRegisterDocuments = supportRegisterDocuments;
-            _jwtHelper = jwtHelper;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(
@@ -36,18 +34,9 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
             CancellationToken cancellationToken
         )
         {
-            Guid? createdByUserId = null;
+            var userIdStr = _currentUserService.GetUserId();
 
-            var createdByUserStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-
-            if (Guid.TryParse(createdByUserStr, out var parsedGuid))
-            {
-                createdByUserId = parsedGuid;
-            }
-
-            if (createdByUserId == null)
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userIdCreated))
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             var userId = await _supportRegisterDocuments.GetUserIdByCitizenIdentificationAsync(
@@ -85,7 +74,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.SupportRegisterDocuments.Comma
                 AuctionId = request.AuctionId,
             };
 
-            return await _supportRegisterDocuments.RegisterAsync(dto, createdByUserId.Value);
+            return await _supportRegisterDocuments.RegisterAsync(dto, userIdCreated);
         }
     }
 }

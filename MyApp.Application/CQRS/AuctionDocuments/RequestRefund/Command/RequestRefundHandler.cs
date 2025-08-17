@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Services.UploadFile;
 using MyApp.Application.Interfaces.IAuctionDocuments;
 
@@ -14,18 +15,19 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
     public class RequestRefundHandler : IRequestHandler<RequestRefundCommand, bool>
     {
         private readonly IAuctionDocuments _auctionDocumentsRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUploadFile _uploadFileService;
+        private readonly ICurrentUserService _currentUserService;
 
         public RequestRefundHandler(
             IAuctionDocuments auctionDocumentsRepository,
             IHttpContextAccessor httpContextAccessor,
-            IUploadFile uploadFileService
+            IUploadFile uploadFileService,
+            ICurrentUserService currentUserService
         )
         {
             _auctionDocumentsRepository = auctionDocumentsRepository;
-            _httpContextAccessor = httpContextAccessor;
             _uploadFileService = uploadFileService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(
@@ -33,15 +35,8 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
             CancellationToken cancellationToken
         )
         {
-            Guid? userId = null;
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-            if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out var parsedUserId))
-            {
-                userId = parsedUserId;
-            }
-            else
+            var userIdStr = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
             {
                 throw new UnauthorizedAccessException("Không thể xác định người dùng hiện tại.");
             }
@@ -52,7 +47,7 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
             {
                 var document = await _auctionDocumentsRepository.GetDocumentByIdAndUserIdAsync(
                     documentId,
-                    userId.Value
+                    userId
                 );
                 if (document == null)
                 {
@@ -102,9 +97,14 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
 
             var refundProofUrl = await _uploadFileService.UploadAsync(request.RefundProof);
 
+            if (string.IsNullOrWhiteSpace(refundProofUrl))
+            {
+                throw new InvalidOperationException("Upload file thất bại, không có URL hợp lệ.");
+            }
+
             return await _auctionDocumentsRepository.RequestRefundAsync(
                 request.AuctionDocumentIds,
-                userId.Value,
+                userId,
                 refundProofUrl,
                 request.RefundReason
             );

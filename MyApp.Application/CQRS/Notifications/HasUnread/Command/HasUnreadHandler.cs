@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.INotificationsRepository;
 
 namespace MyApp.Application.CQRS.Notifications.HasUnread.Command
@@ -13,15 +14,15 @@ namespace MyApp.Application.CQRS.Notifications.HasUnread.Command
     public class HasUnreadHandler : IRequestHandler<HasUnreadCommand, bool>
     {
         private readonly INotificationsRepository _notificationsRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public HasUnreadHandler(
             INotificationsRepository notificationsRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _notificationsRepository = notificationsRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(
@@ -29,14 +30,10 @@ namespace MyApp.Application.CQRS.Notifications.HasUnread.Command
             CancellationToken cancellationToken
         )
         {
-            // Lấy userId từ Claims
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-            if (!Guid.TryParse(userIdStr, out var userId))
-            {
-                throw new UnauthorizedAccessException("Không xác định được người dùng.");
-            }
+            var userIdStr = _currentUserService.GetUserId();
+
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+                throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             // Kiểm tra xem user có notification nào chưa đọc không
             return await _notificationsRepository.HasUnreadNotificationAsync(userId);

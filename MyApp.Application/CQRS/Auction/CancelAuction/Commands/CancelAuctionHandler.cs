@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
@@ -20,7 +21,7 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
     public class CancelAuctionHandler : IRequestHandler<CancelAuctionCommand, bool>
     {
         private readonly IAuctionRepository _auctionRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEnumerable<ISendMessage> _sendMessages;
         private readonly INotificationsRepository _notificationRepository;
@@ -28,7 +29,7 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
 
         public CancelAuctionHandler(
             IAuctionRepository auctionRepository,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             IUnitOfWork unitOfWork,
             IEnumerable<ISendMessage> sendMessages,
             INotificationsRepository notificationRepository,
@@ -36,7 +37,7 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
         )
         {
             _auctionRepository = auctionRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
             _sendMessages = sendMessages;
             _notificationRepository = notificationRepository;
@@ -48,17 +49,9 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
             CancellationToken cancellationToken
         )
         {
-            Guid? userId = null;
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userIdStr = _currentUserService.GetUserId();
 
-            if (Guid.TryParse(userIdStr, out var parsedGuid))
-            {
-                userId = parsedGuid;
-            }
-
-            if (userId == null)
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             try
@@ -67,7 +60,7 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
                 _unitOfWork.BeginTransaction();
 
                 // 2. Hủy đấu giá
-                await _auctionRepository.CancelAuctionAsync(request, userId.Value);
+                await _auctionRepository.CancelAuctionAsync(request, userId);
 
                 // 3. Lấy danh sách hồ sơ đã đăng ký/cọc
                 var listDocs = await _auctionRepository.GetPaidOrDepositedDocumentsByAuctionIdAsync(

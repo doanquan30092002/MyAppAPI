@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.IFindHighestPriceAndFlag;
 
 namespace MyApp.Application.CQRS.AuctionDocuments.FindHighestPriceAndFlag.Queries
@@ -13,15 +14,15 @@ namespace MyApp.Application.CQRS.AuctionDocuments.FindHighestPriceAndFlag.Querie
         : IRequestHandler<FindHighestPriceAndFlagRequest, FindHighestPriceAndFlagResponse>
     {
         private readonly IFindHighestPriceAndFlag _findHighestPriceAndFlag;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public FindHighestPriceAndFlagHandler(
             IFindHighestPriceAndFlag findHighestPriceAndFlag,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _findHighestPriceAndFlag = findHighestPriceAndFlag;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<FindHighestPriceAndFlagResponse> Handle(
@@ -29,22 +30,14 @@ namespace MyApp.Application.CQRS.AuctionDocuments.FindHighestPriceAndFlag.Querie
             CancellationToken cancellationToken
         )
         {
-            Guid? userId = null;
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userIdStr = _currentUserService.GetUserId();
 
-            if (Guid.TryParse(userIdStr, out var parsedGuid))
-            {
-                userId = parsedGuid;
-            }
-
-            if (userId == null)
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             var result = await _findHighestPriceAndFlag.FindHighestPriceAndFlag(
                 request.AuctionId,
-                userId.Value
+                userId
             );
 
             return result;
