@@ -64,18 +64,17 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             {
                 var category = await _categoriesRepository.FindByIdAsync(request.CategoryId);
                 if (category == null)
+                {
                     throw new ValidationException("Loại tài sản đấu giá không tồn tại.");
+                }
             }
-
             _unitOfWork.BeginTransaction();
-
             try
             {
                 bool updateSuccess = await _auctionRepository.UpdateAuctionAsync(request, userId);
 
                 if (!updateSuccess)
                 {
-                    await _unitOfWork.RollbackAsync();
                     throw new InvalidOperationException("Cập nhật phiên đấu giá thất bại.");
                 }
 
@@ -88,7 +87,6 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                         userId
                     );
                 }
-
                 await _unitOfWork.CommitAsync();
             }
             catch

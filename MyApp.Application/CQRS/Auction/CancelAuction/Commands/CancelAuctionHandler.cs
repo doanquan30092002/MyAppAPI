@@ -113,15 +113,18 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
                 }
 
                 // send signalR
-                await _notificationSender.SendToUsersAsync(
-                    userIds,
-                    new
-                    {
-                        Title = "Thông báo từ phiên đấu giá",
-                        Content = "Hủy phiên đấu giá " + request.AuctionId,
-                        Time = DateTime.UtcNow,
-                    }
-                );
+                if (userIds.Any())
+                {
+                    await _notificationSender.SendToUsersAsync(
+                        userIds,
+                        new
+                        {
+                            Title = "Thông báo từ phiên đấu giá",
+                            Content = "Hủy phiên đấu giá " + request.AuctionId,
+                            Time = DateTime.UtcNow,
+                        }
+                    );
+                }
 
                 return true;
             }

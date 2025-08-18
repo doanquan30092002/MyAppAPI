@@ -20,7 +20,6 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
 
         public RequestRefundHandler(
             IAuctionDocuments auctionDocumentsRepository,
-            IHttpContextAccessor httpContextAccessor,
             IUploadFile uploadFileService,
             ICurrentUserService currentUserService
         )
@@ -72,13 +71,6 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
                         $"Hồ sơ ID {documentId} không thể yêu cầu hoàn cọc do đã sau thời gian bắt đầu đấu giá."
                     );
                 }
-
-                //if (document.StatusDeposit != 1)
-                //{
-                //    throw new InvalidOperationException(
-                //        $"Hồ sơ với ID {documentId} không đủ điều kiện để yêu cầu hoàn tiền: Chưa nộp tiền cọc."
-                //    );
-                //}
 
                 if (document.StatusRefund == 1)
                 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,8 +37,8 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer
                 );
             }
 
-            // status : 3 cancel, 2 completed
-            if (auction.Status != 2 && auction.Status != 3)
+            bool isCompletedOrCanceled = auction.Status == 2 || auction.Status == 3;
+            if (!isCompletedOrCanceled)
             {
                 throw new InvalidOperationException(
                     "Chỉ có thể xuất danh sách hoàn tiền cho phiên đấu giá đã bị hủy hoặc đã hoàn thành."
