@@ -11,9 +11,7 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
 
         public GetAuctionByIdHandler(IGetAuctionByIdRepository getAuctionByIdRepository)
         {
-            _getAuctionByIdRepository =
-                getAuctionByIdRepository
-                ?? throw new ArgumentNullException(nameof(getAuctionByIdRepository));
+            _getAuctionByIdRepository = getAuctionByIdRepository;
         }
 
         public async Task<GetAuctionByIdResponse> Handle(

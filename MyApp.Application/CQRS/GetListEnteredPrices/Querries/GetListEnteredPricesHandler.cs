@@ -20,9 +20,7 @@ namespace MyApp.Application.CQRS.GetListEnteredPrices.Queries
             IGetListEnteredPricesRepository getListEnteredPricesRepository
         )
         {
-            _getListEnteredPricesRepository =
-                getListEnteredPricesRepository
-                ?? throw new ArgumentNullException(nameof(getListEnteredPricesRepository));
+            _getListEnteredPricesRepository = getListEnteredPricesRepository;
         }
 
         public async Task<GetListEnteredPricesResponse> Handle(

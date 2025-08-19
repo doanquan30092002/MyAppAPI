@@ -19,9 +19,7 @@ namespace MyApp.Application.CQRS.GetStatisticOverview.Queries
             IGetStatisticOverviewRepository getStatisticOverviewRepository
         )
         {
-            _getStatisticOverviewRepository =
-                getStatisticOverviewRepository
-                ?? throw new ArgumentNullException(nameof(getStatisticOverviewRepository));
+            _getStatisticOverviewRepository = getStatisticOverviewRepository;
         }
 
         public Task<GetStatisticOverviewResponse> Handle(

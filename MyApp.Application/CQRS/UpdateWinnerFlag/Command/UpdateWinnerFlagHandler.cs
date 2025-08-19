@@ -14,9 +14,7 @@ namespace MyApp.Application.CQRS.UpdateFlagWinner.Command
 
         public UpdateWinnerFlagHandler(IUpdateWinnerFlagRepository updateWinnerFlagRepository)
         {
-            _updateWinnerFlagRepository =
-                updateWinnerFlagRepository
-                ?? throw new ArgumentNullException(nameof(updateWinnerFlagRepository));
+            _updateWinnerFlagRepository = updateWinnerFlagRepository;
         }
 
         public async Task<UpdateWinnerFlagResponse> Handle(

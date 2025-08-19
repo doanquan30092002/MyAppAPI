@@ -16,9 +16,7 @@ namespace MyApp.Application.CQRS.GetListUserWinner.Queries
 
         public GetListUserWinnerHandler(IListUserWinnerRepository getListUserWinnerRepository)
         {
-            _getListUserWinnerRepository =
-                getListUserWinnerRepository
-                ?? throw new ArgumentNullException(nameof(getListUserWinnerRepository));
+            _getListUserWinnerRepository = getListUserWinnerRepository;
         }
 
         public async Task<GetListUserWinnerResponse> Handle(
