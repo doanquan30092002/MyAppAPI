@@ -16,8 +16,7 @@ namespace MyApp.Application.CQRS.Auction.GetListAuction.Querries
             ICurrentUserService currentUserService
         )
         {
-            _getListRepository =
-                getListRepository ?? throw new ArgumentNullException(nameof(getListRepository));
+            _getListRepository = getListRepository;
             _currentUserService = currentUserService;
         }
 
