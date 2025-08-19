@@ -19,9 +19,7 @@ namespace MyApp.Application.CQRS.GetListAssetInfoStatistic.Queries
             IGetListAssetInfostatisticsRepository getListAssetInfostatisticsRepository
         )
         {
-            _getListAssetInfostatisticsRepository =
-                getListAssetInfostatisticsRepository
-                ?? throw new ArgumentNullException(nameof(getListAssetInfostatisticsRepository));
+            _getListAssetInfostatisticsRepository = getListAssetInfostatisticsRepository;
         }
 
         public Task<GetListAssetInfoStatisticsResponse> Handle(

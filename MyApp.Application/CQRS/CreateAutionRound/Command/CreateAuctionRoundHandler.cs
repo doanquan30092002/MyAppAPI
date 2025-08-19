@@ -13,9 +13,7 @@ namespace MyApp.Application.CQRS.CreateAutionRound.Command
 
         public CreateAuctionRoundHandler(ICreateAuctionRoundRepository createAuctionRoundRepository)
         {
-            _createAuctionRoundRepository =
-                createAuctionRoundRepository
-                ?? throw new ArgumentNullException(nameof(createAuctionRoundRepository));
+            _createAuctionRoundRepository = createAuctionRoundRepository;
         }
 
         public async Task<CreateAuctionRoundResponse> Handle(

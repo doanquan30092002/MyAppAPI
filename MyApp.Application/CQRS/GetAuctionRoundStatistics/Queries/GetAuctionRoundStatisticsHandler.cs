@@ -19,9 +19,7 @@ namespace MyApp.Application.CQRS.GetAuctionRoundStatistics.Queries
             IGetAuctionRoundStatisticsRepository getAuctionRoundStatisticsRepository
         )
         {
-            _getAuctionRoundStatisticsRepository =
-                getAuctionRoundStatisticsRepository
-                ?? throw new ArgumentNullException(nameof(getAuctionRoundStatisticsRepository));
+            _getAuctionRoundStatisticsRepository = getAuctionRoundStatisticsRepository;
         }
 
         public Task<GetAuctionRoundStatisticsResponse> Handle(

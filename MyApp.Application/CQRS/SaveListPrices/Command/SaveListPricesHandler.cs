@@ -25,13 +25,9 @@ namespace MyApp.Application.CQRS.SaveListPrices.Command
             IGetListEnteredPricesRepository getListEnteredPricesRepository
         )
         {
-            _saveListPricesRepository =
-                saveListPricesRepository
-                ?? throw new ArgumentNullException(nameof(saveListPricesRepository));
-            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
-            _getListEnteredPricesRepository =
-                getListEnteredPricesRepository
-                ?? throw new ArgumentNullException(nameof(getListEnteredPricesRepository));
+            _saveListPricesRepository = saveListPricesRepository;
+            _hubContext = hubContext;
+            _getListEnteredPricesRepository = getListEnteredPricesRepository;
         }
 
         public async Task<SaveListPricesResponse> Handle(
