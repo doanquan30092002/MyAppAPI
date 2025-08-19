@@ -35,105 +35,130 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund.Tests
         }
 
         [Test]
-        public async Task Handle_ShouldReturnFalse_WhenAuctionDocumentIdsNullOrEmpty()
+        public async Task Handle_AuctionDocumentIdsIsNull_ReturnsFalse()
         {
-            // Arrange
-            var command1 = new ConfirmRefundCommand { AuctionDocumentIds = null };
-            var command2 = new ConfirmRefundCommand { AuctionDocumentIds = new List<Guid>() };
+            var request = new ConfirmRefundCommand { AuctionDocumentIds = null };
 
-            // Act
-            var result1 = await _handler.Handle(command1, CancellationToken.None);
-            var result2 = await _handler.Handle(command2, CancellationToken.None);
+            var result = await _handler.Handle(request, CancellationToken.None);
 
-            // Assert
-            Assert.IsFalse(result1);
-            Assert.IsFalse(result2);
-        }
-
-        [Test]
-        public async Task Handle_ShouldReturnFalse_WhenConfirmRefundFails()
-        {
-            // Arrange
-            var docId = Guid.NewGuid();
-            var command = new ConfirmRefundCommand
-            {
-                AuctionDocumentIds = new List<Guid> { docId },
-            };
-
-            _refundRepoMock.Setup(x => x.ConfirmRefundAsync(command)).ReturnsAsync(false);
-            _unitOfWorkMock.Setup(x => x.BeginTransaction());
-
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
             Assert.IsFalse(result);
-            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Never);
         }
 
         [Test]
-        public async Task Handle_ShouldReturnTrue_WhenConfirmRefundSucceeds()
+        public async Task Handle_AuctionDocumentIdsIsEmpty_ReturnsFalse()
         {
-            // Arrange
-            var docId = Guid.NewGuid();
-            var command = new ConfirmRefundCommand
+            var request = new ConfirmRefundCommand { AuctionDocumentIds = new List<Guid>() };
+
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.IsFalse(result);
+            _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Never);
+        }
+
+        [Test]
+        public async Task Handle_ConfirmRefundAsyncReturnsFalse_RollsBackAndReturnsFalse()
+        {
+            var request = new ConfirmRefundCommand
             {
-                AuctionDocumentIds = new List<Guid> { docId },
+                AuctionDocumentIds = new List<Guid> { Guid.NewGuid() },
             };
 
-            var documents = new List<MyApp.Core.Entities.AuctionDocuments>
+            _refundRepoMock.Setup(r => r.ConfirmRefundAsync(request)).ReturnsAsync(false);
+
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            Assert.IsFalse(result);
+            _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.RollbackAsync(), Times.Once);
+        }
+
+        [Test]
+        public async Task Handle_ConfirmRefundAsyncReturnsTrue_NoDocuments_CommitsAndReturnsTrue()
+        {
+            var request = new ConfirmRefundCommand
             {
-                new MyApp.Core.Entities.AuctionDocuments
-                {
-                    AuctionDocumentsId = docId,
-                    UserId = Guid.NewGuid(),
-                },
+                AuctionDocumentIds = new List<Guid> { Guid.NewGuid() },
             };
 
-            _unitOfWorkMock.Setup(x => x.BeginTransaction());
-            _refundRepoMock.Setup(x => x.ConfirmRefundAsync(command)).ReturnsAsync(true);
+            _refundRepoMock.Setup(r => r.ConfirmRefundAsync(request)).ReturnsAsync(true);
             _refundRepoMock
-                .Setup(x => x.GetAuctionDocumentsByIdsAsync(command.AuctionDocumentIds))
-                .ReturnsAsync(documents);
-            _notificationRepoMock
-                .Setup(x =>
-                    x.SaveNotificationsAsync(It.IsAny<List<MyApp.Core.Entities.Notification>>())
-                )
-                .ReturnsAsync(true);
-            _unitOfWorkMock.Setup(x => x.CommitAsync()).Returns(Task.CompletedTask);
+                .Setup(r => r.GetAuctionDocumentsByIdsAsync(request.AuctionDocumentIds))
+                .ReturnsAsync(new List<MyApp.Core.Entities.AuctionDocuments>());
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var result = await _handler.Handle(request, CancellationToken.None);
 
-            // Assert
             Assert.IsTrue(result);
-            _unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
             _notificationRepoMock.Verify(
-                x => x.SaveNotificationsAsync(It.IsAny<List<MyApp.Core.Entities.Notification>>()),
-                Times.Once
+                n => n.SaveNotificationsAsync(It.IsAny<List<MyApp.Core.Entities.Notification>>()),
+                Times.Never
             );
         }
 
         [Test]
-        public async Task Handle_ShouldReturnFalse_WhenExceptionOccurs()
+        public async Task Handle_ConfirmRefundAsyncReturnsTrue_WithDocuments_SavesNotificationsAndCommits()
         {
-            // Arrange
-            var docId = Guid.NewGuid();
-            var command = new ConfirmRefundCommand
+            var doc = new MyApp.Core.Entities.AuctionDocuments
             {
-                AuctionDocumentIds = new List<Guid> { docId },
+                AuctionDocumentsId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+            };
+            var request = new ConfirmRefundCommand
+            {
+                AuctionDocumentIds = new List<Guid> { doc.AuctionDocumentsId },
             };
 
-            _unitOfWorkMock.Setup(x => x.BeginTransaction());
-            _refundRepoMock.Setup(x => x.ConfirmRefundAsync(command)).ThrowsAsync(new Exception());
-            _unitOfWorkMock.Setup(x => x.RollbackAsync()).Returns(Task.CompletedTask);
+            _refundRepoMock.Setup(r => r.ConfirmRefundAsync(request)).ReturnsAsync(true);
+            _refundRepoMock
+                .Setup(r => r.GetAuctionDocumentsByIdsAsync(request.AuctionDocumentIds))
+                .ReturnsAsync(new List<MyApp.Core.Entities.AuctionDocuments> { doc });
+            _notificationRepoMock
+                .Setup(n =>
+                    n.SaveNotificationsAsync(It.IsAny<List<MyApp.Core.Entities.Notification>>())
+                )
+                .ReturnsAsync(true);
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            var result = await _handler.Handle(request, CancellationToken.None);
 
-            // Assert
+            Assert.IsTrue(result);
+            _notificationRepoMock.Verify(
+                n =>
+                    n.SaveNotificationsAsync(
+                        It.Is<List<MyApp.Core.Entities.Notification>>(l => l.Count == 1)
+                    ),
+                Times.Once
+            );
+            _unitOfWorkMock.Verify(u => u.CommitAsync(), Times.Once);
+        }
+
+        [Test]
+        public async Task Handle_SaveNotificationsThrowsException_RollsBackAndReturnsFalse()
+        {
+            var doc = new MyApp.Core.Entities.AuctionDocuments
+            {
+                AuctionDocumentsId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+            };
+            var request = new ConfirmRefundCommand
+            {
+                AuctionDocumentIds = new List<Guid> { doc.AuctionDocumentsId },
+            };
+
+            _refundRepoMock.Setup(r => r.ConfirmRefundAsync(request)).ReturnsAsync(true);
+            _refundRepoMock
+                .Setup(r => r.GetAuctionDocumentsByIdsAsync(request.AuctionDocumentIds))
+                .ReturnsAsync(new List<MyApp.Core.Entities.AuctionDocuments> { doc });
+            _notificationRepoMock
+                .Setup(n =>
+                    n.SaveNotificationsAsync(It.IsAny<List<MyApp.Core.Entities.Notification>>())
+                )
+                .ThrowsAsync(new Exception("DB error"));
+
+            var result = await _handler.Handle(request, CancellationToken.None);
+
             Assert.IsFalse(result);
-            _unitOfWorkMock.Verify(x => x.RollbackAsync(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.RollbackAsync(), Times.Once);
         }
     }
 }
