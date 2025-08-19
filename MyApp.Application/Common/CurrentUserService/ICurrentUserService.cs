@@ -6,6 +6,7 @@ namespace MyApp.Application.Common.CurrentUserService
     public interface ICurrentUserService
     {
         string? GetUserId();
+        string? GetRole();
     }
 
     public class CurrentUserService : ICurrentUserService
@@ -22,6 +23,11 @@ namespace MyApp.Application.Common.CurrentUserService
             return _httpContextAccessor
                 .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                 ?.Value;
+        }
+
+        public string? GetRole()
+        {
+            return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
         }
     }
 }

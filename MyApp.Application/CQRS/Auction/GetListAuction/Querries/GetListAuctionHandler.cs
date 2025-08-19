@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.CQRS.Auction.GetListAution.Querries;
 using MyApp.Application.Interfaces.IGetListRepository;
 
@@ -10,17 +9,16 @@ namespace MyApp.Application.CQRS.Auction.GetListAuction.Querries
         : IRequestHandler<GetListAuctionRequest, GetListAuctionResponse>
     {
         private readonly IGetListRepository _getListRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public GetListAuctionHandler(
             IGetListRepository getListRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _getListRepository =
                 getListRepository ?? throw new ArgumentNullException(nameof(getListRepository));
-            _httpContextAccessor =
-                httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _currentUserService = currentUserService;
         }
 
         public Task<GetListAuctionResponse> Handle(
@@ -28,10 +26,8 @@ namespace MyApp.Application.CQRS.Auction.GetListAuction.Querries
             CancellationToken cancellationToken
         )
         {
-            string userId = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-            string role = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
+            string userId = _currentUserService.GetUserId() ?? string.Empty;
+            string role = _currentUserService.GetRole() ?? string.Empty;
             if (role != null && role.Equals("Auctioneer"))
             {
                 return _getListRepository.GetListAuctionsAsync(request, userId);
