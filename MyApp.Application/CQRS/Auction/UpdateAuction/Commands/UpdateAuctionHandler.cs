@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.IActionAssetsRepository;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
@@ -21,7 +22,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
         private readonly IAuctionRepository _auctionRepository;
         private readonly IAuctionCategoriesRepository _categoriesRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IExcelRepository _excelRepository;
         private readonly IAuctionAssetsRepository _auctionAssetRepository;
 
@@ -29,7 +30,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             IAuctionRepository auctionRepository,
             IAuctionCategoriesRepository categoriesRepository,
             IUnitOfWork unitOfWork,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             IExcelRepository excelRepository,
             IAuctionAssetsRepository auctionAssetRepository
         )
@@ -37,7 +38,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             _auctionRepository = auctionRepository;
             _categoriesRepository = categoriesRepository;
             _unitOfWork = unitOfWork;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _excelRepository = excelRepository;
             _auctionAssetRepository = auctionAssetRepository;
         }
@@ -47,18 +48,9 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             CancellationToken cancellationToken
         )
         {
-            Guid? userId = null;
+            var userIdStr = _currentUserService.GetUserId();
 
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-
-            if (Guid.TryParse(userIdStr, out var parsedGuid))
-            {
-                userId = parsedGuid;
-            }
-
-            if (userId == null)
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             var auction = await _auctionRepository.FindAuctionByIdAsync(request.AuctionId);
@@ -72,21 +64,17 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
             {
                 var category = await _categoriesRepository.FindByIdAsync(request.CategoryId);
                 if (category == null)
+                {
                     throw new ValidationException("Loại tài sản đấu giá không tồn tại.");
+                }
             }
-
             _unitOfWork.BeginTransaction();
-
             try
             {
-                bool updateSuccess = await _auctionRepository.UpdateAuctionAsync(
-                    request,
-                    userId.Value
-                );
+                bool updateSuccess = await _auctionRepository.UpdateAuctionAsync(request, userId);
 
                 if (!updateSuccess)
                 {
-                    await _unitOfWork.RollbackAsync();
                     throw new InvalidOperationException("Cập nhật phiên đấu giá thất bại.");
                 }
 
@@ -96,10 +84,9 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                     await _excelRepository.SaveAssetsFromExcelAsync(
                         request.AuctionId,
                         request.AuctionAssetFile,
-                        userId.Value
+                        userId
                     );
                 }
-
                 await _unitOfWork.CommitAsync();
             }
             catch

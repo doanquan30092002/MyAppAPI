@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.CQRS.Notifications.GetNotificationByUserId.Queries;
 using MyApp.Application.Interfaces.INotificationsRepository;
 
@@ -15,15 +16,15 @@ namespace MyApp.Application.CQRS.Notifications.GetNofiticationByUserId.Queries
         : IRequestHandler<GetNotificationsByUserIdRequest, GetNotificationsByUserIdResponse>
     {
         private readonly INotificationsRepository _notificationsRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public GetNotificationsUserIdHandler(
             INotificationsRepository notificationsRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _notificationsRepository = notificationsRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<GetNotificationsByUserIdResponse> Handle(
@@ -31,28 +32,19 @@ namespace MyApp.Application.CQRS.Notifications.GetNofiticationByUserId.Queries
             CancellationToken cancellationToken
         )
         {
-            Guid? userId = null;
+            var userIdStr = _currentUserService.GetUserId();
 
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-
-            if (Guid.TryParse(userIdStr, out var parsedGuid))
-            {
-                userId = parsedGuid;
-            }
-
-            if (userId == null)
-                throw new UnauthorizedAccessException("Vui lòng đăng nhập lại để xem thông báo.");
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+                throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             var notifications = await _notificationsRepository.GetNotificationsByUserIdAsync(
-                userId.Value,
+                userId,
                 request.PageIndex,
                 request.PageSize
             );
 
             var totalCount = await _notificationsRepository.GetTotalNotificationsByUserIdAsync(
-                userId.Value
+                userId
             );
 
             var notificationDtos = notifications

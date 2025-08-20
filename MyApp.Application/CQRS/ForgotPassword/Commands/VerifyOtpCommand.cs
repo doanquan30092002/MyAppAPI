@@ -18,12 +18,12 @@ namespace MyApp.Application.CQRS.ForgotPassword.Commands
         [Required(ErrorMessage = "Mã OTP là bắt buộc.")]
         public string OtpCode { get; set; }
 
-        [Required(ErrorMessage = "Kênh gữi OTP là bắt buộc.")]
-        [Range(0, 1, ErrorMessage = "Kênh OTP không hỗ trợ")]
+        [Required(ErrorMessage = "Kênh gửi OTP là bắt buộc.")]
         public OTPChannel Channel { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Contact
             if (string.IsNullOrWhiteSpace(Contact))
             {
                 yield return new ValidationResult(
@@ -44,19 +44,17 @@ namespace MyApp.Application.CQRS.ForgotPassword.Commands
                 }
             }
 
+            // OTP
             if (string.IsNullOrWhiteSpace(OtpCode))
             {
                 yield return new ValidationResult("Mã OTP là bắt buộc.", new[] { nameof(OtpCode) });
             }
 
-            if (
-                !Enum.IsDefined(typeof(OTPChannel), Channel)
-                || (int)Channel < 0
-                || (int)Channel > 1
-            )
+            // Channel
+            if (!Enum.IsDefined(typeof(OTPChannel), Channel))
             {
                 yield return new ValidationResult(
-                    "Kênh gửi OTP phải là 0 (Email) hoặc 1 (SMS).",
+                    "Kênh gửi OTP không hợp lệ.",
                     new[] { nameof(Channel) }
                 );
             }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.CQRS.Notifications.GetNofiticationByUserId.Queries;
 using MyApp.Application.Interfaces.INotificationsRepository;
 
@@ -15,15 +16,15 @@ namespace MyApp.Application.CQRS.Notifications.GetNotificationById.Queries
         : IRequestHandler<GetNotificationsByIdRequest, NotificationDto>
     {
         private readonly INotificationsRepository _notificationsRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
 
         public GetNotificationByIdHandler(
             INotificationsRepository notificationsRepository,
-            IHttpContextAccessor httpContextAccessor
+            ICurrentUserService currentUserService
         )
         {
             _notificationsRepository = notificationsRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<NotificationDto> Handle(
@@ -31,14 +32,10 @@ namespace MyApp.Application.CQRS.Notifications.GetNotificationById.Queries
             CancellationToken cancellationToken
         )
         {
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
+            var userIdStr = _currentUserService.GetUserId();
 
-            if (!Guid.TryParse(userIdStr, out var userId))
-            {
-                throw new UnauthorizedAccessException("Không xác định được người dùng.");
-            }
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+                throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             var notification = await _notificationsRepository.GetNotificationByIdAsync(
                 request.NotificationId

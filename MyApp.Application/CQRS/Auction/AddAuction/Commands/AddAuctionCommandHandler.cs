@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Interfaces.IAuctionCategoriesRepository;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.IExcelRepository;
@@ -20,24 +21,21 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
         private readonly IAuctionRepository _auctionRepository;
         private readonly IExcelRepository _excelRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IJwtHelper _jwtHelper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IAuctionCategoriesRepository _auctionCategoriesRepository;
 
         public AddAuctionCommandHandler(
             IAuctionRepository auctionRepository,
             IExcelRepository excelRepository,
             IUnitOfWork unitOfWork,
-            IJwtHelper jwtHelper,
-            IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             IAuctionCategoriesRepository auctionCategoriesRepository
         )
         {
             _auctionRepository = auctionRepository;
             _excelRepository = excelRepository;
             _unitOfWork = unitOfWork;
-            _jwtHelper = jwtHelper;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
             _auctionCategoriesRepository = auctionCategoriesRepository;
         }
 
@@ -46,18 +44,9 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
             CancellationToken cancellationToken
         )
         {
-            Guid? userId = null;
+            var userIdStr = _currentUserService.GetUserId();
 
-            var userIdStr = _httpContextAccessor
-                .HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
-                ?.Value;
-
-            if (Guid.TryParse(userIdStr, out var parsedGuid))
-            {
-                userId = parsedGuid;
-            }
-
-            if (userId == null)
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
 
             var category = await _auctionCategoriesRepository.FindByIdAsync(request.CategoryId);
@@ -76,14 +65,14 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
             _unitOfWork.BeginTransaction();
             try
             {
-                var auctionId = await _auctionRepository.AddAuctionAsync(request, userId.Value);
+                var auctionId = await _auctionRepository.AddAuctionAsync(request, userId);
 
                 if (request.AuctionAssetFile != null && request.AuctionAssetFile.Length > 0)
                 {
                     await _excelRepository.SaveAssetsFromExcelAsync(
                         auctionId,
                         request.AuctionAssetFile,
-                        userId.Value
+                        userId
                     );
                 }
 

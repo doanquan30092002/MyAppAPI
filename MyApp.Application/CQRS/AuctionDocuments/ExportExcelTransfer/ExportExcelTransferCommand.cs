@@ -10,7 +10,19 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ExportExcelTransfer
 {
     public class ExportExcelTransferCommand : IRequest<byte[]>
     {
-        [Required(ErrorMessage = "Phiên đấu giá là bắt buộc.")]
+        [RequiredGuid(ErrorMessage = "Phiên đấu giá là bắt buộc.")]
         public Guid AuctionId { get; set; }
+    }
+}
+
+public class RequiredGuidAttribute : RequiredAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        if (value is Guid guid)
+        {
+            return guid != Guid.Empty;
+        }
+        return false;
     }
 }

@@ -36,11 +36,11 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund
             if (request.AuctionDocumentIds == null || request.AuctionDocumentIds.Count == 0)
                 return false;
 
+            // Bắt đầu transaction
+            _unitOfWork.BeginTransaction();
+
             try
             {
-                // Bắt đầu transaction
-                _unitOfWork.BeginTransaction();
-
                 // 1. Xác nhận hoàn tiền
                 var result = await _refundRepository.ConfirmRefundAsync(request);
                 if (!result)
@@ -73,7 +73,8 @@ namespace MyApp.Application.CQRS.AuctionDocuments.ConfirmReufund
                     );
                 }
 
-                await _notificationRepository.SaveNotificationsAsync(notifications);
+                if (notifications.Count > 0)
+                    await _notificationRepository.SaveNotificationsAsync(notifications);
 
                 // 3. Commit transaction
                 await _unitOfWork.CommitAsync();
