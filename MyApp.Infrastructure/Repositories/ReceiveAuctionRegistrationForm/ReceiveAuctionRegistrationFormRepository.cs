@@ -70,7 +70,11 @@ namespace MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm
             }
         }
 
-        public async Task<bool> UpdateStatusTicketSigned(Guid auctionDocumentsId)
+        public async Task<bool> UpdateStatusTicketSigned(
+            Guid auctionDocumentsId,
+            int statusTicket,
+            string? note
+        )
         {
             var auctionDocuments = await _context.AuctionDocuments.FirstOrDefaultAsync(ad =>
                 ad.AuctionDocumentsId == auctionDocumentsId
@@ -79,7 +83,11 @@ namespace MyApp.Infrastructure.Repositories.ReceiveAuctionRegistrationForm
             {
                 return false;
             }
-            auctionDocuments.StatusTicket = 2;
+            if (!string.IsNullOrEmpty(note))
+            {
+                auctionDocuments.Note = note;
+            }
+            auctionDocuments.StatusTicket = statusTicket;
             auctionDocuments.UpdateAtTicket = DateTime.Now;
             try
             {

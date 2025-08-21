@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Interfaces.ReceiveAuctionRegistrationForm;
@@ -8,7 +9,7 @@ namespace MyApp.Application.CQRS.ReceiveAuctionRegistrationForm
     public class ReceiveAuctionRegistrationFormHandler
         : IRequestHandler<ReceiveAuctionRegistrationFormRequest, bool>
     {
-        IReceiveAuctionRegistrationFormRepository _repository;
+        private readonly IReceiveAuctionRegistrationFormRepository _repository;
         private readonly INotificationSender _notificationSender;
 
         public ReceiveAuctionRegistrationFormHandler(
@@ -25,7 +26,11 @@ namespace MyApp.Application.CQRS.ReceiveAuctionRegistrationForm
             CancellationToken cancellationToken
         )
         {
-            var response = await _repository.UpdateStatusTicketSigned(request.AuctionDocumentsId);
+            var response = await _repository.UpdateStatusTicketSigned(
+                request.AuctionDocumentsId,
+                request.StatusTicket,
+                request.Note
+            );
             if (response)
             {
                 // get userId of the auction document
