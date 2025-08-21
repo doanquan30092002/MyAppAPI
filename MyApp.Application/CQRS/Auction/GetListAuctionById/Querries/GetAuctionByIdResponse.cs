@@ -45,6 +45,9 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
 
         public string AuctioneerBy { get; set; }
 
+        public string StaffInCharge { get; set; }
+        public string ManagerInCharge { get; set; }
+
         public List<AuctionAssets> ListAuctionAssets { get; set; } = new List<AuctionAssets>();
     }
 }

@@ -67,38 +67,34 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                     );
                 }
                 // Filter by ConditionAuction
-                if (getListAuctionRequest.ConditionAuction != null)
+                if (
+                    getListAuctionRequest.ConditionAuction != null
+                    && getListAuctionRequest.ConditionAuction.Any()
+                )
                 {
-                    foreach (var condition in getListAuctionRequest.ConditionAuction)
-                    {
-                        switch (condition)
-                        {
-                            case 1: // Đang thu hồ sơ
-                                query = query.Where(a =>
-                                    a.auction.RegisterOpenDate <= DateTime.Now
-                                    && a.auction.RegisterEndDate >= DateTime.Now
-                                );
-                                break;
-                            case 2: // Chuẩn bị tổ chức
-                                query = query.Where(a =>
-                                    a.auction.RegisterEndDate < DateTime.Now
-                                    && a.auction.AuctionStartDate > DateTime.Now
-                                );
-                                break;
-                            case 3: // Hôm nay tổ chức
-                                query = query.Where(a =>
-                                    a.auction.AuctionStartDate <= DateTime.Now
-                                    && a.auction.AuctionEndDate >= DateTime.Now
-                                );
-                                break;
-                            case 4: // Đã kết thúc
-                                query = query.Where(a => a.auction.AuctionEndDate < DateTime.Now);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                    var conditions = getListAuctionRequest.ConditionAuction.ToList();
+
+                    query = query.Where(a =>
+                        (conditions.Contains(0) && DateTime.Now < a.auction.RegisterOpenDate)
+                        || (
+                            conditions.Contains(1)
+                            && a.auction.RegisterOpenDate <= DateTime.Now
+                            && a.auction.RegisterEndDate >= DateTime.Now
+                        )
+                        || (
+                            conditions.Contains(2)
+                            && a.auction.RegisterEndDate < DateTime.Now
+                            && a.auction.AuctionStartDate > DateTime.Now
+                        )
+                        || (
+                            conditions.Contains(3)
+                            && a.auction.AuctionStartDate <= DateTime.Now
+                            && a.auction.AuctionEndDate >= DateTime.Now
+                        )
+                        || (conditions.Contains(4) && a.auction.AuctionEndDate < DateTime.Now)
+                    );
                 }
+
                 // Filter by CreatedBy if provided
                 if (getListAuctionRequest.CreatedBy.HasValue)
                 {

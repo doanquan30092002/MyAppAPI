@@ -68,6 +68,8 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                         CancelReason = a.CancelReason,
                         RejectReason = a.RejectReason,
                         AuctioneerBy = auctioneerUser != null ? auctioneerUser.Name : null,
+                        StaffInCharge = a.StaffInCharge,
+                        ManagerInCharge = a.ManagerInCharge,
                         ListAuctionAssets = (
                             from aa in context.AuctionAssets
                             where aa.AuctionId == a.AuctionId
