@@ -1,0 +1,227 @@
+﻿using System.Text;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
+using MyApp.Application.Common.InformationBank;
+using MyApp.Application.Common.Message;
+using MyApp.Application.CQRS.RegisterAuctionDocument.Command;
+using MyApp.Application.Interfaces.RegisterAuctionDocument.Repository;
+using MyApp.Core.Entities;
+using MyApp.Infrastructure.Data;
+
+namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
+{
+    public class RegisterAuctionDocumentRepository : IRegisterAuctionDocumentRepository
+    {
+        private readonly AppDbContext _context;
+
+        public RegisterAuctionDocumentRepository(AppDbContext context)
+        {
+            this._context = context;
+        }
+
+        public async Task<AuctionDocumentResponse?> CheckAuctionDocumentPaid(
+            string? userId,
+            string auctionAssetsId
+        )
+        {
+            var auctionDocument = await _context.AuctionDocuments.FirstOrDefaultAsync(ad =>
+                ad.UserId.ToString() == userId && ad.AuctionAssetId.ToString() == auctionAssetsId
+            );
+            if (auctionDocument == null)
+            {
+                return null;
+            }
+            return new AuctionDocumentResponse
+            {
+                AuctionDocumentsId = auctionDocument.AuctionDocumentsId,
+                StatusTicket = auctionDocument.StatusTicket,
+            };
+        }
+
+        public async Task<RegisterAuctionDocumentResponse> CreateQRForPayTicket(
+            Guid auctionDocumentsId
+        )
+        {
+            var auctionDocument = await _context
+                .AuctionDocuments.Include(ad => ad.AuctionAsset)
+                .ThenInclude(aa => aa.Auction)
+                .FirstOrDefaultAsync(ad => ad.AuctionDocumentsId == auctionDocumentsId);
+            string amount = auctionDocument.AuctionAsset.RegistrationFee.ToString("0");
+            string content = $"DH{auctionDocumentsId}";
+            string template = "compact";
+            string download = "false";
+            string accountNumber = InformationBank.ACCOUNT_NUMBER_TUAN_LINH;
+            string beneficiaryBank = InformationBank.INFOR_BANK_BENEFICIARY_BANK;
+            StringBuilder qrUrl = new StringBuilder();
+            qrUrl.Append("https://qr.sepay.vn/img?");
+            qrUrl.Append($"acc={Uri.EscapeDataString(accountNumber)}");
+            qrUrl.Append($"&bank={Uri.EscapeDataString(beneficiaryBank)}");
+            qrUrl.Append($"&amount={Uri.EscapeDataString(amount)}");
+            qrUrl.Append($"&des={Uri.EscapeDataString(content)}");
+            qrUrl.Append($"&template={Uri.EscapeDataString(template)}");
+            qrUrl.Append($"&download={Uri.EscapeDataString(download)}");
+            return new RegisterAuctionDocumentResponse
+            {
+                Code = 200,
+                Message = Message.CREATE_QR_SUCCESS,
+                QrUrl = qrUrl.ToString(),
+                AuctionDocumentsId = auctionDocumentsId,
+                AccountNumber = accountNumber,
+                BeneficiaryBank = beneficiaryBank,
+                AmountTicket = auctionDocument.AuctionAsset.RegistrationFee,
+                Description = content,
+            };
+        }
+
+        public async Task<string> GetAuctionNameByAuctionDocumentsIdAsync(Guid? auctionDocumentsId)
+        {
+            if (auctionDocumentsId == null)
+            {
+                return string.Empty;
+            }
+
+            var auctionName = await _context
+                .AuctionDocuments.Where(ad => ad.AuctionDocumentsId == auctionDocumentsId)
+                .Include(ad => ad.AuctionAsset)
+                .ThenInclude(aa => aa.Auction)
+                .Select(ad => ad.AuctionAsset.Auction.AuctionName)
+                .FirstOrDefaultAsync();
+
+            return auctionName ?? string.Empty;
+        }
+
+        public async Task<List<Guid>> GetUserIdByRoleAsync()
+        {
+            const int staffRoleId = 3;
+            return await _context
+                .Accounts.Where(a => a.RoleId == staffRoleId && a.IsActive)
+                .Select(a => a.UserId)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<Guid> InsertAuctionDocumentAsync(
+            string auctionAssetsId,
+            string? userId,
+            string? bankAccount,
+            string? bankAccountNumber,
+            string? bankBranch
+        )
+        {
+            var auctionDocument = new AuctionDocuments
+            {
+                AuctionDocumentsId = Guid.NewGuid(),
+                UserId = Guid.Parse(userId),
+                AuctionAssetId = Guid.Parse(auctionAssetsId),
+                BankAccount = !string.IsNullOrWhiteSpace(bankAccount) ? bankAccount.Trim() : null,
+                BankAccountNumber = !string.IsNullOrWhiteSpace(bankAccountNumber)
+                    ? bankAccountNumber.Trim()
+                    : null,
+                BankBranch = !string.IsNullOrWhiteSpace(bankBranch) ? bankBranch.Trim() : null,
+                CreateByTicket = Guid.Parse(userId),
+                CreateAtTicket = DateTime.Now,
+                UpdateAtTicket = DateTime.Now,
+                CreateAtDeposit = null,
+                StatusTicket = 0, // 0: chưa chuyển tiền phiếu đăng ký hồ sơ
+                StatusDeposit = 0,
+                NumericalOrder = null,
+            };
+            try
+            {
+                await _context.AuctionDocuments.AddAsync(auctionDocument);
+                await _context.SaveChangesAsync();
+                return auctionDocument.AuctionDocumentsId;
+            }
+            catch (Exception)
+            {
+                return Guid.Empty; // Handle the exception as needed
+            }
+        }
+
+        public async Task SaveNotificationAsync(List<Guid> userIds, string message)
+        {
+            if (userIds == null || !userIds.Any() || string.IsNullOrWhiteSpace(message))
+                return;
+
+            var notifications = userIds
+                .Select(userId => new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    UserId = userId,
+                    Message = message,
+                    NotificationType = 0, // default type, adjust as needed
+                    SentAt = DateTime.UtcNow,
+                    IsRead = false,
+                    UpdatedAt = DateTime.UtcNow,
+                    UrlAction = "/notifications",
+                })
+                .ToList();
+            try
+            {
+                await _context.Notifications.AddRangeAsync(notifications);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return; // failed to save notifications
+            }
+        }
+
+        public async Task<bool> UpdateInforBankFromUser(
+            Guid auctionDocumentsId,
+            string? bankAccount,
+            string? bankAccountNumber,
+            string? bankBranch
+        )
+        {
+            var auctionDocument = await _context.AuctionDocuments.FirstOrDefaultAsync(x =>
+                x.AuctionDocumentsId == auctionDocumentsId
+            );
+            if (auctionDocument == null)
+            {
+                return false; // Auction document not found
+            }
+            try
+            {
+                auctionDocument.BankAccount = !string.IsNullOrWhiteSpace(bankAccount)
+                    ? bankAccount.Trim()
+                    : null;
+                auctionDocument.BankAccountNumber = !string.IsNullOrWhiteSpace(bankAccountNumber)
+                    ? bankAccountNumber.Trim()
+                    : null;
+                auctionDocument.BankBranch = !string.IsNullOrWhiteSpace(bankBranch)
+                    ? bankBranch.Trim()
+                    : null;
+                auctionDocument.UpdateAtTicket = DateTime.Now;
+                _context.AuctionDocuments.Update(auctionDocument);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateStatusTicketAndGetUserIdAsync(Guid? auctionDocumentsId)
+        {
+            var auctionDocument = await _context.AuctionDocuments.FindAsync(auctionDocumentsId);
+            if (auctionDocument == null)
+            {
+                return false; // Auction document not found
+            }
+            try
+            {
+                auctionDocument.StatusTicket = 1; // 1: đã chuyển tiền phiếu đăng ký hồ sơ
+                auctionDocument.UpdateAtTicket = DateTime.Now;
+                _context.AuctionDocuments.Update(auctionDocument);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false; // Handle the exception as needed
+            }
+        }
+    }
+}

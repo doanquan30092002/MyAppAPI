@@ -1,10 +1,19 @@
+﻿using System.Globalization;
 using System.Text;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyApp.Api;
+using MyApp.Application.Common.Response;
+using MyApp.Application.Common.Services.AuctionRoundPriceHub;
+using MyApp.Application.Common.Services.NotificationHub;
+using MyApp.Application.CQRS.PaymentDeposit.RealTimeStatusDeposit;
+using MyApp.Application.Exceptions;
+using MyApp.Infrastructure.Services.Realtime;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +75,7 @@ builder.Services.AddSwaggerGen(option =>
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
+    {
         option.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -77,19 +87,89 @@ builder
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
             ),
-        }
-    );
+        };
+        option.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var tokenFromCookie = context.Request.Cookies["access_token"];
+                if (!string.IsNullOrEmpty(tokenFromCookie))
+                {
+                    context.Token = tokenFromCookie;
+                }
+                return Task.CompletedTask;
+            },
+        };
+    });
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "https://digitalauction-fe.pages.dev",
+                    "http://localhost:3000",
+                    "http://auctiondigital.mooo.com",
+                    "http://161.248.147.123:4000"
+                )
+                .AllowCredentials()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    );
+});
+var cultureInfo = new CultureInfo("vi-VN");
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
+builder.Services.AddHangfire(config =>
+{
+    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddHangfireServer();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context
+            .ModelState.Where(x => x.Value?.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors)
+            .Select(x => x.ErrorMessage)
+            .Distinct()
+            .ToList();
+
+        var response = new ApiResponse<string>
+        {
+            Code = StatusCodes.Status400BadRequest,
+            Message = string.Join(" | ", errors),
+            Data = null,
+        };
+
+        return new BadRequestObjectResult(response);
+    };
+});
+
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHangfireDashboard();
 }
-
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -104,5 +184,8 @@ app.UseStaticFiles(
     }
 );
 app.MapControllers();
-
+app.MapHub<AuctionDepositHub>("/hubs/auctionDeposit");
+app.MapHub<NotificationHub>("/hub/notification");
+app.MapHub<NotificationsHub>("/hub/notifications");
+app.MapHub<AuctionRoundPriceHub>("/hub/auction-round");
 app.Run();

@@ -1,0 +1,93 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using MimeKit;
+using MyApp.Application.Common.Utils;
+using MyApp.Application.CQRS.ForgotPassword.Enums;
+using MyApp.Core.Models;
+
+namespace MyApp.Application.CQRS.ForgotPassword.Service
+{
+    public class EmailOTPService : IOTPService
+    {
+        private readonly IMemoryCache _cache;
+        private readonly EmailSettings _emailSettings;
+        private readonly TimeSpan _otpExpire = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _guidExpire = TimeSpan.FromMinutes(10);
+
+        public EmailOTPService(IMemoryCache cache, EmailSettings emailSettings)
+        {
+            _cache = cache;
+            _emailSettings = emailSettings;
+        }
+
+        public OTPChannel Channel => OTPChannel.Email;
+
+        public async Task<string> SendOtpAsync(string to, string messageTemplate = null)
+        {
+            var otp = new Random().Next(100000, 999999).ToString();
+            _cache.Set($"otp_{to}", otp, _otpExpire);
+
+            var htmlBody = GenTemplate.GenerateOtpEmailTemplate(otp, _otpExpire.TotalMinutes);
+
+            var message = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.SenderEmail, _emailSettings.SenderName),
+                Subject = "Mã xác thực OTP",
+                Body = htmlBody,
+                IsBodyHtml = true,
+            };
+            message.To.Add(to);
+
+            using (var client = new SmtpClient(_emailSettings.SmtpServer, _emailSettings.Port))
+            {
+                client.Credentials = new NetworkCredential(
+                    _emailSettings.SenderEmail,
+                    _emailSettings.Password
+                );
+                client.EnableSsl = true;
+                await client.SendMailAsync(message);
+            }
+
+            return otp;
+        }
+
+        public Task<string> VerifyOtpAsync(string to, string code)
+        {
+            if (
+                _cache.TryGetValue($"otp_{to}", out var cachedObj)
+                && cachedObj is string cachedOtp
+                && cachedOtp == code
+            )
+            {
+                _cache.Remove($"otp_{to}");
+
+                var resetGuid = Guid.NewGuid().ToString();
+                _cache.Set($"reset_{to}", resetGuid, _guidExpire);
+
+                return Task.FromResult(resetGuid);
+            }
+
+            throw new UnauthorizedAccessException("OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        public bool VerifyResetGuid(string to, string guid)
+        {
+            if (
+                _cache.TryGetValue($"reset_{to}", out var cachedObj)
+                && cachedObj is string cachedGuid
+                && cachedGuid == guid
+            )
+            {
+                _cache.Remove($"reset_{to}");
+                return true;
+            }
+            return false;
+        }
+    }
+}

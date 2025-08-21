@@ -83,12 +83,14 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("AuctionEndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("AuctionMap")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AuctionName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AuctionPlanningMap")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AuctionRules")
@@ -98,8 +100,13 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("AuctionStartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Auction_Map")
-                        .IsRequired()
+                    b.Property<Guid?>("Auctioneer")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CancelReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CancelReasonFile")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CategoryId")
@@ -124,7 +131,13 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<DateTime>("RegisterOpenDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Status")
+                    b.Property<string>("RejectReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("Updateable")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -134,10 +147,11 @@ namespace MyApp.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("WinnerData")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AuctionId");
+
+                    b.HasIndex("Auctioneer");
 
                     b.HasIndex("CategoryId");
 
@@ -222,18 +236,15 @@ namespace MyApp.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BankAccount")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BankAccountNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BankBranch")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreateAtDeposit")
+                    b.Property<DateTime?>("CreateAtDeposit")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreateAtTicket")
@@ -242,14 +253,32 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<Guid>("CreateByTicket")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("StatusRefundDeposit")
+                    b.Property<bool?>("IsAttended")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("StatusTicket")
-                        .HasColumnType("bit");
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Status_deposit")
-                        .HasColumnType("bit");
+                    b.Property<string>("NoteReviewRefund")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("NumericalOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RefundProof")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefundReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusDeposit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StatusRefund")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusTicket")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateAtTicket")
                         .HasColumnType("datetime2");
@@ -280,9 +309,6 @@ namespace MyApp.Infrastructure.Migrations
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("HighestBid")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("RoundNumber")
                         .HasColumnType("int");
@@ -318,6 +344,9 @@ namespace MyApp.Infrastructure.Migrations
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("FlagWinner")
+                        .HasColumnType("bit");
 
                     b.Property<string>("RecentLocation")
                         .IsRequired()
@@ -367,28 +396,10 @@ namespace MyApp.Infrastructure.Migrations
                     b.ToTable("Blacklists");
                 });
 
-            modelBuilder.Entity("MyApp.Core.Entities.BlogType", b =>
-                {
-                    b.Property<Guid>("BlogTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BlogsName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("BlogTypeId");
-
-                    b.ToTable("BlogTypes");
-                });
-
             modelBuilder.Entity("MyApp.Core.Entities.Blogs", b =>
                 {
                     b.Property<Guid>("BlogId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BlogTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
@@ -401,8 +412,11 @@ namespace MyApp.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
@@ -412,15 +426,13 @@ namespace MyApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UpdatedBy")
+                    b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("BlogId");
-
-                    b.HasIndex("BlogTypeId");
 
                     b.HasIndex("CreatedBy");
 
@@ -497,6 +509,9 @@ namespace MyApp.Infrastructure.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("UrlAction")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -605,6 +620,10 @@ namespace MyApp.Infrastructure.Migrations
 
             modelBuilder.Entity("MyApp.Core.Entities.Auction", b =>
                 {
+                    b.HasOne("MyApp.Core.Entities.User", "AuctioneerUser")
+                        .WithMany()
+                        .HasForeignKey("Auctioneer");
+
                     b.HasOne("MyApp.Core.Entities.AuctionCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
@@ -616,6 +635,8 @@ namespace MyApp.Infrastructure.Migrations
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("AuctioneerUser");
 
                     b.Navigation("Category");
 
@@ -687,19 +708,11 @@ namespace MyApp.Infrastructure.Migrations
 
             modelBuilder.Entity("MyApp.Core.Entities.Blogs", b =>
                 {
-                    b.HasOne("MyApp.Core.Entities.BlogType", "BlogType")
-                        .WithMany()
-                        .HasForeignKey("BlogTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("MyApp.Core.Entities.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("BlogType");
 
                     b.Navigation("CreatedByUser");
                 });
