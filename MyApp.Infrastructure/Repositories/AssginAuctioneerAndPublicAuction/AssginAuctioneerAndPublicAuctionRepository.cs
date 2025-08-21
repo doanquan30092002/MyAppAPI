@@ -18,7 +18,8 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
         public async Task<(bool, string, string)> AssignAuctioneerToAuctionAndPublicAuctionAsync(
             Guid auctionId,
             Guid auctioneerId,
-            string userId
+            string userId,
+            string staffInCharges
         )
         {
             var auction = await _context.Auctions.FirstOrDefaultAsync(x =>
@@ -31,6 +32,7 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
                 auction.Status = 1; // public auction status
                 auction.UpdatedAt = DateTime.UtcNow;
                 auction.UpdatedBy = Guid.Parse(userId);
+                auction.StaffInCharge = staffInCharges;
                 _context.Auctions.Update(auction);
                 await _context.SaveChangesAsync();
                 return (true, auction.AuctionEndDate.ToString(), auction.AuctionName.ToString()); // successfully assigned auctioneer to auction

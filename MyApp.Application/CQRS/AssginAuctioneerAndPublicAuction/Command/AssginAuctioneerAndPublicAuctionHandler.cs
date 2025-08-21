@@ -74,12 +74,15 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                     Message = Message.AUCTIONEER_ASSIGNED_ANOTHER_AUCTION,
                 };
             }
+            // convert list staff in charge to string
+            string staffInCharges = string.Join(",", request.StaffInCharges);
 
             // assign auctioneer to auction and public auction
             var result = await _repository.AssignAuctioneerToAuctionAndPublicAuctionAsync(
                 request.AuctionId,
                 request.Auctioneer,
-                userId
+                userId,
+                staffInCharges
             );
 
             if (!result.Item1)

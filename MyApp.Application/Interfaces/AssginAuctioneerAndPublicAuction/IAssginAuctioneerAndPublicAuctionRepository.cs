@@ -9,7 +9,8 @@
         Task<(bool, string, string)> AssignAuctioneerToAuctionAndPublicAuctionAsync(
             Guid auctionId,
             Guid auctioneerId,
-            string userId
+            string userId,
+            string staffInCharges
         );
         Task<List<Guid>> GetAllUserIdRoleCustomer();
         Task<bool> SaveNotificationAsync(List<Guid> userIds, string message);
