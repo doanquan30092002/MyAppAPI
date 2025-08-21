@@ -5,6 +5,10 @@ namespace MyApp.Application.Interfaces.UserRegisteredAuction
 {
     public interface IUserRegisteredAuctionRepository
     {
+        Task<string> GetCitizenIdentificationByAuctionIdAndNumericalOrderAsync(
+            Guid auctionId,
+            int numericalOrder
+        );
         Task<List<(string TagName, decimal AuctionPrice)>> GetNextRoundTagNamesForUserAsync(
             Guid? auctionRoundId,
             string citizenIdentification

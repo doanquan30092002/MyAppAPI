@@ -15,6 +15,24 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
             _context = context;
         }
 
+        public async Task<string> GetCitizenIdentificationByAuctionIdAndNumericalOrderAsync(
+            Guid auctionId,
+            int numericalOrder
+        )
+        {
+            var userId = await _context
+                .AuctionDocuments.Where(ad =>
+                    ad.AuctionAsset.AuctionId == auctionId && ad.NumericalOrder == numericalOrder
+                )
+                .Select(ad => ad.UserId)
+                .FirstOrDefaultAsync();
+            var citizenIdentification = await _context
+                .Users.Where(u => u.Id == userId)
+                .Select(u => u.CitizenIdentification)
+                .FirstOrDefaultAsync();
+            return citizenIdentification;
+        }
+
         public async Task<
             List<(string TagName, decimal AuctionPrice)>
         > GetNextRoundTagNamesForUserAsync(Guid? auctionRoundId, string citizenIdentification)

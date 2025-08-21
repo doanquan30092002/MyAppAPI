@@ -19,7 +19,14 @@ namespace MyApp.Application.CQRS.UserRegisteredAuction
             CancellationToken cancellationToken
         )
         {
-            var user = await _repository.GetUserByCitizenIdAsync(request.CitizenIdentification);
+            // get CitizenIdentification by AuctionId and NumericalOrder
+            string citizenIdentification =
+                await _repository.GetCitizenIdentificationByAuctionIdAndNumericalOrderAsync(
+                    request.AuctionId,
+                    request.NumericalOrder
+                );
+
+            var user = await _repository.GetUserByCitizenIdAsync(citizenIdentification);
             if (user == null)
             {
                 return new UserRegisteredAuctionResponseDTO
@@ -64,7 +71,7 @@ namespace MyApp.Application.CQRS.UserRegisteredAuction
                 List<(string TagName, decimal AuctionPrice)> nextRoundTagNames =
                     await _repository.GetNextRoundTagNamesForUserAsync(
                         request.AuctionRoundId,
-                        request.CitizenIdentification
+                        citizenIdentification
                     );
                 if (!nextRoundTagNames.Any())
                 {
