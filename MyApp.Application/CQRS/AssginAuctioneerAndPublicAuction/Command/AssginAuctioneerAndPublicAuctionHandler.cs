@@ -3,6 +3,7 @@ using MediatR;
 using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.NotificationHub;
+using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.JobBackgroud.AuctionJob;
 
@@ -18,18 +19,21 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
         private readonly ICurrentUserService _currentUserService;
         private readonly ISetAuctionUpdateableFalse _setAuctionUpdateableFalse;
         private readonly INotificationSender _notificationSender;
+        private readonly IEnumerable<ISendMessage> _sendMessages;
 
         public AssginAuctioneerAndPublicAuctionHandler(
             IAssginAuctioneerAndPublicAuctionRepository repository,
             ICurrentUserService currentUserService,
             ISetAuctionUpdateableFalse setAuctionUpdateableFalse,
-            INotificationSender notificationSender
+            INotificationSender notificationSender,
+            IEnumerable<ISendMessage> sendMessages
         )
         {
             _repository = repository;
             _currentUserService = currentUserService;
             _setAuctionUpdateableFalse = setAuctionUpdateableFalse;
             _notificationSender = notificationSender;
+            _sendMessages = sendMessages;
         }
 
         public async Task<AssginAuctioneerAndPublicAuctionResponse> Handle(
@@ -100,6 +104,35 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
             // send notification to customer
             var message = string.Format(Message.NEW_AUCTION_TO_CUSTOMER, result.Item3);
             await _notificationSender.SendToUsersAsync(userIds, new { Message = message });
+
+            //send mail to auctioneer and staff in charge
+            var emailSender = _sendMessages.FirstOrDefault(x =>
+                x.Channel == SendMessageChannel.Email
+            );
+
+            if (emailSender != null && request.StaffInCharges.Any())
+            {
+                var subject_auctioneer =
+                    $"[Thông báo phân công] Bạn được chỉ định làm Đấu giá viên cho phiên {result.Item3}";
+                var subject_staff =
+                    $"[Thông báo phân công]: Bạn được giao nhiệm vụ hỗ trợ phiên đấu giá {result.Item3}";
+                var content_auctioneer =
+                    $"Bạn đã được phân công làm Đấu giá viên cho phiên đấu giá {result.Item3}.\r\n\r\nVui lòng truy cập hệ thống để xem chi tiết và chuẩn bị điều hành.\r\n\r\nTrân trọng,  \r\n[Hệ thống đấu giá số Tuấn Linh]";
+                var content_staff =
+                    $"Bạn đã được phân công hỗ trợ cho phiên đấu giá {result.Item3}.\r\n\r\nVui lòng truy cập hệ thống để xem chi tiết.\r\n\r\nTrân trọng,  \r\n[Hệ thống đấu giá số Tuấn Linh]";
+                await emailSender.SendAsync(
+                    request.Auctioneer.ToString(),
+                    subject_auctioneer,
+                    content_auctioneer,
+                    null
+                );
+                await emailSender.SendAsync(
+                    "",
+                    subject_staff,
+                    content_staff,
+                    request.StaffInCharges
+                );
+            }
 
             // save notification to database
             var checkSaveNotificationAsync = await _repository.SaveNotificationAsync(

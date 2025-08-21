@@ -7,6 +7,6 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
     {
         public Guid AuctionId { get; set; }
         public Guid Auctioneer { get; set; }
-        public List<Guid> StaffInCharges { get; set; } = new List<Guid>();
+        public List<string> StaffInCharges { get; set; } = new List<string>();
     }
 }
