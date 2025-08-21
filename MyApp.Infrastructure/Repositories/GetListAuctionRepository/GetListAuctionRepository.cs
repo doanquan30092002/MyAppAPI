@@ -67,31 +67,28 @@ namespace MyApp.Infrastructure.Repositories.GetListAuctionRepository
                     );
                 }
                 // Filter by ConditionAuction
-                if (
-                    getListAuctionRequest.ConditionAuction != null
-                    && getListAuctionRequest.ConditionAuction.Any()
-                )
+                if (getListAuctionRequest.ConditionAuction?.Any() == true)
                 {
-                    var conditions = getListAuctionRequest.ConditionAuction.ToList();
-
+                    var now = DateTime.Now; // Hoặc DateTime.UtcNow nếu cần
+                    var conds = getListAuctionRequest.ConditionAuction;
                     query = query.Where(a =>
-                        (conditions.Contains(0) && DateTime.Now < a.auction.RegisterOpenDate)
+                        (conds.Contains(0) && now < a.auction.RegisterOpenDate)
                         || (
-                            conditions.Contains(1)
-                            && a.auction.RegisterOpenDate <= DateTime.Now
-                            && a.auction.RegisterEndDate >= DateTime.Now
+                            conds.Contains(1)
+                            && a.auction.RegisterOpenDate <= now
+                            && a.auction.RegisterEndDate >= now
                         )
                         || (
-                            conditions.Contains(2)
-                            && a.auction.RegisterEndDate < DateTime.Now
-                            && a.auction.AuctionStartDate > DateTime.Now
+                            conds.Contains(2)
+                            && a.auction.RegisterEndDate < now
+                            && a.auction.AuctionStartDate > now
                         )
                         || (
-                            conditions.Contains(3)
-                            && a.auction.AuctionStartDate <= DateTime.Now
-                            && a.auction.AuctionEndDate >= DateTime.Now
+                            conds.Contains(3)
+                            && a.auction.AuctionStartDate <= now
+                            && a.auction.AuctionEndDate >= now
                         )
-                        || (conditions.Contains(4) && a.auction.AuctionEndDate < DateTime.Now)
+                        || (conds.Contains(4) && a.auction.AuctionEndDate < now)
                     );
                 }
 
