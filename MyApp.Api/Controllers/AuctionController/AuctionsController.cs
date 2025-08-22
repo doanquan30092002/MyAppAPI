@@ -65,18 +65,16 @@ namespace MyApp.Api.Controllers.AuctionController
         }
 
         [Authorize(Roles = "Staff")]
-        [HttpPut("waiting-public/{auctionId}")]
-        public async Task<IActionResult> WaitingPublic(Guid auctionId)
+        [HttpPut("waiting-public")]
+        public async Task<IActionResult> WaitingPublic([FromBody] WaitingPublicCommand command)
         {
-            var command = new WaitingPublicCommand { AuctionId = auctionId };
-
             var result = await _mediator.Send(command);
 
             var response = new ApiResponse<Object>
             {
                 Code = 200,
                 Message = "Chuyển trạng thái phiên đấu giá sang 'Chờ công bố' thành công",
-                Data = new { AuctionId = auctionId, Status = result },
+                Data = command,
             };
 
             return Ok(response);

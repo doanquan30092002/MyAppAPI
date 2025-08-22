@@ -301,7 +301,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             return emails;
         }
 
-        public async Task<bool> WaitingPublicAsync(Guid auctionId)
+        public async Task<bool> WaitingPublicAsync(Guid auctionId, Guid managerInCharge)
         {
             Guid? userId = null;
             var userIdStr = _httpContextAccessor
@@ -315,6 +315,18 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
 
             if (userId == null)
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
+
+            var account = await _context
+                .Accounts.Include(a => a.Role)
+                .FirstOrDefaultAsync(a => a.UserId == managerInCharge);
+
+            if (account == null)
+                throw new KeyNotFoundException("Không tìm thấy người quản lý phụ trách.");
+
+            if (account.RoleId != 6) // role manager
+                throw new ValidationException(
+                    "Người phụ trách không có quyền quản lý (RoleId phải là 6)."
+                );
 
             var auction = await _context.Auctions.FirstOrDefaultAsync(a =>
                 a.AuctionId == auctionId
@@ -341,6 +353,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 );
             }
 
+            auction.ManagerInCharge = account.UserId.ToString();
             auction.Status = 4; // Trạng thái chờ công bố
             auction.UpdatedAt = DateTime.Now;
             auction.RejectReason = null;

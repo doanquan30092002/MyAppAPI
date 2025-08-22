@@ -59,7 +59,7 @@ namespace MyApp.Application.Interfaces.IAuctionRepository
         /// </summary>
         /// <param name="auctionId">Id phiên đấu giá.</param>
         /// <returns>Task hoàn thành.</returns>
-        Task<bool> WaitingPublicAsync(Guid auctionId);
+        Task<bool> WaitingPublicAsync(Guid auctionId, Guid managerInCharge);
 
         /// <summary>
         /// Từ chối phiên đấu giá ở trạng thái chờ công bố.
