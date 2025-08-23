@@ -53,5 +53,6 @@ namespace MyApp.Core.Entities
         public User AuctioneerUser { get; set; }
         public string? StaffInCharge { get; set; }
         public string? ManagerInCharge { get; set; }
+        public string? legalDocumentUrls { get; set; }
     }
 }

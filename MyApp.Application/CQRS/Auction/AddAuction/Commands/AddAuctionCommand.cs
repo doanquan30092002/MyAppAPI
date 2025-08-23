@@ -38,6 +38,7 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
         [Range(1, int.MaxValue, ErrorMessage = "Loại tài sản là bắt buộc.")]
         public int CategoryId { get; set; }
         public IFormFile AuctionAssetFile { get; set; }
+        public IFormFileCollection? LegalDocuments { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
