@@ -196,6 +196,19 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                     auction.AuctionPlanningMap = "No file uploaded";
                 }
 
+                if (command.LegalDocuments != null && command.LegalDocuments.Count > 0)
+                {
+                    var uploadTasks = command.LegalDocuments.Select(file =>
+                        _uploadFileService.UploadAsync(file)
+                    );
+
+                    var urls = await Task.WhenAll(uploadTasks);
+
+                    auction.legalDocumentUrls = urls.Any()
+                        ? Newtonsoft.Json.JsonConvert.SerializeObject(urls)
+                        : null;
+                }
+
                 auction.AuctionMap = command.Auction_Map;
                 auction.AuctionName = command.AuctionName;
                 auction.AuctionDescription = command.AuctionDescription;
