@@ -41,6 +41,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
         {
             string? auctionRulesUrl = null;
             string? auctionPlanningMapUrl = null;
+            var legalDocumentUrls = new List<string>();
 
             if (command.AuctionRulesFile != null && command.AuctionRulesFile.Length > 0)
             {
@@ -52,6 +53,17 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 auctionPlanningMapUrl = await _uploadFileService.UploadAsync(
                     command.AuctionPlanningMap
                 );
+            }
+
+            if (command.LegalDocuments != null && command.LegalDocuments.Count > 0)
+            {
+                var uploadTasks = command
+                    .LegalDocuments.Where(f => f.Length > 0)
+                    .Select(f => _uploadFileService.UploadAsync(f))
+                    .ToList();
+
+                var urls = await Task.WhenAll(uploadTasks);
+                legalDocumentUrls.AddRange(urls);
             }
 
             var auction = new Auction
@@ -70,7 +82,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 CreatedBy = userId,
                 UpdatedAt = DateTime.Now,
                 UpdatedBy = userId,
-                QRLink = "Test",
+                QRLink = "",
                 NumberRoundMax = command.NumberRoundMax,
                 Status = 0,
                 WinnerData = null,
@@ -78,6 +90,9 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 Updateable = true,
                 CancelReasonFile = "No file uploaded",
                 CancelReason = null,
+                legalDocumentUrls = legalDocumentUrls.Any()
+                    ? Newtonsoft.Json.JsonConvert.SerializeObject(legalDocumentUrls)
+                    : null,
             };
 
             await _context.Auctions.AddAsync(auction);
@@ -179,6 +194,19 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 else
                 {
                     auction.AuctionPlanningMap = "No file uploaded";
+                }
+
+                if (command.LegalDocuments != null && command.LegalDocuments.Count > 0)
+                {
+                    var uploadTasks = command.LegalDocuments.Select(file =>
+                        _uploadFileService.UploadAsync(file)
+                    );
+
+                    var urls = await Task.WhenAll(uploadTasks);
+
+                    auction.legalDocumentUrls = urls.Any()
+                        ? Newtonsoft.Json.JsonConvert.SerializeObject(urls)
+                        : null;
                 }
 
                 auction.AuctionMap = command.Auction_Map;
@@ -301,7 +329,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             return emails;
         }
 
-        public async Task<bool> WaitingPublicAsync(Guid auctionId)
+        public async Task<bool> WaitingPublicAsync(Guid auctionId, Guid managerInCharge)
         {
             Guid? userId = null;
             var userIdStr = _httpContextAccessor
@@ -315,6 +343,18 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
 
             if (userId == null)
                 throw new UnauthorizedAccessException("Không thể lấy UserId từ người dùng.");
+
+            var account = await _context
+                .Accounts.Include(a => a.Role)
+                .FirstOrDefaultAsync(a => a.UserId == managerInCharge);
+
+            if (account == null)
+                throw new KeyNotFoundException("Không tìm thấy người quản lý phụ trách.");
+
+            if (account.RoleId != 6) // role manager
+                throw new ValidationException(
+                    "Người phụ trách không có quyền quản lý (RoleId phải là 6)."
+                );
 
             var auction = await _context.Auctions.FirstOrDefaultAsync(a =>
                 a.AuctionId == auctionId
@@ -341,6 +381,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 );
             }
 
+            auction.ManagerInCharge = account.UserId.ToString();
             auction.Status = 4; // Trạng thái chờ công bố
             auction.UpdatedAt = DateTime.Now;
             auction.RejectReason = null;

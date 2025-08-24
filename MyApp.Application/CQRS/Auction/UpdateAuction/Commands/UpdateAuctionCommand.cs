@@ -43,6 +43,8 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
         public int CategoryId { get; set; }
         public IFormFile? AuctionAssetFile { get; set; }
 
+        public IFormFileCollection? LegalDocuments { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (AuctionStartDate >= AuctionEndDate)

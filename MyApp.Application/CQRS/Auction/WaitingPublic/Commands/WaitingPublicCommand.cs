@@ -13,5 +13,8 @@ namespace MyApp.Application.CQRS.Auction.WaitingPublic.Commands
     {
         [Required(ErrorMessage = "Phiên đấu giá là bắt buộc.")]
         public Guid AuctionId { get; set; }
+
+        [Required(ErrorMessage = "Người quản lý phụ trách là bắt buộc.")]
+        public Guid ManagerInCharge { get; set; }
     }
 }

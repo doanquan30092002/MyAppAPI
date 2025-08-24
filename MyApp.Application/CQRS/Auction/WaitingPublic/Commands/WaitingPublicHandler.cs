@@ -30,7 +30,10 @@ namespace MyApp.Application.CQRS.Auction.WaitingPublic.Commands
             CancellationToken cancellationToken
         )
         {
-            var success = await _auctionRepository.WaitingPublicAsync(request.AuctionId);
+            var success = await _auctionRepository.WaitingPublicAsync(
+                request.AuctionId,
+                request.ManagerInCharge
+            );
 
             if (!success)
                 return false;
