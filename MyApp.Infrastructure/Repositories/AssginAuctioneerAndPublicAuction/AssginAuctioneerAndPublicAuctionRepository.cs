@@ -87,6 +87,33 @@ namespace MyApp.Infrastructure.Repositories.AssginAuctioneerAndPublicAuction
                 .ToListAsync();
         }
 
+        public async Task<string> GetEmailFromAuctioneer(Guid auctioneer)
+        {
+            var emailAuctioneer = await _context
+                .Accounts.Where(a => a.UserId == auctioneer)
+                .Select(a => a.Email)
+                .FirstOrDefaultAsync();
+
+            return emailAuctioneer;
+        }
+
+        public async Task<List<string>> GetEmailFromStaffInCharges(List<string> staffInCharges)
+        {
+            List<string> emailStaffs = new List<string>();
+            foreach (var staffId in staffInCharges)
+            {
+                var email = await _context
+                    .Accounts.Where(a => a.UserId.ToString() == staffId)
+                    .Select(a => a.Email)
+                    .FirstOrDefaultAsync();
+                if (email != null)
+                {
+                    emailStaffs.Add(email);
+                }
+            }
+            return emailStaffs;
+        }
+
         public async Task<bool> SaveNotificationAsync(List<Guid> userIds, string message)
         {
             if (userIds == null || !userIds.Any() || string.IsNullOrWhiteSpace(message))

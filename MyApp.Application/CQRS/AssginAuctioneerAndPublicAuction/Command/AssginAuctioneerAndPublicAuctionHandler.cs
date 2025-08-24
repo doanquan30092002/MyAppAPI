@@ -97,7 +97,14 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                     Message = Message.SYSTEM_ERROR,
                 };
             }
-
+            //get list email from staff in charge
+            List<string> staffEmails = await _repository.GetEmailFromStaffInCharges(
+                request.StaffInCharges
+            );
+            //get email sender from Auctioneer
+            string emailFromAuctioneer = await _repository.GetEmailFromAuctioneer(
+                request.Auctioneer
+            );
             // get userId role customer
             List<Guid> userIds = await _repository.GetAllUserIdRoleCustomer();
 
@@ -121,17 +128,12 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                 var content_staff =
                     $"Bạn đã được phân công hỗ trợ cho phiên đấu giá {result.Item3}.\r\n\r\nVui lòng truy cập hệ thống để xem chi tiết.\r\n\r\nTrân trọng,  \r\n[Hệ thống đấu giá số Tuấn Linh]";
                 await emailSender.SendAsync(
-                    request.Auctioneer.ToString(),
+                    emailFromAuctioneer,
                     subject_auctioneer,
                     content_auctioneer,
                     null
                 );
-                await emailSender.SendAsync(
-                    "",
-                    subject_staff,
-                    content_staff,
-                    request.StaffInCharges
-                );
+                await emailSender.SendAsync("", subject_staff, content_staff, staffEmails);
             }
 
             // save notification to database

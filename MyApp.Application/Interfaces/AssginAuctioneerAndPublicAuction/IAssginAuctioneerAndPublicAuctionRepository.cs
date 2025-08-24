@@ -15,5 +15,7 @@
         Task<List<Guid>> GetAllUserIdRoleCustomer();
         Task<bool> SaveNotificationAsync(List<Guid> userIds, string message);
         Task<bool> CheckStatusAuctionIsWaitingAsync(Guid auctionId);
+        Task<List<string>> GetEmailFromStaffInCharges(List<string> staffInCharges);
+        Task<string> GetEmailFromAuctioneer(Guid auctioneer);
     }
 }
