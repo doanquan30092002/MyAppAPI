@@ -39,31 +39,49 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
 
         public async Task<Guid> AddAuctionAsync(AddAuctionCommand command, Guid userId)
         {
+            var uploadTasks = new List<Task<string>>();
+            var fileMapping = new Dictionary<int, string>();
+            int index = 0;
+
+            // AuctionRulesFile
+            if (command.AuctionRulesFile?.Length > 0)
+            {
+                uploadTasks.Add(_uploadFileService.UploadAsync(command.AuctionRulesFile));
+                fileMapping[index++] = "AuctionRules";
+            }
+
+            // AuctionPlanningMap
+            if (command.AuctionPlanningMap?.Length > 0)
+            {
+                uploadTasks.Add(_uploadFileService.UploadAsync(command.AuctionPlanningMap));
+                fileMapping[index++] = "AuctionPlanningMap";
+            }
+
+            // LegalDocuments
+            if (command.LegalDocuments != null && command.LegalDocuments.Count > 0)
+            {
+                foreach (var file in command.LegalDocuments.Where(f => f.Length > 0))
+                {
+                    uploadTasks.Add(_uploadFileService.UploadAsync(file));
+                    fileMapping[index++] = "LegalDocument";
+                }
+            }
+
+            var results = await Task.WhenAll(uploadTasks);
+
             string? auctionRulesUrl = null;
             string? auctionPlanningMapUrl = null;
             var legalDocumentUrls = new List<string>();
 
-            if (command.AuctionRulesFile != null && command.AuctionRulesFile.Length > 0)
+            for (int i = 0; i < results.Length; i++)
             {
-                auctionRulesUrl = await _uploadFileService.UploadAsync(command.AuctionRulesFile);
-            }
-
-            if (command.AuctionPlanningMap != null && command.AuctionPlanningMap.Length > 0)
-            {
-                auctionPlanningMapUrl = await _uploadFileService.UploadAsync(
-                    command.AuctionPlanningMap
-                );
-            }
-
-            if (command.LegalDocuments != null && command.LegalDocuments.Count > 0)
-            {
-                var uploadTasks = command
-                    .LegalDocuments.Where(f => f.Length > 0)
-                    .Select(f => _uploadFileService.UploadAsync(f))
-                    .ToList();
-
-                var urls = await Task.WhenAll(uploadTasks);
-                legalDocumentUrls.AddRange(urls);
+                var url = results[i];
+                if (fileMapping[i] == "AuctionRules")
+                    auctionRulesUrl = url;
+                else if (fileMapping[i] == "AuctionPlanningMap")
+                    auctionPlanningMapUrl = url;
+                else if (fileMapping[i] == "LegalDocument" && !string.IsNullOrEmpty(url))
+                    legalDocumentUrls.Add(url!);
             }
 
             var auction = new Auction
@@ -151,6 +169,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             int oldStatus = auction.Status;
             int newStatus = command.Status;
 
+            // Check công khai
             if (newStatus == 1)
             {
                 var account = await _context.Accounts.FirstOrDefaultAsync(a => a.UserId == userId);
@@ -167,6 +186,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                     );
             }
 
+            // Nếu đã công khai rồi
             if (oldStatus == 1)
             {
                 if (command.WinnerData != null)
@@ -178,37 +198,63 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             }
             else
             {
-                if (command.AuctionRulesFile != null && command.AuctionRulesFile.Length > 0)
+                // Gom tất cả upload file vào 1 list
+                var uploadTasks = new List<Task<string>>();
+                var fileMapping = new Dictionary<int, string>();
+                int index = 0;
+
+                if (command.AuctionRulesFile?.Length > 0)
                 {
-                    auction.AuctionRules = await _uploadFileService.UploadAsync(
-                        command.AuctionRulesFile
-                    );
+                    uploadTasks.Add(_uploadFileService.UploadAsync(command.AuctionRulesFile));
+                    fileMapping[index++] = "AuctionRules";
                 }
 
-                if (command.AuctionPlanningMap != null && command.AuctionPlanningMap.Length > 0)
+                if (command.AuctionPlanningMap?.Length > 0)
                 {
-                    auction.AuctionPlanningMap = await _uploadFileService.UploadAsync(
-                        command.AuctionPlanningMap
-                    );
-                }
-                else
-                {
-                    auction.AuctionPlanningMap = "No file uploaded";
+                    uploadTasks.Add(_uploadFileService.UploadAsync(command.AuctionPlanningMap));
+                    fileMapping[index++] = "AuctionPlanningMap";
                 }
 
                 if (command.LegalDocuments != null && command.LegalDocuments.Count > 0)
                 {
-                    var uploadTasks = command.LegalDocuments.Select(file =>
-                        _uploadFileService.UploadAsync(file)
-                    );
-
-                    var urls = await Task.WhenAll(uploadTasks);
-
-                    auction.legalDocumentUrls = urls.Any()
-                        ? Newtonsoft.Json.JsonConvert.SerializeObject(urls)
-                        : null;
+                    foreach (var file in command.LegalDocuments.Where(f => f.Length > 0))
+                    {
+                        uploadTasks.Add(_uploadFileService.UploadAsync(file));
+                        fileMapping[index++] = "LegalDocument";
+                    }
                 }
 
+                // Chạy tất cả upload song song
+                var results = uploadTasks.Any()
+                    ? await Task.WhenAll(uploadTasks)
+                    : Array.Empty<string>();
+
+                var legalDocumentUrls = new List<string>();
+
+                for (int i = 0; i < results.Length; i++)
+                {
+                    var url = results[i];
+                    if (fileMapping[i] == "AuctionRules")
+                        auction.AuctionRules = url;
+                    else if (fileMapping[i] == "AuctionPlanningMap")
+                        auction.AuctionPlanningMap = url;
+                    else if (fileMapping[i] == "LegalDocument" && !string.IsNullOrEmpty(url))
+                        legalDocumentUrls.Add(url);
+                }
+
+                if (!uploadTasks.Any(f => fileMapping.ContainsValue("AuctionPlanningMap")))
+                {
+                    auction.AuctionPlanningMap = "No file uploaded";
+                }
+
+                if (legalDocumentUrls.Any())
+                {
+                    auction.legalDocumentUrls = Newtonsoft.Json.JsonConvert.SerializeObject(
+                        legalDocumentUrls
+                    );
+                }
+
+                // Update các field khác
                 auction.AuctionMap = command.Auction_Map;
                 auction.AuctionName = command.AuctionName;
                 auction.AuctionDescription = command.AuctionDescription;
@@ -224,7 +270,6 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             }
 
             _context.Auctions.Update(auction);
-
             return true;
         }
 
