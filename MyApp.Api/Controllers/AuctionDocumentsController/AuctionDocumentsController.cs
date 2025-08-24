@@ -203,7 +203,7 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
         /// <param name="auctionId">Id phiên đấu giá</param>
         /// <returns>File Excel (base64)</returns>
         [HttpGet("export-refund-excel")]
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Staff,Manager")]
         public async Task<IActionResult> ExportRefundDocumentsExcel([FromQuery] Guid auctionId)
         {
             var command = new ExportExcelTransferCommand { AuctionId = auctionId };
