@@ -16,7 +16,7 @@ namespace MyApp.Application.CQRS.ExportAuctionBook.Queries
         [Required(ErrorMessage = "AuctionId là bắt buộc.")]
         public Guid AuctionId { get; set; }
 
-        [Required(ErrorMessage = "Mẫu xuất file là bắt buộc.")]
-        public IFormFile TemplateFile { get; set; }
+        //[Required(ErrorMessage = "Mẫu xuất file là bắt buộc.")]
+        public IFormFile? TemplateFile { get; set; }
     }
 }

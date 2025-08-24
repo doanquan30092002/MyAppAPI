@@ -20,7 +20,42 @@ namespace MyApp.Application.Common.Services.ExportWord.ExportAuctionBook
             {
                 using var outputStream = new MemoryStream();
                 using var templateStream = new MemoryStream();
-                await templateFile.CopyToAsync(templateStream);
+
+                if (templateFile != null)
+                {
+                    await templateFile.CopyToAsync(templateStream);
+                }
+                else
+                {
+                    // Lấy thư mục chạy (bin\Debug\... của Api project)
+                    var baseDir = AppContext.BaseDirectory;
+
+                    // Đi ngược lên tới thư mục project MyApp.Api
+                    var apiProjectDir = Directory.GetParent(baseDir)!.Parent!.Parent!.Parent!;
+
+                    // Lấy solution folder (cha của MyApp.Api)
+                    var solutionDir = apiProjectDir.Parent!.FullName;
+
+                    var defaultTemplatePath = Path.Combine(
+                        solutionDir,
+                        "MyApp.Application",
+                        "Common",
+                        "Services",
+                        "ExportWord",
+                        "ExportAuctionBook",
+                        "mau-so-dang-ky.docx"
+                    );
+
+                    if (!File.Exists(defaultTemplatePath))
+                        throw new FileNotFoundException(
+                            "Không tìm thấy file mẫu mặc định",
+                            defaultTemplatePath
+                        );
+
+                    var bytes = await File.ReadAllBytesAsync(defaultTemplatePath);
+                    await templateStream.WriteAsync(bytes, 0, bytes.Length);
+                }
+
                 templateStream.Position = 0;
 
                 using var document = new TemplateProcessor(templateStream).SetRemoveContentControls(
