@@ -181,9 +181,9 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                                 row
                             ),
                             Description = worksheet.Cells[row, 6].Text?.Trim(),
-                            CreatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTime.Now,
                             CreatedBy = userId,
-                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.Now,
                             UpdatedBy = userId,
                             AuctionId = auctionId,
                         };
