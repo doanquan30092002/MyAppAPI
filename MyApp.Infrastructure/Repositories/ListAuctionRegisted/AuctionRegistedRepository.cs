@@ -16,8 +16,13 @@ namespace MyApp.Infrastructure.Repositories.ListAuctionRegisted
 
         public async Task<List<Guid>> GetRegisteredAssetIdsAsync(Guid userId)
         {
+            var validStatuses = new[] { 1, 2, 3 };
             return await _context
-                .AuctionDocuments.Where(ad => ad.UserId == userId && ad.StatusTicket != 0)
+                .AuctionDocuments.Where(ad =>
+                    ad.UserId == userId
+                    && ad.StatusTicket != 0
+                    && validStatuses.Contains(ad.AuctionAsset.Auction.Status)
+                )
                 .Select(ad => ad.AuctionAssetId)
                 .ToListAsync();
         }
