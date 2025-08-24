@@ -70,6 +70,7 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                         AuctioneerBy = auctioneerUser != null ? auctioneerUser.Name : null,
                         StaffInCharge = a.StaffInCharge,
                         ManagerInCharge = a.ManagerInCharge,
+                        legalDocumentUrls = a.legalDocumentUrls,
                         ListAuctionAssets = (
                             from aa in context.AuctionAssets
                             where aa.AuctionId == a.AuctionId
