@@ -10,6 +10,7 @@ using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
+using MyApp.Application.Common.Utils;
 using MyApp.Application.CQRS.Auction.UpdateAuction.Commands;
 using MyApp.Application.Interfaces.IAuctionRepository;
 using MyApp.Application.Interfaces.INotificationsRepository;
@@ -106,9 +107,15 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
 
                 if (emailSender != null && emailList.Any())
                 {
+                    var auction = await _auctionRepository.FindAuctionByIdAsync(request.AuctionId);
+                    var auctionName = auction?.AuctionName ?? "Phiên đấu giá";
+
                     var subject = "Thông báo hủy phiên đấu giá";
-                    var content =
-                        $"Phiên đấu giá bạn đã đăng ký hoặc đặt cọc đã bị hủy. Lý do: {request.CancelReason}";
+
+                    var content = GenTemplate.GenerateCancelAuctionTemplate(
+                        auctionName,
+                        request.CancelReason
+                    );
                     await emailSender.SendAsync("", subject, content, emailList);
                 }
 
