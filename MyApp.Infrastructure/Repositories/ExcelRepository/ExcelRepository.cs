@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -156,9 +157,16 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 using (var package = new ExcelPackage(stream))
                 {
                     var worksheet = package.Workbook.Worksheets[0];
-                    int rowCount = worksheet.Dimension.Rows;
+                    if (worksheet == null)
+                        throw new ValidationException("File Excel không có sheet nào.");
 
-                    for (int row = 2; row <= rowCount; row++)
+                    int lastRowWithData = worksheet
+                        .Cells.Where(c => !string.IsNullOrWhiteSpace(c.Text))
+                        .Select(c => c.Start.Row)
+                        .DefaultIfEmpty(1)
+                        .Max();
+
+                    for (int row = 2; row <= lastRowWithData; row++)
                     {
                         var asset = new AuctionAssets
                         {
@@ -193,7 +201,8 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 }
             }
 
-            await _context.AuctionAssets.AddRangeAsync(assets);
+            if (assets.Count > 0)
+                await _context.AuctionAssets.AddRangeAsync(assets);
         }
 
         private decimal ParseDecimalCell(ExcelRange cell, string columnName, int rowNumber)
