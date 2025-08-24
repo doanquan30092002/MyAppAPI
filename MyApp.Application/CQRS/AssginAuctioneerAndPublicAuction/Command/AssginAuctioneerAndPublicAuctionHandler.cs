@@ -4,6 +4,7 @@ using MyApp.Application.Common.CurrentUserService;
 using MyApp.Application.Common.Message;
 using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Common.Services.SendMessage;
+using MyApp.Application.Common.Utils;
 using MyApp.Application.Interfaces.AssginAuctioneerAndPublicAuction;
 using MyApp.Application.JobBackgroud.AuctionJob;
 
@@ -20,13 +21,15 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
         private readonly ISetAuctionUpdateableFalse _setAuctionUpdateableFalse;
         private readonly INotificationSender _notificationSender;
         private readonly IEnumerable<ISendMessage> _sendMessages;
+        private readonly ITemplateEmail _templateEmail;
 
         public AssginAuctioneerAndPublicAuctionHandler(
             IAssginAuctioneerAndPublicAuctionRepository repository,
             ICurrentUserService currentUserService,
             ISetAuctionUpdateableFalse setAuctionUpdateableFalse,
             INotificationSender notificationSender,
-            IEnumerable<ISendMessage> sendMessages
+            IEnumerable<ISendMessage> sendMessages,
+            ITemplateEmail templateEmail
         )
         {
             _repository = repository;
@@ -34,6 +37,7 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
             _setAuctionUpdateableFalse = setAuctionUpdateableFalse;
             _notificationSender = notificationSender;
             _sendMessages = sendMessages;
+            _templateEmail = templateEmail;
         }
 
         public async Task<AssginAuctioneerAndPublicAuctionResponse> Handle(
@@ -122,18 +126,45 @@ namespace MyApp.Application.CQRS.AssginAuctioneerAndPublicAuction.Command
                 var subject_auctioneer =
                     $"[Thông báo phân công] Bạn được chỉ định làm Đấu giá viên cho phiên {result.Item3}";
                 var subject_staff =
-                    $"[Thông báo phân công]: Bạn được giao nhiệm vụ hỗ trợ phiên đấu giá {result.Item3}";
-                var content_auctioneer =
-                    $"Bạn đã được phân công làm Đấu giá viên cho phiên đấu giá {result.Item3}.\r\n\r\nVui lòng truy cập hệ thống để xem chi tiết và chuẩn bị điều hành.\r\n\r\nTrân trọng,  \r\n[Hệ thống đấu giá số Tuấn Linh]";
-                var content_staff =
-                    $"Bạn đã được phân công hỗ trợ cho phiên đấu giá {result.Item3}.\r\n\r\nVui lòng truy cập hệ thống để xem chi tiết.\r\n\r\nTrân trọng,  \r\n[Hệ thống đấu giá số Tuấn Linh]";
+                    $"[Thông báo phân công] Bạn được giao nhiệm vụ hỗ trợ phiên đấu giá {result.Item3}";
+
+                var content_auctioneer = _templateEmail.BuildEmailHtml(
+                    "Phân công Đấu giá viên",
+                    $@"<p style=""margin:0 0 12px 0;"">
+          Bạn đã được phân công làm <strong>Đấu giá viên</strong> cho phiên đấu giá <strong>{result.Item3}</strong>.
+       </p>
+       <p style=""margin:0;"">
+          Vui lòng truy cập hệ thống để xem chi tiết và chuẩn bị điều hành.
+       </p>"
+                );
+
+                var content_staff = _templateEmail.BuildEmailHtml(
+                    "Phân công hỗ trợ phiên đấu giá",
+                    $@"<p style=""margin:0 0 12px 0;"">
+          Bạn đã được phân công <strong>hỗ trợ</strong> cho phiên đấu giá <strong>{result.Item3}</strong>.
+       </p>
+       <p style=""margin:0;"">
+          Vui lòng truy cập hệ thống để xem chi tiết.
+       </p>"
+                );
+
+                // ----- Gửi email -----
+                // Lưu ý: cần bật gửi dạng HTML trong phương thức SendAsync (ví dụ tham số isHtml=true)
+                // Ví dụ giả định chữ ký (emailFrom, subject, htmlBody, attachments, isHtml)
                 await emailSender.SendAsync(
                     emailFromAuctioneer,
                     subject_auctioneer,
                     content_auctioneer,
                     null
                 );
-                await emailSender.SendAsync("", subject_staff, content_staff, staffEmails);
+
+                // Gửi cho danh sách staff
+                await emailSender.SendAsync(
+                    "", // from hoặc dùng emailFromStaff nếu có
+                    subject_staff,
+                    content_staff,
+                    staffEmails
+                );
             }
 
             // save notification to database

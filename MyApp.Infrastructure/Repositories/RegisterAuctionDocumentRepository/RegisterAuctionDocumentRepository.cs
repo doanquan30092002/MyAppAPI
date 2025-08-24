@@ -25,7 +25,9 @@ namespace MyApp.Infrastructure.Repositories.RegisterAuctionDocumentRepository
         )
         {
             var auctionDocument = await _context.AuctionDocuments.FirstOrDefaultAsync(ad =>
-                ad.UserId.ToString() == userId && ad.AuctionAssetId.ToString() == auctionAssetsId
+                ad.UserId.ToString() == userId
+                && ad.AuctionAssetId.ToString() == auctionAssetsId
+                && ad.StatusTicket != 4
             );
             if (auctionDocument == null)
             {
