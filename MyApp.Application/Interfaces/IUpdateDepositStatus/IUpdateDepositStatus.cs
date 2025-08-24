@@ -11,6 +11,8 @@ namespace MyApp.Application.Interfaces.IUpdateDepositStatus
 {
     public interface IUpdateDepositStatus
     {
+        Task<List<string>?> GetEmailList(Guid auctionDocumentsId);
+        Task<int> GetOrderNumber(Guid auctionDocumentsId);
         public Task<UpdateDepositStatusResponse> UpdateDepositStatus(
             UpdateDepositStatusRequest updateDepositStatusRequest,
             CancellationToken cancellationToken

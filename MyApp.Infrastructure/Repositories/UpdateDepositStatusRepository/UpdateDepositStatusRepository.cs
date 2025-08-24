@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using MyApp.Application.CQRS.UpdateStatusDeposit.Command;
 using MyApp.Application.Interfaces.IUpdateDepositStatus;
 using MyApp.Infrastructure.Data;
@@ -16,6 +17,43 @@ namespace MyApp.Infrastructure.Repositories.UpdateDepositStatusRepository
         public UpdateDepositStatusRepository(AppDbContext context)
         {
             this.context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+
+        public async Task<List<string>?> GetEmailList(Guid auctionDocumentsId)
+        {
+            var auctionDocument = await context.AuctionDocuments.FirstOrDefaultAsync(ad =>
+                ad.AuctionDocumentsId == auctionDocumentsId
+            );
+
+            if (auctionDocument == null || auctionDocument.UserId == Guid.Empty)
+            {
+                return null;
+            }
+
+            var account = await context.Accounts.FirstOrDefaultAsync(a =>
+                a.UserId == auctionDocument.UserId
+            );
+
+            if (account == null || string.IsNullOrEmpty(account.Email))
+            {
+                return null;
+            }
+
+            return new List<string> { account.Email };
+        }
+
+        public async Task<int> GetOrderNumber(Guid auctionDocumentsId)
+        {
+            var auctionDocument = await context.AuctionDocuments.FirstOrDefaultAsync(ad =>
+                ad.AuctionDocumentsId == auctionDocumentsId
+            );
+
+            if (auctionDocument == null)
+            {
+                return 0;
+            }
+
+            return auctionDocument.NumericalOrder ?? 0;
         }
 
         public Task<UpdateDepositStatusResponse> UpdateDepositStatus(
