@@ -48,6 +48,8 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
         public string StaffInCharge { get; set; }
         public string ManagerInCharge { get; set; }
 
+        public string? legalDocumentUrls { get; set; }
+
         public List<AuctionAssets> ListAuctionAssets { get; set; } = new List<AuctionAssets>();
     }
 }
