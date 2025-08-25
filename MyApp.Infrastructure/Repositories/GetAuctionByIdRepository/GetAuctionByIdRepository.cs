@@ -71,6 +71,8 @@ namespace MyApp.Infrastructure.Repositories.GetAuctionByIdRepository
                         StaffInCharge = a.StaffInCharge,
                         ManagerInCharge = a.ManagerInCharge,
                         legalDocumentUrls = a.legalDocumentUrls,
+                        PriceMin = a.PriceMin,
+                        PriceMax = a.PriceMax,
                         ListAuctionAssets = (
                             from aa in context.AuctionAssets
                             where aa.AuctionId == a.AuctionId
