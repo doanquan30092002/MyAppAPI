@@ -43,13 +43,11 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
         public int CategoryId { get; set; }
         public IFormFile? AuctionAssetFile { get; set; }
 
-        [Required(ErrorMessage = "Giá khởi điểm tối thiểu là bắt buộc.")]
         [Range(1, double.MaxValue, ErrorMessage = "Giá khởi điểm tối thiểu phải lớn hơn 0.")]
-        public decimal PriceMin { get; set; }
+        public decimal? PriceMin { get; set; }
 
-        [Required(ErrorMessage = "Giá khởi điểm tối đa là bắt buộc.")]
         [Range(1, double.MaxValue, ErrorMessage = "Giá khởi điểm tối đa phải lớn hơn 0.")]
-        public decimal PriceMax { get; set; }
+        public decimal? PriceMax { get; set; }
 
         public IFormFileCollection? LegalDocuments { get; set; }
 
@@ -86,7 +84,7 @@ namespace MyApp.Application.CQRS.Auction.UpdateAuction.Commands
                 );
             }
 
-            if (PriceMax <= PriceMin)
+            if (PriceMin.HasValue && PriceMax.HasValue && PriceMax.Value <= PriceMin.Value)
             {
                 yield return new ValidationResult(
                     "Giá khởi điểm tối đa phải lớn hơn giá khởi điểm tối thiểu.",
