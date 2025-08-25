@@ -50,6 +50,9 @@ namespace MyApp.Application.CQRS.Auction.GetListAuctionById.Querries
 
         public string? legalDocumentUrls { get; set; }
 
+        public decimal? PriceMin { get; set; }
+        public decimal? PriceMax { get; set; }
+
         public List<AuctionAssets> ListAuctionAssets { get; set; } = new List<AuctionAssets>();
     }
 }
