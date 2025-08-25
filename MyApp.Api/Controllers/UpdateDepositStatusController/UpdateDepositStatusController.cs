@@ -22,12 +22,10 @@ namespace MyApp.Api.Controllers.UpdateDepositStatusController
             [FromBody] UpdateDepositStatusRequest request
         )
         {
-            // Gán auction_document_id từ path variable vào request
             request.AuctionDocumentsId = auction_document_id;
             request.AuctionId = auction_id;
             try
             {
-                // Gửi yêu cầu qua MediatR
                 var response = await _mediator.Send(request);
 
                 return Ok(

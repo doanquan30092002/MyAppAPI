@@ -23,7 +23,6 @@ namespace MyApp.Api.Controllers.GetListAssetInfoStatisticsController
         {
             try
             {
-                // Set the auction_assets_id in the request object
                 getListAssetInfostatisticsRequest.AuctionAssetsId = auction_assets_id;
 
                 var response = await _mediator.Send(getListAssetInfostatisticsRequest);
