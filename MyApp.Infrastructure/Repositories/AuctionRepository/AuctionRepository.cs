@@ -111,6 +111,8 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 legalDocumentUrls = legalDocumentUrls.Any()
                     ? Newtonsoft.Json.JsonConvert.SerializeObject(legalDocumentUrls)
                     : null,
+                PriceMin = command.PriceMin,
+                PriceMax = command.PriceMax,
             };
 
             await _context.Auctions.AddAsync(auction);
@@ -267,6 +269,8 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
                 auction.NumberRoundMax = command.NumberRoundMax;
                 auction.Status = newStatus;
                 auction.CategoryId = command.CategoryId;
+                auction.PriceMin = command.PriceMin;
+                auction.PriceMax = command.PriceMax;
             }
 
             _context.Auctions.Update(auction);
