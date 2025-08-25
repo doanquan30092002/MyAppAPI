@@ -14,5 +14,9 @@ namespace MyApp.Application.CQRS.CreateAutionRound.Command
         public Guid AuctionId { get; set; }
 
         public Guid CreatedBy { get; set; }
+
+        public decimal? PriceMin { get; set; }
+        public decimal? PriceMax { get; set; }
+        public decimal? TotalPriceMax { get; set; }
     }
 }
