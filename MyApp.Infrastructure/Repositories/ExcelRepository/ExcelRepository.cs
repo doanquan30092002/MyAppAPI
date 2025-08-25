@@ -338,6 +338,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 "Đã chuyển tiền",
                 "Đã ký phiếu",
                 "Đã hoàn",
+                "Hồ sơ không hợp lệ",
                 "Không xác định",
             };
             string[] statusDepositOptions =
@@ -412,6 +413,7 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 1 => "Đã cọc",
                 2 => "Đã hoàn tiền",
                 3 => "Đã hoàn",
+                4 => "Hồ sơ không hợp lệ",
                 _ => "Không xác định",
             };
         }
