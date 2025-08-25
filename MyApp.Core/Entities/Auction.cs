@@ -54,5 +54,7 @@ namespace MyApp.Core.Entities
         public string? StaffInCharge { get; set; }
         public string? ManagerInCharge { get; set; }
         public string? legalDocumentUrls { get; set; }
+        public decimal? PriceMin { get; set; }
+        public decimal? PriceMax { get; set; }
     }
 }

@@ -40,6 +40,14 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
         public IFormFile AuctionAssetFile { get; set; }
         public IFormFileCollection? LegalDocuments { get; set; }
 
+        [Required(ErrorMessage = "Giá khởi điểm tối thiểu là bắt buộc.")]
+        [Range(1, double.MaxValue, ErrorMessage = "Giá khởi điểm tối thiểu phải lớn hơn 0.")]
+        public decimal PriceMin { get; set; }
+
+        [Required(ErrorMessage = "Giá khởi điểm tối đa là bắt buộc.")]
+        [Range(1, double.MaxValue, ErrorMessage = "Giá khởi điểm tối đa phải lớn hơn 0.")]
+        public decimal PriceMax { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (AuctionStartDate >= AuctionEndDate)
@@ -70,6 +78,14 @@ namespace MyApp.Application.CQRS.Auction.AddAuction.Commands
                 yield return new ValidationResult(
                     "Ngày kết thúc đăng ký phải trước ngày bắt đầu đấu giá ít nhất 3 ngày.",
                     new[] { "RegisterEndDate", "AuctionStartDate" }
+                );
+            }
+
+            if (PriceMax <= PriceMin)
+            {
+                yield return new ValidationResult(
+                    "Giá khởi điểm tối đa phải lớn hơn giá khởi điểm tối thiểu.",
+                    new[] { "PriceMin", "PriceMax" }
                 );
             }
         }
