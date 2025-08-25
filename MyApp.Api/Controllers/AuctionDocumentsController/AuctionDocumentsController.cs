@@ -19,7 +19,7 @@ namespace MyApp.Api.Controllers.AuctionDocumentsController
     [ApiController]
     public class AuctionDocumentsController(IMediator _mediator) : ControllerBase
     {
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Manager,Staff")]
         [HttpPost("review-refund")]
         public async Task<IActionResult> ReviewRequestRefund(
             [FromBody] ReviewRequestRefundRequest request
