@@ -20,5 +20,8 @@ namespace MyApp.Core.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public Guid CreatedBy { get; set; }
+        public decimal? PriceMin { get; set; }
+        public decimal? PriceMax { get; set; }
+        public decimal? TotalPriceMax { get; set; }
     }
 }
