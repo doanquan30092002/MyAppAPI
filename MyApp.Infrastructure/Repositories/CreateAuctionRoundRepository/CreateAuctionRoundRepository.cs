@@ -39,6 +39,9 @@ namespace MyApp.Infrastructure.Repositories.CreateAuctionRoundRepository
                 Status = 1,
                 CreatedAt = DateTime.Now,
                 CreatedBy = createAuctionRoundRequest.CreatedBy,
+                PriceMin = createAuctionRoundRequest.PriceMin,
+                PriceMax = createAuctionRoundRequest.PriceMax,
+                TotalPriceMax = createAuctionRoundRequest.TotalPriceMax,
             };
 
             await context.AuctionRounds.AddAsync(auctionRound);
