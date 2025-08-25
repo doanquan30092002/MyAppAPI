@@ -37,6 +37,8 @@ namespace MyApp.Application.Common.Services.UploadFile
                 BucketName = _settings.BucketName,
                 ContentType = file.ContentType,
                 CannedACL = S3CannedACL.PublicRead,
+                PartSize = 5 * 1024 * 1024,
+                StorageClass = S3StorageClass.Standard,
             };
 
             var transferUtility = new TransferUtility(_s3Client);
