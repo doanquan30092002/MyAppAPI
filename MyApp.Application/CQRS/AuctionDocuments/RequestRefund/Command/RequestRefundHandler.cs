@@ -34,11 +34,10 @@ namespace MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Command
         {
             var userId = _helper.GetCurrentUserId();
 
-            await Task.WhenAll(
-                request.AuctionDocumentIds.Select(docId =>
-                    _helper.ValidateDocumentForRefundAsync(docId, userId)
-                )
-            );
+            foreach (var docId in request.AuctionDocumentIds)
+            {
+                await _helper.ValidateDocumentForRefundAsync(docId, userId);
+            }
 
             var refundProofUrl = await _helper.UploadRefundProofAsync(request.RefundProof);
 
