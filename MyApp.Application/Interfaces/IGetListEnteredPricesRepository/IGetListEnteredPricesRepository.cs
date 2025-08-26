@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyApp.Application.CQRS.GetListEnteredPrices.Querries;
 using MyApp.Core.Entities;
 
 namespace MyApp.Application.Interfaces.IGetListEnteredPricesRepository
 {
     public interface IGetListEnteredPricesRepository
     {
-        Task<List<AuctionRoundPrices>?> GetListEnteredPricesAsync(Guid auctionRoundId);
+        Task<GetListEnteredPricesResponse> GetListEnteredPricesAsync(Guid auctionRoundId);
     }
 }
