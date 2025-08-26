@@ -33,14 +33,7 @@ namespace MyApp.Application.CQRS.GetListEnteredPrices.Queries
                     request.AuctionRoundId
                 );
 
-            // Create response object
-            var response = new GetListEnteredPricesResponse
-            {
-                ListAuctionRoundPrices =
-                    auctionRoundPrices?.ToList() ?? new List<AuctionRoundPrices>(),
-            };
-
-            return response;
+            return auctionRoundPrices;
         }
     }
 }

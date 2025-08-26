@@ -27,11 +27,7 @@ namespace MyApp.Api.Controllers.GetListEnteredPricesController
                 var request = new GetListEnteredPricesRequest { AuctionRoundId = auctionRoundId };
                 var response = await _mediator.Send(request);
 
-                if (
-                    response == null
-                    || response.ListAuctionRoundPrices == null
-                    || !response.ListAuctionRoundPrices.Any()
-                )
+                if (response == null || response.Items == null || !response.Items.Any())
                 {
                     return NotFound(
                         new ApiResponse<GetListEnteredPricesResponse>
