@@ -128,7 +128,7 @@ namespace MyApp.Application.CQRS.Auction.CancelAuction.Commands
                         {
                             Title = "Thông báo từ phiên đấu giá",
                             Content = "Hủy phiên đấu giá " + request.AuctionId,
-                            Time = DateTime.UtcNow,
+                            Time = DateTime.Now,
                         }
                     );
                 }
