@@ -71,7 +71,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionAssetsImplement
 
             var winnerBidMap = winningBids
                 .GroupBy(p => p.TagName)
-                .Select(g => g.First())
+                .Select(g => g.OrderByDescending(x => x.AuctionPrice).First())
                 .ToDictionary(
                     b => b.TagName,
                     b =>
@@ -161,7 +161,7 @@ namespace MyApp.Infrastructure.Repositories.AuctionAssetsImplement
 
             var winnerBidMap = winningBids
                 .GroupBy(p => p.TagName)
-                .Select(g => g.First())
+                .Select(g => g.OrderByDescending(x => x.AuctionPrice).First())
                 .ToDictionary(
                     b => b.TagName,
                     b =>
