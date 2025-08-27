@@ -14,15 +14,15 @@ namespace MyApp.Application.CQRS.Auction.WaitingPublic.Commands
     public class WaitingPublicHandler : IRequestHandler<WaitingPublicCommand, bool>
     {
         private readonly IAuctionRepository _auctionRepository;
-        private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly IJobScheduler _jobScheduler;
 
         public WaitingPublicHandler(
             IAuctionRepository auctionRepository,
-            IBackgroundJobClient backgroundJobClient
+            IJobScheduler jobScheduler
         )
         {
             _auctionRepository = auctionRepository;
-            _backgroundJobClient = backgroundJobClient;
+            _jobScheduler = jobScheduler;
         }
 
         public async Task<bool> Handle(
@@ -39,7 +39,7 @@ namespace MyApp.Application.CQRS.Auction.WaitingPublic.Commands
             if (auction == null || auction.RegisterOpenDate <= DateTime.Now)
                 return false;
 
-            _backgroundJobClient.Schedule<SetAuctionStatus>(
+            _jobScheduler.Schedule<SetAuctionStatus>(
                 job => job.SetAuctionStatusAsync(request.AuctionId, 5, 4),
                 auction.RegisterOpenDate
             );

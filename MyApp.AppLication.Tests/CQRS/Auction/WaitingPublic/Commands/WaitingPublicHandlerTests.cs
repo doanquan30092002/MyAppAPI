@@ -17,15 +17,15 @@ namespace MyApp.Application.CQRS.Auction.WaitingPublic.Commands.Tests
     public class WaitingPublicHandlerTests
     {
         private Mock<IAuctionRepository> _auctionRepoMock;
-        private Mock<IBackgroundJobClient> _backgroundJobMock;
+        private Mock<IJobScheduler> _jobSchedulerMock;
         private WaitingPublicHandler _handler;
 
         [SetUp]
         public void Setup()
         {
             _auctionRepoMock = new Mock<IAuctionRepository>();
-            _backgroundJobMock = new Mock<IBackgroundJobClient>();
-            _handler = new WaitingPublicHandler(_auctionRepoMock.Object, _backgroundJobMock.Object);
+            _jobSchedulerMock = new Mock<IJobScheduler>();
+            _handler = new WaitingPublicHandler(_auctionRepoMock.Object, _jobSchedulerMock.Object);
         }
 
         [Test]
@@ -97,7 +97,8 @@ namespace MyApp.Application.CQRS.Auction.WaitingPublic.Commands.Tests
             );
 
             Assert.IsTrue(result);
-            _backgroundJobMock.Verify(
+
+            _jobSchedulerMock.Verify(
                 x =>
                     x.Schedule<SetAuctionStatus>(
                         It.IsAny<Expression<Func<SetAuctionStatus, Task>>>(),

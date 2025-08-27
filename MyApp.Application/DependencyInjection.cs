@@ -9,6 +9,7 @@ using MyApp.Application.Common.Services.JwtHelper;
 using MyApp.Application.Common.Services.NotificationHub;
 using MyApp.Application.Common.Services.SendMessage;
 using MyApp.Application.Common.Services.UploadFile;
+using MyApp.Application.CQRS.Auction.WaitingPublic.Commands;
 using MyApp.Application.CQRS.AuctionDocuments.RequestRefund.Helper;
 using MyApp.Application.CQRS.ForgotPassword.Service;
 using MyApp.Application.Interfaces.IJwtHelper;
@@ -80,6 +81,8 @@ namespace MyApp.Application
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             services.AddScoped<IRequestRefundHelper, RequestRefundHelper>();
+
+            services.AddScoped<IJobScheduler, HangfireJobScheduler>();
 
             return services;
         }
