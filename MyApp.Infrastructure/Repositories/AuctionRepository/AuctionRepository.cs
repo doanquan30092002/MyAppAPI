@@ -334,7 +334,9 @@ namespace MyApp.Infrastructure.Repositories.AuctionRepository
             switch (auction.Status)
             {
                 case 3: // Hủy
-                    query = query.Where(doc => doc.StatusTicket == 1 || doc.StatusDeposit == 1);
+                    query = query.Where(doc =>
+                        doc.StatusTicket == 1 || doc.StatusTicket == 2 || doc.StatusDeposit == 1
+                    );
                     break;
 
                 case 2: // Hoàn thành
