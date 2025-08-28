@@ -247,6 +247,13 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 auctionId
             );
 
+            var auction = await _context
+                .Auctions.AsNoTracking()
+                .FirstOrDefaultAsync(a => a.AuctionId == auctionId);
+
+            if (auction == null)
+                throw new KeyNotFoundException($"Phiên đấu giá với id {auctionId} không tồn tại.");
+
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             using (var package = new ExcelPackage())
@@ -262,8 +269,8 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
                 var cashRefunds = documents.Except(bankRefunds).ToList();
 
                 // Ghi từng sheet
-                WriteRefundSheet(package, bankRefunds, "HoanTien_ChuyenKhoan");
-                WriteRefundSheet(package, cashRefunds, "HoanTien_TienMat");
+                WriteRefundSheet(package, bankRefunds, "HoanTien_ChuyenKhoan", auction.Status);
+                WriteRefundSheet(package, cashRefunds, "HoanTien_TienMat", auction.Status);
 
                 return await Task.FromResult(package.GetAsByteArray());
             }
@@ -272,7 +279,8 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
         private void WriteRefundSheet(
             ExcelPackage package,
             List<AuctionDocuments> documents,
-            string sheetName
+            string sheetName,
+            int auctionStatus
         )
         {
             var worksheet = package.Workbook.Worksheets.Add(sheetName);
@@ -291,8 +299,18 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
             worksheet.Cells[1, 11].Value = "Phí đăng ký";
             worksheet.Cells[1, 12].Value = "Trạng thái phiếu hồ sơ";
             worksheet.Cells[1, 13].Value = "Trạng thái tiền cọc";
-            worksheet.Cells[1, 14].Value = "Trạng thái điểm danh";
-            worksheet.Cells[1, 15].Value = "Trạng thái hoàn cọc";
+
+            int colRefund = 14; // mặc định là cột hoàn cọc
+            if (auctionStatus != 3) // chỉ khi KHÔNG phải trạng thái Hủy mới có cột điểm danh
+            {
+                worksheet.Cells[1, 14].Value = "Trạng thái điểm danh";
+                worksheet.Cells[1, 15].Value = "Trạng thái xin hủy tham gia";
+                colRefund = 15;
+            }
+            else
+            {
+                worksheet.Cells[1, 14].Value = "Trạng thái xin hủy tham gia";
+            }
 
             int row = 2,
                 stt = 1;
@@ -317,68 +335,96 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
 
                 worksheet.Cells[row, 12].Value = GetStatusTicketText(doc.StatusTicket);
                 worksheet.Cells[row, 13].Value = GetStatusDepositText(doc.StatusDeposit);
-                worksheet.Cells[row, 14].Value = GetIsAttendedText(doc.IsAttended);
-                worksheet.Cells[row, 15].Value = GetStatusRefundText(doc.StatusRefund);
+
+                if (auctionStatus != 3) // Không phải hủy thì mới in điểm danh
+                {
+                    worksheet.Cells[row, 14].Value = GetIsAttendedText(doc.IsAttended);
+                    worksheet.Cells[row, 15].Value = GetStatusRefundText(doc.StatusRefund);
+                }
+                else
+                {
+                    worksheet.Cells[row, 14].Value = GetStatusRefundText(doc.StatusRefund);
+                }
 
                 row++;
             }
 
             // Format header bold
-            using (var range = worksheet.Cells[1, 1, 1, 15])
+            int lastCol = colRefund; // số cột cuối
+            using (var range = worksheet.Cells[1, 1, 1, lastCol])
             {
                 range.Style.Font.Bold = true;
             }
 
             worksheet.Cells.AutoFitColumns();
 
-            // Dropdown cho trạng thái (cột 12, 13, 14, 15)
-            string[] statusTicketOptions =
-            {
-                "Chưa chuyển tiền",
-                "Đã chuyển tiền",
-                "Đã ký phiếu",
-                "Đã hoàn",
-                "Hồ sơ không hợp lệ",
-                "Không xác định",
-            };
-            string[] statusDepositOptions =
-            {
-                "Chưa cọc",
-                "Đã cọc",
-                "Đã hoàn tiền",
-                "Đã hoàn",
-                "Không xác định",
-            };
-            string[] attendedOptions = { "Không điểm danh", "Đã điểm danh", "Không xác định" };
-            string[] refundOptions =
-            {
-                "Không xác định",
-                "Đã yêu cầu hoàn tiền cọc",
-                "Chấp nhận hoàn cọc",
-                "Từ chối hoàn cọc",
-                "Không xác định",
-            };
-
+            // Bỏ qua dropdown cho "Trạng thái điểm danh" nếu auction bị Hủy
             for (int r = 2; r < row; r++)
             {
                 var statusTicketValidation = worksheet.DataValidations.AddListValidation($"L{r}");
-                foreach (var opt in statusTicketOptions)
+                foreach (
+                    var opt in new[]
+                    {
+                        "Chưa chuyển tiền",
+                        "Đã chuyển tiền",
+                        "Đã ký phiếu",
+                        "Đã hoàn",
+                        "Hồ sơ không hợp lệ",
+                        "Không xác định",
+                    }
+                )
                     statusTicketValidation.Formula.Values.Add(opt);
 
                 var statusDepositValidation = worksheet.DataValidations.AddListValidation($"M{r}");
-                foreach (var opt in statusDepositOptions)
+                foreach (
+                    var opt in new[]
+                    {
+                        "Chưa cọc",
+                        "Đã cọc",
+                        "Đã hoàn tiền",
+                        "Đã hoàn",
+                        "Không xác định",
+                    }
+                )
                     statusDepositValidation.Formula.Values.Add(opt);
 
-                var attendedValidation = worksheet.DataValidations.AddListValidation($"N{r}");
-                foreach (var opt in attendedOptions)
-                    attendedValidation.Formula.Values.Add(opt);
+                if (auctionStatus != 3)
+                {
+                    var attendedValidation = worksheet.DataValidations.AddListValidation($"N{r}");
+                    foreach (
+                        var opt in new[] { "Không điểm danh", "Đã điểm danh", "Không xác định" }
+                    )
+                        attendedValidation.Formula.Values.Add(opt);
 
-                var refundValidation = worksheet.DataValidations.AddListValidation($"O{r}");
-                foreach (var opt in refundOptions)
-                    refundValidation.Formula.Values.Add(opt);
+                    var refundValidation = worksheet.DataValidations.AddListValidation($"O{r}");
+                    foreach (
+                        var opt in new[]
+                        {
+                            "Không xác định",
+                            "Đã yêu cầu hoàn tiền cọc",
+                            "Chấp nhận hoàn cọc",
+                            "Từ chối hoàn cọc",
+                        }
+                    )
+                        refundValidation.Formula.Values.Add(opt);
+                }
+                else
+                {
+                    var refundValidation = worksheet.DataValidations.AddListValidation($"N{r}");
+                    foreach (
+                        var opt in new[]
+                        {
+                            "Không xác định",
+                            "Đã yêu cầu hoàn tiền cọc",
+                            "Chấp nhận hoàn cọc",
+                            "Từ chối hoàn cọc",
+                        }
+                    )
+                        refundValidation.Formula.Values.Add(opt);
+                }
             }
 
-            // Lock toàn bộ rồi mở khoá các cột trạng thái
+            // Lock sheet
             worksheet.Protection.IsProtected = true;
             worksheet.Protection.SetPassword("1234");
 
@@ -386,11 +432,14 @@ namespace MyApp.Infrastructure.Repositories.ExcelRepository
             {
                 worksheet.Cells[r, 12].Style.Locked = false; // phiếu hồ sơ
                 worksheet.Cells[r, 13].Style.Locked = false; // tiền cọc
-                worksheet.Cells[r, 14].Style.Locked = false; // điểm danh
-                worksheet.Cells[r, 15].Style.Locked = false; // hoàn cọc
+
+                if (auctionStatus != 3)
+                    worksheet.Cells[r, 14].Style.Locked = false; // điểm danh
+
+                worksheet.Cells[r, lastCol].Style.Locked = false; // hoàn cọc
             }
 
-            worksheet.Cells[1, 12, 1, 15].Style.Locked = false;
+            worksheet.Cells[1, 12, 1, lastCol].Style.Locked = false;
         }
 
         private string GetStatusTicketText(int status)
