@@ -75,7 +75,7 @@ namespace MyApp.Infrastructure.Repositories.UserRegisteredAuction
                     && ad.AuctionAsset.AuctionId == auctionId
                     && ad.StatusTicket == 2
                     && ad.StatusDeposit == 1
-                    && ad.StatusRefund != 3
+                    && ad.StatusRefund != 2
                 )
                 .Select(ad => new AuctionAsset
                 {
